@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/abrisco/rules_helm/helm/private/helm_utils"
+	"github.com/bazelbuild/rules_go/go/runfiles"
 )
 
 // Chart represents the structure of Chart.yaml
@@ -133,11 +134,17 @@ func main() {
 		log.Printf("WARNING: A Helm registry password was set but no associated `HELM_REGISTRY_USERNAME` var was found. Skipping `helm registry login`.")
 	}
 
+	r, err := runfiles.New()
+	if err != nil {
+		log.Fatalf("Unable to create runfiles.")
+	}
+
 	// Subprocess image pushers
 	for _, pusher := range imagePushers {
 		cmd := exec.Command(pusher)
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
+		cmd.Env = r.Env()
 
 		log.Printf("Running image pusher: %s", pusher)
 		if err := cmd.Run(); err != nil {
