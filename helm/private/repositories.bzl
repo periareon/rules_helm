@@ -38,7 +38,7 @@ def _helm_toolchain_repository_impl(repository_ctx):
     results = repository_ctx.download_and_extract(
         repository_ctx.attr.urls,
         integrity = repository_ctx.attr.integrity,
-        strip_prefix = repository_ctx.attr.strip_prefix,
+        stripPrefix = repository_ctx.attr.strip_prefix,
     )
 
     if repository_ctx.attr.platform.startswith("windows"):

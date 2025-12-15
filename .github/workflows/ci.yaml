@@ -83,6 +83,47 @@ jobs:
         run: bazel $env:BAZEL_STARTUP_FLAGS test //...
         if: startswith(runner.os, 'Windows')
 
+  ci-min-bazel:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: macos-14
+          - os: ubuntu-22.04
+          - os: ubuntu-24.04-arm
+          - os: windows-latest
+    steps:
+      # Checkout the code
+      - uses: actions/checkout@v4
+
+      - uses: bazel-contrib/setup-bazel@0.14.0
+        with:
+          bazelisk-cache: true
+          disk-cache: ${{ github.workflow }}
+          repository-cache: true
+
+      - name: Setup Bazelrc (Windows)
+        run: |
+          echo "startup --output_user_root=C:/bzl" > ./user.bazelrc
+        if: startswith(runner.os, 'Windows')
+      - name: Setup Bazelrc
+        run: |
+          echo "common --config=strict" >> ./user.bazelrc
+          echo "common --keep_going" >> ./user.bazelrc
+
+      # Build and Test the code
+      - name: Test (Unix)
+        run: bazel ${BAZEL_STARTUP_FLAGS[@]} test //...
+        if: startswith(runner.os, 'Windows') != true
+        env:
+          USE_BAZEL_VERSION: 7.x
+      - name: Test (Windows)
+        run: bazel $env:BAZEL_STARTUP_FLAGS test //...
+        if: startswith(runner.os, 'Windows')
+        env:
+          USE_BAZEL_VERSION: 7.x
+
+
   ci-buildifier:
     runs-on: ubuntu-latest
     steps:
