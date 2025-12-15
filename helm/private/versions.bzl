@@ -1,6 +1,6 @@
 """Constants for accessing helm binaries"""
 
-DEFAULT_HELM_VERSION = "4.0.0"
+DEFAULT_HELM_VERSION = "4.0.4"
 
 DEFAULT_HELM_URL_TEMPLATES = [
     "https://get.helm.sh/helm-v{version}-{platform}.{compression}",
@@ -456,6 +456,16 @@ HELM_VERSIONS = {
         "linux-ppc64le": "sha256-cNeC+yCOvme1xQj25ZEKC3X5ssme48VpqSZauhR9ajc=",
         "windows-amd64": "sha256-iz6je818Xtpo6t0nhpBJj7iGoX7FQbRJIWqztFdIYA4=",
     },
+    "3.19.3": {
+        "darwin-amd64": "sha256-Fw8Oafs2zu318wTsCcETQQ7Jp1xagx5I91kF6eEeeXk=",
+        "darwin-arm64": "sha256-WUvWBjttV/CkR0vjZ1vnJtaa0EayUu3w0YL8gplauos=",
+        "linux-amd64": "sha256-2UOfWKpypFgLJbZBlA+VD+IGlTResW7I8QYTQAcGLfE=",
+        "linux-arm": "sha256-8dTiLcDa2GAGrS4mEQxxChsno3KWpsZ20CZ98hAzDbw=",
+        "linux-arm64": "sha256-EBNq72kFbHxb6SMHgqqynK5ln3yNY98kSItsZGnhdWM=",
+        "linux-i386": "sha256-irwlLd1TeU++F8aTOi6mAmGn/b3oUgx1NhI5SZefZDE=",
+        "linux-ppc64le": "sha256-1feX+ftXkLwcm15sOJy3dVL+Gqw54S5vgdxHHRRongc=",
+        "windows-amd64": "sha256-jXAqQJwIpXdPx52KoDN+tQQ/bDrYULTuXntVrxmdjqo=",
+    },
     "3.4.2": {
         "darwin-amd64": "sha256-wzt+5ysABvI7M/UDK1Md1gn/97CKQyT5ugdyKk8/7Jo=",
         "linux-amd64": "sha256-ys3ndoQg3UERGkYw4EfCMa+gH2fknMDGQpVj4CTaS5g=",
@@ -540,5 +550,45 @@ HELM_VERSIONS = {
         "linux-i386": "sha256-7aC2UI3vRUugfi+TjFX3O+eV5/mVUgeMzIrywrvVikU=",
         "linux-ppc64le": "sha256-c66D6YiKr6DpxXodTXfctsl8JT7xdaSYOou0vMdx0us=",
         "windows-amd64": "sha256-D5qMiRuNkIo3+7aPEt6pK2M+sp5JBwvWUPV2ChqZqo0=",
+    },
+    "4.0.1": {
+        "darwin-amd64": "sha256-qNHKRsP/VISytjXfwlgyrdTzb90Jzyo2+3CYKcBbQRI=",
+        "darwin-arm64": "sha256-jguWFc9ypi+qoM/A4iEV8FvN39PX7lhAbvl7wbpWOug=",
+        "linux-amd64": "sha256-4DZVSPAe1SpYoRga0xC2BKMkT1kldCW7FzlJk3K9/2A=",
+        "linux-arm": "sha256-uUZAH4V94HjHRJkBiPj2ZOyxxyza/eHtI5Ag+juy/Dw=",
+        "linux-arm64": "sha256-lZ+lLTTi4fAVTjIg7V8iJjyFk0R2R6Q68HiQu6SwBNE=",
+        "linux-i386": "sha256-ajWN5xyNws9KeUaTD/mnCno3FlMeZAk6iBgvZL2upaM=",
+        "linux-ppc64le": "sha256-Ke8B7tKbO6Z2z220XckLUOB/K17EsepABxMmv/SSKk4=",
+        "windows-amd64": "sha256-qXbunzAWrobYlIwKbT/F7XSJzSZM/9v/SGC9lxIL0lY=",
+    },
+    "4.0.2": {
+        "darwin-amd64": "sha256-HdLON4VfU4CryG1Wqzg4fU8biwW+KWdgrd/jLXxWo5M=",
+        "darwin-arm64": "sha256-/taiO7pduKIeQBdfRMFZ4FeyamNh9CgOJMgg0IQeFQs=",
+        "linux-amd64": "sha256-mAdWqbL9UBodbd0bIXQWeIdd8AXJG7BbtBCTmIu4O7c=",
+        "linux-arm": "sha256-JLqXq9HWIZTHUpP3dfgKNC/v+HKqXwDfVd1zpHzZy48=",
+        "linux-arm64": "sha256-PeaBtGP7eD9J9aty1wDAVxJO9z+nQGJiS4/pXer97Us=",
+        "linux-i386": "sha256-+dNp0l5LKi8cgwYz9F1KbWOmHGopfMJWCYiMJgyXm5Y=",
+        "linux-ppc64le": "sha256-N0z7E+xpJlTNFvGqwqqCsAkqxcEqE4CRhOn65hBzqDA=",
+        "windows-amd64": "sha256-OhYMoHoNpyv4cmARFu0TYxIMP+HUivsLt/U7u6RnP38=",
+    },
+    "4.0.3": {
+        "darwin-amd64": "sha256-IYGmg0ClsY6dT/T/QhtZR/qyqdBhZL8LxlJi9+nstp8=",
+        "darwin-arm64": "sha256-FFd3BagX93Ip7FFSBA1c3GPXuPofsfRdPndex46BeLo=",
+        "linux-amd64": "sha256-HaueC1isBEI0TQ7PwWjQVf5ZHiCaZsXCchJ6VTCJBEg=",
+        "linux-arm": "sha256-zWrfQy6aZftABDbdUfaW+Y9yJXVAqgPRi28eNMrkQFY=",
+        "linux-arm64": "sha256-2fysutJNTu0aQIJ0rWFw1yvHE5omjJqvh1fBRvERe9M=",
+        "linux-i386": "sha256-HwpgCH5+cOktHG8Qs7hJKDrsr6oC57lgAch5s1fMrm0=",
+        "linux-ppc64le": "sha256-Ee4pNnFFSetbNfPPwwohDJKYu3F0I4XdaxI2QLktzxU=",
+        "windows-amd64": "sha256-OmV+TNZz0OdMyUDWVZNslDmZH2Yjzbq3Aiqvp2UjLtU=",
+    },
+    "4.0.4": {
+        "darwin-amd64": "sha256-c7z9arAA/claz5/hxZ6ORxeUJqZT5FrkhYiYadSgBSM=",
+        "darwin-arm64": "sha256-p+qZk3qWebOTX6Citw5XeqHqhOWFbnwIIcpv+gZOqXY=",
+        "linux-amd64": "sha256-KUVLw1H0Qz5mwA9dN4QWJ8u8wC5McKbXllKdNVI3Zxw=",
+        "linux-arm": "sha256-klVzLjG1ql7ntVvoSX7qRyPj37CKY8N2A64NFamp2Cw=",
+        "linux-arm64": "sha256-FriKzGUD1ka3U3opjnOJvvRpxcyeut9ydUer6fajWQM=",
+        "linux-i386": "sha256-5tv0UxO6tI5Rorel8ycaGbs9i58HtLtIujQjidkCr1M=",
+        "linux-ppc64le": "sha256-wQjRgaDina3ygfu09KDg8hSZIrEZ7HRc7Rpa5vCRhwM=",
+        "windows-amd64": "sha256-E1v/rdPIev+IVuBu+zZr6ipIrE0XQtc6+AJQQQJG8U0=",
     },
 }
