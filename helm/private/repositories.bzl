@@ -5,18 +5,28 @@ load("@rules_helm//helm:toolchain.bzl", "helm_toolchain")
 
 package(default_visibility = ["//visibility:public"])
 
+filegroup(
+    name = "helm_bin",
+    srcs = ["{bin}"],
+    data = glob(
+        include = ["**"],
+        exclude = [
+            "BUILD",
+            "WORKSPACE",
+            "*.bazel",
+        ],
+    ),
+)
+
 helm_toolchain(
-    name = "toolchain_impl",
-    helm = "@helm_{platform}//:{bin}",
+    name = "helm_toolchain",
+    helm = ":helm_bin",
     plugins = {plugins},
 )
 
-toolchain(
-    name = "toolchain",
-    toolchain = ":toolchain_impl",
-    toolchain_type = "@rules_helm//helm:toolchain_type",
-    exec_compatible_with = {exec_compatible_with},
-    target_compatible_with = {target_compatible_with},
+alias(
+    name = "{name}",
+    actual = ":helm_toolchain",
 )
 """
 
@@ -25,18 +35,20 @@ workspace(name = "{}")
 """
 
 def _helm_toolchain_repository_impl(repository_ctx):
-    platform = repository_ctx.attr.platform
+    results = repository_ctx.download_and_extract(
+        repository_ctx.attr.urls,
+        integrity = repository_ctx.attr.integrity,
+        strip_prefix = repository_ctx.attr.strip_prefix,
+    )
 
-    if platform.startswith("windows"):
+    if repository_ctx.attr.platform.startswith("windows"):
         bin = "helm.exe"
     else:
         bin = "helm"
 
     repository_ctx.file("BUILD.bazel", _HELM_TOOLCHAIN_BUILD_CONTENT.format(
-        platform = platform.replace("-", "_"),
+        name = repository_ctx.original_name,
         bin = bin,
-        exec_compatible_with = json.encode(repository_ctx.attr.exec_compatible_with),
-        target_compatible_with = json.encode(repository_ctx.attr.target_compatible_with),
         plugins = json.encode(repository_ctx.attr.plugins),
     ))
 
@@ -44,13 +56,28 @@ def _helm_toolchain_repository_impl(repository_ctx):
         repository_ctx.name,
     ))
 
+    return {
+        "integrity": results.integrity,
+        "name": repository_ctx.name,
+        "platform": repository_ctx.attr.platform,
+        "plugins": repository_ctx.attr.plugins,
+        "strip_prefix": repository_ctx.attr.strip_prefix,
+        "urls": repository_ctx.attr.urls,
+    }
+
 helm_toolchain_repository = repository_rule(
     implementation = _helm_toolchain_repository_impl,
-    doc = "A repository rule for generating a Helm toolchain definition.",
+    doc = "A repository rule for generating a Helm toolchain definition",
     attrs = {
-        "exec_compatible_with": attr.string_list(
-            doc = "A list of constraints for the execution platform for this toolchain.",
-            default = [],
+        "integrity": attr.string(
+            doc = """\
+Expected checksum in Subresource Integrity format of the file downloaded.
+
+This must match the checksum of the file downloaded. _It is a security risk
+to omit the checksum as remote files can change._ At best omitting this
+field will make your build non-hermetic. It is optional to make development
+easier but either this attribute or `sha256` should be set before shipping.
+""",
         ),
         "platform": attr.string(
             doc = "Platform the Helm executable was built for.",
@@ -60,9 +87,20 @@ helm_toolchain_repository = repository_rule(
             doc = "A list of plugins to add to the generated toolchain.",
             default = [],
         ),
-        "target_compatible_with": attr.string_list(
-            doc = "A list of constraints for the target platform for this toolchain.",
-            default = [],
+        "strip_prefix": attr.string(
+            doc = "A directory prefix to strip from the extracted files.",
+        ),
+        "urls": attr.string_list(
+            doc = """\
+A list of URLs to a file that will be made available to Bazel.
+
+Each entry must be a file, http or https URL. Redirections are followed.
+Authentication is not supported.
+
+URLs are tried in order until one succeeds, so you should list local mirrors first.
+If all downloads fail, the rule will fail.
+""",
+            mandatory = True,
         ),
     },
 )
@@ -136,4 +174,64 @@ helm_host_alias_repository = repository_rule(
     doc = """Creates a repository with a shorter name meant for the host platform, which contains
     a BUILD.bazel file that exports symlinks to the host platform's binaries
     """,
+)
+
+_BUILD_FILE_FOR_TOOLCHAIN_HUB_TEMPLATE = """
+toolchain(
+    name = "{name}",
+    exec_compatible_with = {exec_constraint_sets_serialized},
+    target_compatible_with = {target_constraint_sets_serialized},
+    toolchain = "{toolchain}",
+    toolchain_type = "@rules_helm//helm:toolchain_type",
+    visibility = ["//visibility:public"],
+)
+"""
+
+def _BUILD_for_toolchain_hub(
+        toolchain_names,
+        toolchain_labels,
+        target_compatible_with,
+        exec_compatible_with):
+    return "\n".join([_BUILD_FILE_FOR_TOOLCHAIN_HUB_TEMPLATE.format(
+        name = toolchain_name,
+        exec_constraint_sets_serialized = json.encode(exec_compatible_with.get(toolchain_name, [])),
+        target_constraint_sets_serialized = json.encode(target_compatible_with.get(toolchain_name, [])),
+        toolchain = toolchain_labels[toolchain_name],
+    ) for toolchain_name in toolchain_names])
+
+def _helm_toolchain_repository_hub_impl(repository_ctx):
+    repository_ctx.file("WORKSPACE.bazel", """workspace(name = "{}")""".format(
+        repository_ctx.name,
+    ))
+
+    repository_ctx.file("BUILD.bazel", _BUILD_for_toolchain_hub(
+        toolchain_names = repository_ctx.attr.toolchain_names,
+        toolchain_labels = repository_ctx.attr.toolchain_labels,
+        target_compatible_with = repository_ctx.attr.target_compatible_with,
+        exec_compatible_with = repository_ctx.attr.exec_compatible_with,
+    ))
+
+helm_toolchain_repository_hub = repository_rule(
+    doc = (
+        "Generates a toolchain-bearing repository that declares a set of other toolchains from other " +
+        "repositories. This exists to allow registering a set of toolchains in one go with the `:all` target."
+    ),
+    implementation = _helm_toolchain_repository_hub_impl,
+    attrs = {
+        "exec_compatible_with": attr.string_list_dict(
+            doc = "A list of constraints for the execution platform for this toolchain, keyed by toolchain name.",
+            mandatory = True,
+        ),
+        "target_compatible_with": attr.string_list_dict(
+            doc = "A list of constraints for the target platform for this toolchain, keyed by toolchain name.",
+            mandatory = True,
+        ),
+        "toolchain_labels": attr.string_dict(
+            doc = "The name of the toolchain implementation target, keyed by toolchain name.",
+            mandatory = True,
+        ),
+        "toolchain_names": attr.string_list(
+            mandatory = True,
+        ),
+    },
 )

@@ -32,22 +32,16 @@ use_repo(
 )
 
 helm = use_extension("@rules_helm//helm:extensions.bzl", "helm")
+helm.toolchain()
+helm.host_tools()
 use_repo(
     helm,
     "helm",
-    "helm_darwin_amd64_toolchain",
-    "helm_darwin_arm64_toolchain",
-    "helm_linux_amd64_toolchain",
-    "helm_linux_arm64_toolchain",
-    "helm_windows_amd64_toolchain",
+    "helm_toolchains",
 )
 
 register_toolchains(
-    "@helm_darwin_amd64_toolchain//:toolchain",
-    "@helm_darwin_arm64_toolchain//:toolchain",
-    "@helm_linux_amd64_toolchain//:toolchain",
-    "@helm_linux_arm64_toolchain//:toolchain",
-    "@helm_windows_amd64_toolchain//:toolchain",
+    "@helm_toolchains//:all",
 )
 
 helm_test = use_extension("@rules_helm//tests:test_extensions.bzl", "helm_test", dev_dependency = True)
