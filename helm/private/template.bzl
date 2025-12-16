@@ -1,7 +1,7 @@
 """Helm rules"""
 
-load(":helm_install.bzl", "HelmInstallInfo")
 load(":helm_utils.bzl", "rlocationpath", "symlink")
+load(":install.bzl", "HelmInstallInfo")
 load(":providers.bzl", "HelmPackageInfo")
 
 def _helm_template_test_impl(ctx):

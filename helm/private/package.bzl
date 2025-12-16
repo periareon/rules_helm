@@ -1,8 +1,8 @@
 """Helm rules"""
 
-load("//helm/private:helm_utils.bzl", "is_stamping_enabled")
-load("//helm/private:json_to_yaml.bzl", "json_to_yaml")
+load(":helm_utils.bzl", "is_stamping_enabled")
 load(":image_utils.bzl", "ImagePushRepositoryInfo", "image_push_repository_aspect")
+load(":json_to_yaml.bzl", "json_to_yaml")
 load(":providers.bzl", "HelmPackageInfo")
 
 def _rlocationpath(file, workspace_name):

@@ -1,6 +1,6 @@
 """Helm rules for managing external dependencies"""
 
-load(":helm_import_authn.bzl", "authn")
+load(":import_authn.bzl", "authn")
 load(":providers.bzl", "HelmPackageInfo")
 
 def _helm_import_impl(ctx):

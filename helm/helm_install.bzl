@@ -1,7 +1,7 @@
 """# helm_install rules."""
 
 load(
-    "//helm/private:helm_install.bzl",
+    "//helm/private:install.bzl",
     _helm_install = "helm_install",
     _helm_uninstall = "helm_uninstall",
     _helm_upgrade = "helm_upgrade",

@@ -1,8 +1,8 @@
 """Helm rules"""
 
-load("//helm/private:helm_install.bzl", "helm_install", "helm_uninstall", "helm_upgrade")
-load("//helm/private:helm_package.bzl", "helm_package")
-load("//helm/private:helm_registry.bzl", "helm_push", "helm_push_images")
+load(":install.bzl", "helm_install", "helm_uninstall", "helm_upgrade")
+load(":package.bzl", "helm_package")
+load(":registry.bzl", "helm_push", "helm_push_images")
 
 def helm_chart(
         *,

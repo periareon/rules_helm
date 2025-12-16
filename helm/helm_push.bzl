@@ -1,7 +1,7 @@
 """# helm_push rules."""
 
 load(
-    "//helm/private:helm_registry.bzl",
+    "//helm/private:registry.bzl",
     _helm_push = "helm_push",
     _helm_push_images = "helm_push_images",
 )

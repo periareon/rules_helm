@@ -1,7 +1,7 @@
 """# helm_plugin rule."""
 
 load(
-    "//helm/private:helm_toolchain.bzl",
+    "//helm/private:toolchain.bzl",
     _helm_plugin = "helm_plugin",
 )
 
