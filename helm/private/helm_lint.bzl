@@ -1,8 +1,8 @@
 """Helm rules"""
 
 load("@bazel_skylib//rules:common_settings.bzl", "BuildSettingInfo")
-load("//helm:providers.bzl", "HelmPackageInfo")
 load(":helm_utils.bzl", "rlocationpath", "symlink")
+load(":providers.bzl", "HelmPackageInfo")
 
 def _helm_lint_aspect_impl(target, ctx):
     if HelmPackageInfo not in target:

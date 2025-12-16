@@ -30,6 +30,10 @@ load(
     _helm_package = "helm_package",
 )
 load(
+    ":helm_package_info.bzl",
+    _HelmPackageInfo = "HelmPackageInfo",
+)
+load(
     ":helm_plugin.bzl",
     _helm_plugin = "helm_plugin",
 )
@@ -47,10 +51,6 @@ load(
 load(
     ":helm_toolchain.bzl",
     _helm_toolchain = "helm_toolchain",
-)
-load(
-    ":providers.bzl",
-    _HelmPackageInfo = "HelmPackageInfo",
 )
 
 chart_content = _chart_content

@@ -1,7 +1,7 @@
 """Helm rules for managing external dependencies"""
 
-load("//helm:providers.bzl", "HelmPackageInfo")
 load(":helm_import_authn.bzl", "authn")
+load(":providers.bzl", "HelmPackageInfo")
 
 def _helm_import_impl(ctx):
     metadata_output = ctx.actions.declare_file(ctx.label.name + ".metadata.json")

@@ -1,7 +1,7 @@
 """Helm rules"""
 
-load("//helm:providers.bzl", "HelmPackageInfo")
 load(":helm_utils.bzl", "is_stamping_enabled", "rlocationpath", "symlink")
+load(":providers.bzl", "HelmPackageInfo")
 
 HelmInstallInfo = provider(
     doc = "Info about a helm installer.",

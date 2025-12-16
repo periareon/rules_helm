@@ -1,6 +1,6 @@
 """Test rules and utiltiies"""
 
-load("//helm:providers.bzl", "HelmPackageInfo")
+load("//helm:helm_package_info.bzl", "HelmPackageInfo")
 
 def _rlocationpath(file, workspace_name):
     if file.short_path.startswith("../"):

@@ -1,7 +1,7 @@
 """Helm dependencies"""
 
 _HELM_TOOLCHAIN_BUILD_CONTENT = """\
-load("@rules_helm//helm:toolchain.bzl", "helm_toolchain")
+load("@rules_helm//helm:helm_toolchain.bzl", "helm_toolchain")
 
 package(default_visibility = ["//visibility:public"])
 

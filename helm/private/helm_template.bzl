@@ -1,8 +1,8 @@
 """Helm rules"""
 
-load("//helm:providers.bzl", "HelmPackageInfo")
 load(":helm_install.bzl", "HelmInstallInfo")
 load(":helm_utils.bzl", "rlocationpath", "symlink")
+load(":providers.bzl", "HelmPackageInfo")
 
 def _helm_template_test_impl(ctx):
     toolchain = ctx.toolchains[Label("//helm:toolchain_type")]

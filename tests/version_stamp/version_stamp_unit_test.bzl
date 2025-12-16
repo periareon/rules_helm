@@ -3,7 +3,7 @@
 load("@bazel_skylib//rules:diff_test.bzl", "diff_test")
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load("//helm:defs.bzl", "helm_lint_test", "helm_package", "helm_template_test")
-load("//helm:providers.bzl", "HelmPackageInfo")
+load("//helm:helm_package_info.bzl", "HelmPackageInfo")
 
 def _helm_pkg_metadata_impl(ctx):
     return DefaultInfo(

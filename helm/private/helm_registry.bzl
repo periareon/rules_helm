@@ -1,7 +1,7 @@
 """Helm rules"""
 
-load("//helm:providers.bzl", "HelmPackageInfo")
 load(":helm_utils.bzl", "rlocationpath", "symlink")
+load(":providers.bzl", "HelmPackageInfo")
 
 def _get_image_push_commands(ctx, pkg_info):
     image_pushers = []
