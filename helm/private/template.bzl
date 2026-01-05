@@ -12,6 +12,9 @@ def _helm_template_test_impl(ctx):
             ctx.label,
         ))
 
+    if ctx.attr.installer and ctx.files.values:
+        fail("values is not supported with installer")
+
     template_patterns = None
     if ctx.attr.template_patterns:
         template_patterns = ctx.actions.declare_file("{}.template_patterns.json".format(ctx.label.name))
