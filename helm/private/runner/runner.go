@@ -203,22 +203,33 @@ func main() {
 			}
 
 			templates := parseHelmOutput(test_stream.String())
+			failed := false
 			for templatePath, testPatterns := range patterns {
 				content, found := templates[templatePath]
 				if !found {
-					log.Fatalf("Template not found in the helm chart: %s", templatePath)
+					failed = true
+					log.Printf("Template not found in the helm chart: %s", templatePath)
+					continue
 				}
 
 				for _, pattern := range testPatterns {
 					regex, err := regexp.Compile(pattern)
 					if err != nil {
-						log.Fatal("Error compiling regex:", err)
+						failed = true
+						log.Print("Error compiling regex:", err)
+						continue
 					}
 
 					if !regex.MatchString(content) {
-						log.Fatalf("Error: The file `%s` does not contain the pattern:\n```\n%s\n```", templatePath, pattern)
+						failed = true
+						log.Printf("Error: The file `%s` does not contain the pattern:\n```\n%s\n```", templatePath, pattern)
+						continue
 					}
 				}
+			}
+
+			if failed {
+				log.Fatalf("Failed")
 			}
 		}
 	}
