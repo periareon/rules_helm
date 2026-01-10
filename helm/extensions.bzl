@@ -62,7 +62,7 @@ def _helm_impl(module_ctx):
 
             # The URLs for linux-i386 artifacts are actually published under
             # a different name. The check below accounts for this.
-            # https://github.com/abrisco/rules_helm/issues/76
+            # https://github.com/periareon/rules_helm/issues/76
             url_platform = platform
             if url_platform == "linux-i386":
                 url_platform = "linux-386"

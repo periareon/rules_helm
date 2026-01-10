@@ -3,7 +3,7 @@ load("@rules_go//go:def.bzl", "go_library")
 go_library(
     name = "helm_utils",
     srcs = ["helm_utils.go"],
-    importpath = "github.com/abrisco/rules_helm/helm/private/helm_utils",
+    importpath = "github.com/periareon/rules_helm/helm/private/helm_utils",
     visibility = ["//helm:__subpackages__"],
     deps = [
         "@rules_go//go/runfiles",

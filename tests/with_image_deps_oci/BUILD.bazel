@@ -7,7 +7,7 @@ exports_files(["Chart.lock"])
 
 EXCLUDE_WINDOWS = select({
     # TODO: rules_oci is broken on simple windows systems such as the windows github runners
-    # https://github.com/abrisco/rules_helm/issues/53
+    # https://github.com/periareon/rules_helm/issues/53
     "@platforms//os:windows": ["@platforms//:incompatible"],
     "//conditions:default": [],
 })

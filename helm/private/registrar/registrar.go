@@ -10,8 +10,8 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/abrisco/rules_helm/helm/private/helm_utils"
 	"github.com/bazelbuild/rules_go/go/runfiles"
+	"github.com/periareon/rules_helm/helm/private/helm_utils"
 )
 
 // Chart represents the structure of Chart.yaml

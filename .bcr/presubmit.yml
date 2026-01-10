@@ -1,6 +1,6 @@
 ---
 bcr_test_module:
-  # TODO(abrisco/rules_helm#38): Have this run in a regression test
+  # TODO(periareon/rules_helm#38): Have this run in a regression test
   # directory which is consuming rules_helm and not just testing
   # within the same repository.
   module_path: "."

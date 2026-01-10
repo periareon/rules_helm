@@ -12,7 +12,7 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/abrisco/rules_helm/helm/private/helm_utils"
+	"github.com/periareon/rules_helm/helm/private/helm_utils"
 )
 
 func parseArgsUpToDashDash(argv []string) ([]string, []string) {

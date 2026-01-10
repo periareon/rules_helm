@@ -6,4 +6,4 @@ src = "src"
 title = "rules_helm"
 
 [output.html]
-git-repository-url = "https://github.com/abrisco/rules_helm/"
+git-repository-url = "https://github.com/periareon/rules_helm/"

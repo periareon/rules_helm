@@ -1,3 +1,3 @@
 """ Version info for the `rules_helm` repository """
 
-VERSION = "0.20.1"
+VERSION = "0.21.0"
