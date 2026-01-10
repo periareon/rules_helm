@@ -16,7 +16,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/abrisco/rules_helm/helm/private/helm_utils"
+	"github.com/periareon/rules_helm/helm/private/helm_utils"
 	"gopkg.in/yaml.v3"
 )
 

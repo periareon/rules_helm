@@ -1,5 +1,5 @@
 {
-  "homepage": "https://github.com/abrisco/rules_helm",
+  "homepage": "https://github.com/periareon/rules_helm",
   "maintainers": [
     {
       "name": "Andre Brisco",
@@ -9,7 +9,8 @@
     }
   ],
   "repository": [
-    "github:abrisco/rules_helm"
+    "github:abrisco/rules_helm",
+    "github:periareon/rules_helm"
   ],
   "versions": [],
   "yanked_versions": {}

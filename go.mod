@@ -1,4 +1,4 @@
-module github.com/abrisco/rules_helm
+module github.com/periareon/rules_helm
 
 go 1.23.0
 

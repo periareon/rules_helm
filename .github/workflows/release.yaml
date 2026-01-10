@@ -18,7 +18,7 @@ env:
 
 jobs:
   release:
-    if: ${{ github.repository_owner == 'abrisco' }}
+    if: ${{ github.repository_owner == 'periareon' }}
     permissions:
       contents: write
       actions: write

@@ -1,8 +1,8 @@
-"""abrisco/rules_helm"""
+"""periareon/rules_helm"""
 
 module(
     name = "rules_helm",
-    version = "0.20.1",
+    version = "0.21.0",
     compatibility_level = 1,
 )
 

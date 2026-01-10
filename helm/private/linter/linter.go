@@ -13,7 +13,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/abrisco/rules_helm/helm/private/helm_utils"
+	"github.com/periareon/rules_helm/helm/private/helm_utils"
 )
 
 // stringSliceFlag is a custom flag type for collecting multiple values
