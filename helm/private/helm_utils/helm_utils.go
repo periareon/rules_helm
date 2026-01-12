@@ -2,6 +2,7 @@ package helm_utils
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -168,12 +169,12 @@ func GetRunfile(runfile_path string) string {
 	// Use the runfiles library to locate files
 	runfile, err := runfiles.Rlocation(runfile_path)
 	if err != nil {
-		log.Fatal("When reading file ", runfile_path, " got error ", err)
+		log.Fatalf("When reading file %s, got error %v", runfile, err)
 	}
 
 	// Check that the file actually exist
-	if _, err := os.Stat(runfile); err != nil {
-		log.Fatal("File found by runfile doesn't exist")
+	if _, err := os.Stat(runfile); errors.Is(err, os.ErrNotExist) {
+		log.Fatalf("File %s found by runfile doesn't exist", runfile)
 	}
 
 	return runfile
