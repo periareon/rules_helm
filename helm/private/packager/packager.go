@@ -735,7 +735,7 @@ func installHelmContent(workingDir string, packagePath string, stampedChartConte
 		return "", fmt.Errorf("Error unmarshalling crds manifest %s: %w", crdsManifest, err)
 	}
 
-	crdsDir := filepath.Join(workingDir, "crds")
+	crdsDir := filepath.Join(workingDir, packagePath, "crds")
 	crdsRoot := ""
 
 	// Copy all templates
