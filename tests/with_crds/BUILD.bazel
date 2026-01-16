@@ -1,5 +1,5 @@
-load("//helm:defs.bzl", "helm_chart", "helm_lint_test", "helm_template_test")
 load("@rules_go//go:def.bzl", "go_test")
+load("//helm:defs.bzl", "helm_chart", "helm_lint_test", "helm_template_test")
 
 helm_chart(
     name = "with_crds",
