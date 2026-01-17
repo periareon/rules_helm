@@ -1,3 +1,4 @@
+load("@rules_go//go:def.bzl", "go_test")
 load("//helm:defs.bzl", "helm_chart", "helm_lint_test", "helm_template_test")
 
 helm_chart(
@@ -13,4 +14,15 @@ helm_lint_test(
 helm_template_test(
     name = "with_crds_template_test",
     chart = ":with_crds",
+)
+
+go_test(
+    name = "with_crds_test",
+    srcs = ["with_crds_test.go"],
+    data = [":with_crds"],
+    env = {"HELM_CHART": "$(rlocationpath :with_crds)"},
+    deps = [
+        "@in_gopkg_yaml_v3//:yaml_v3",
+        "@rules_go//go/runfiles",
+    ],
 )
