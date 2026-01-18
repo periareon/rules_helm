@@ -387,7 +387,7 @@ helm_template(<a href="#helm_template-name">name</a>, <a href="#helm_template-ou
 <pre>
 load("@rules_helm//helm:defs.bzl", "helm_template_test")
 
-helm_template_test(<a href="#helm_template_test-name">name</a>, <a href="#helm_template_test-chart">chart</a>, <a href="#helm_template_test-installer">installer</a>, <a href="#helm_template_test-template_patterns">template_patterns</a>)
+helm_template_test(<a href="#helm_template_test-name">name</a>, <a href="#helm_template_test-chart">chart</a>, <a href="#helm_template_test-installer">installer</a>, <a href="#helm_template_test-template_patterns">template_patterns</a>, <a href="#helm_template_test-values">values</a>)
 </pre>
 <p>A test rule for rendering helm chart templates.</p>
 <p><strong>ATTRIBUTES</strong></p>
@@ -396,6 +396,7 @@ helm_template_test(<a href="#helm_template_test-name">name</a>, <a href="#helm_t
 <tr><td style="text-align: left"><a id="helm_template_test-chart"></a>chart</td><td style="text-align: left">The helm package to resolve templates for. Mutually exclusive with <code>installer</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
 <tr><td style="text-align: left"><a id="helm_template_test-installer"></a>installer</td><td style="text-align: left">The <code>helm_install</code>/<code>helm_upgrade</code> target to resolve templates for. Mutually exclusive with <code>chart</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
 <tr><td style="text-align: left"><a id="helm_template_test-template_patterns"></a>template_patterns</td><td style="text-align: left">A mapping of template paths to regex patterns required to match.</td><td style="text-align: left"><a href="https://bazel.build/rules/lib/dict">Dictionary: String -&gt; List of strings</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>{}</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_template_test-values"></a>values</td><td style="text-align: left">Values files to pass to <code>helm template --values</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
 </tbody></table>
 </div>
 <p><a id="helm_toolchain"></a></p>
