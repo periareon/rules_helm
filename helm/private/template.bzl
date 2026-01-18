@@ -41,12 +41,13 @@ def _helm_template_test_impl(ctx):
         args.add("-chart", rlocationpath(pkg_info.chart, ctx.workspace_name))
         args.add("-helm", rlocationpath(toolchain.helm, ctx.workspace_name))
         args.add("-helm_plugins", rlocationpath(toolchain.helm_plugins, ctx.workspace_name))
+
+        for values in ctx.files.values:
+            args.add("--values", rlocationpath(values, ctx.workspace_name))
+
         args.add("--")
         args.add("template")
         args.add(rlocationpath(pkg_info.chart, ctx.workspace_name))
-
-        for values in ctx.files.values:
-            args.add("--values", values)
 
         ctx.actions.write(
             output = args_file,

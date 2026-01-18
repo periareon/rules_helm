@@ -75,6 +75,20 @@ func loadTemplatePatterns(path string) (map[string][]string, error) {
 	return data, nil
 }
 
+// Flag type for a list of values passed as mutiple arguments.
+type valuesList []string
+
+// Provide the flag.Value interface in the simplest possible way.
+func (vs *valuesList) Set(value string) error {
+	*vs = append(*vs, value)
+	return nil
+}
+
+// Provide the flag.Value interface in the simplest possible way.
+func (vs *valuesList) String() string {
+	return fmt.Sprint(*vs)
+}
+
 func main() {
 	// Get the file path for args
 	argsRlocation := os.Getenv("RULES_HELM_HELM_RUNNER_ARGS_FILE")
@@ -92,11 +106,14 @@ func main() {
 
 	internalArgs, helmArgs := parseArgsUpToDashDash(argv)
 
+	var values valuesList
+
 	// Setup flags for helm, chart, registry_url, and image_pushers
 	rawHelmPath := flag.String("helm", "", "Path to helm binary")
 	rawHelmPluginsPath := flag.String("helm_plugins", "", "The path to helm plugins.")
 	rawChartPath := flag.String("chart", "", "Path to Helm .tgz file")
 	rawImagePushers := flag.String("image_pushers", "", "Comma-separated list of image pusher executables")
+	flag.Var(&values, "values", "Extra Values files (maye be used mutiple times).")
 
 	// Parse command line arguments
 	flag.CommandLine.Parse(internalArgs)
@@ -129,6 +146,11 @@ func main() {
 		for i, item := range helmArgs {
 			helmArgs[i] = strings.ReplaceAll(item, *rawChartPath, chartPath)
 		}
+	}
+
+	for _, value := range values {
+		// Translate to correct path and forward to helm.
+		helmArgs = append(helmArgs, "--values", helm_utils.GetRunfile(value))
 	}
 
 	var imagePushers []string
