@@ -22,4 +22,12 @@ helm_template(
 helm_template_test(
     name = "template_with_values_template_test",
     chart = ":template_with_values",
+    template_patterns = {
+        "template-with-values/templates/deployment.yaml": [
+            "  replicas: 10\\b",  # overriden by template_values.yaml
+        ],
+    },
+    values = [
+        ":template_values.yaml",
+    ],
 )

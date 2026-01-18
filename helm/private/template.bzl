@@ -12,6 +12,9 @@ def _helm_template_test_impl(ctx):
             ctx.label,
         ))
 
+    if ctx.attr.installer and ctx.files.values:
+        fail("values is not supported with installer")
+
     template_patterns = None
     if ctx.attr.template_patterns:
         template_patterns = ctx.actions.declare_file("{}.template_patterns.json".format(ctx.label.name))
@@ -38,6 +41,10 @@ def _helm_template_test_impl(ctx):
         args.add("-chart", rlocationpath(pkg_info.chart, ctx.workspace_name))
         args.add("-helm", rlocationpath(toolchain.helm, ctx.workspace_name))
         args.add("-helm_plugins", rlocationpath(toolchain.helm_plugins, ctx.workspace_name))
+
+        for values in ctx.files.values:
+            args.add("--values", rlocationpath(values, ctx.workspace_name))
+
         args.add("--")
         args.add("template")
         args.add(rlocationpath(pkg_info.chart, ctx.workspace_name))
@@ -47,7 +54,7 @@ def _helm_template_test_impl(ctx):
             content = args,
         )
 
-        runfiles = runfiles.merge(ctx.runfiles([
+        runfiles = runfiles.merge(ctx.runfiles(ctx.files.values + [
             args_file,
             ctx.executable._runner,
             toolchain.helm,
@@ -107,6 +114,10 @@ helm_template_test = rule(
         ),
         "template_patterns": attr.string_list_dict(
             doc = "A mapping of template paths to regex patterns required to match.",
+        ),
+        "values": attr.label_list(
+            doc = "Values files to pass to `helm template --values`.",
+            allow_files = [".yml", ".yaml"],
         ),
         "_copier": attr.label(
             cfg = "exec",
