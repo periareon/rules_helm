@@ -15,24 +15,6 @@ import (
 	"github.com/periareon/rules_helm/helm/private/helm_utils"
 )
 
-func parseArgsUpToDashDash(argv []string) ([]string, []string) {
-	var before, after []string
-	foundSeparator := false
-
-	for _, arg := range argv {
-		if foundSeparator == false && arg == "--" {
-			foundSeparator = true
-			continue // Skip adding "--" itself to either list
-		}
-		if foundSeparator {
-			after = append(after, arg)
-		} else {
-			before = append(before, arg)
-		}
-	}
-	return before, after
-}
-
 // ParseHelmOutput extracts sections of Helm output and maps them to their respective sources.
 func parseHelmOutput(input string) map[string]string {
 	result := make(map[string]string)
@@ -104,8 +86,6 @@ func main() {
 		log.Fatalf("Error loading command line args: %s", err)
 	}
 
-	internalArgs, helmArgs := parseArgsUpToDashDash(argv)
-
 	var values valuesList
 
 	// Setup flags for helm, chart, registry_url, and image_pushers
@@ -116,7 +96,8 @@ func main() {
 	flag.Var(&values, "values", "Extra Values files (maye be used mutiple times).")
 
 	// Parse command line arguments
-	flag.CommandLine.Parse(internalArgs)
+	flag.CommandLine.Parse(argv)
+	helmArgs := flag.CommandLine.Args()
 
 	_, is_test := os.LookupEnv("RULES_HELM_HELM_TEMPLATE_TEST")
 	_, is_debug := os.LookupEnv("RULES_HELM_DEBUG")
