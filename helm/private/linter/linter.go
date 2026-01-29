@@ -36,6 +36,7 @@ type Arguments struct {
 	helmPlugins   string
 	pkg           string
 	output        string
+	helmArgs      []string
 }
 
 func makeAbsolutePath(path string) string {
@@ -74,6 +75,7 @@ func parse_args() Arguments {
 	}
 
 	flag.CommandLine.Parse(argv)
+	args.helmArgs = flag.CommandLine.Args()
 
 	return args
 }
@@ -280,5 +282,5 @@ func main() {
 		helmArgs = append(helmArgs, "--values", v)
 	}
 
-	lint(dir, helm, helmArgs, helmPlugins, args.output)
+	lint(dir, helm, append(helmArgs, args.helmArgs...), helmPlugins, args.output)
 }
