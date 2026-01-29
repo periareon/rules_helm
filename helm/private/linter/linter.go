@@ -61,7 +61,7 @@ func parse_args() Arguments {
 	flag.StringVar(&args.output, "output", "", "The path to the Bazel `HelmPackage` action output")
 	flag.StringVar(&args.pkg, "package", "", "The path to the helm package to lint.")
 
-	argv := os.Args[1:]
+	var argv []string
 
 	// Get the file path for args
 	args_file, found := os.LookupEnv("RULES_HELM_HELM_LINT_TEST_ARGS_PATH")
@@ -74,7 +74,7 @@ func parse_args() Arguments {
 		}
 	}
 
-	flag.CommandLine.Parse(argv)
+	flag.CommandLine.Parse(append(os.Args[1:], argv...))
 	args.helmArgs = flag.CommandLine.Args()
 
 	return args
