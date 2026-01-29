@@ -49,6 +49,9 @@ def _helm_template_test_impl(ctx):
         args.add("template")
         args.add(rlocationpath(pkg_info.chart, ctx.workspace_name))
 
+        if ctx.attr.opts:
+            args.add_all(ctx.attr.opts)
+
         ctx.actions.write(
             output = args_file,
             content = args,
@@ -112,6 +115,9 @@ helm_template_test = rule(
             doc = "The `helm_install`/`helm_upgrade` target to resolve templates for. Mutually exclusive with `chart`.",
             providers = [HelmInstallInfo],
         ),
+        "opts": attr.string_list(
+            doc = "Additional arguments to pass to `helm template`.",
+        ),
         "template_patterns": attr.string_list_dict(
             doc = "A mapping of template paths to regex patterns required to match.",
         ),
@@ -152,6 +158,10 @@ def _helm_template_impl(ctx):
     for values in ctx.files.values:
         args.add("-values", values)
 
+    if ctx.attr.opts:
+        args.add("--")
+        args.add_all(ctx.attr.opts)
+
     ctx.actions.run(
         executable = ctx.executable._templater,
         outputs = [output],
@@ -175,6 +185,9 @@ helm_template = rule(
             doc = "The helm package to resolve charts for.",
             mandatory = True,
             providers = [HelmPackageInfo],
+        ),
+        "opts": attr.string_list(
+            doc = "Additional arguments to pass to `helm template`.",
         ),
         "out": attr.output(
             doc = "The output file to write the output from `helm template`.",
