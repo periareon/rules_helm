@@ -144,7 +144,7 @@ func main() {
 		cmd := exec.Command(pusher)
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
-		cmd.Env = r.Env()
+		cmd.Env = append(os.Environ(), r.Env()...)
 
 		log.Printf("Running image pusher: %s", pusher)
 		if err := cmd.Run(); err != nil {
