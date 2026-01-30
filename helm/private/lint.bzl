@@ -91,6 +91,10 @@ def _helm_lint_test_impl(ctx):
     for v in ctx.files.values:
         args.add("-values", rlocationpath(v, ctx.workspace_name))
 
+    if ctx.attr.opts:
+        args.add("--")
+        args.add_all(ctx.attr.opts)
+
     ctx.actions.write(
         output = args_file,
         content = args,
@@ -129,6 +133,9 @@ helm_lint_test = rule(
             doc = "The helm package to run linting on.",
             mandatory = True,
             providers = [HelmPackageInfo],
+        ),
+        "opts": attr.string_list(
+            doc = "Additional arguments to pass to `helm lint`.",
         ),
         "substitutions": attr.string_dict(
             doc = "A dictionary of substitutions passed to `helm lint --set flag.",

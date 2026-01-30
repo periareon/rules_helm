@@ -55,6 +55,10 @@ def _helm_push_impl(ctx):
         if image_pushers:
             args.add("-image_pushers", ",".join([rlocationpath(p, ctx.workspace_name) for p in image_pushers]))
 
+    if ctx.attr.opts:
+        args.add("--")
+        args.add_all(ctx.attr.opts)
+
     args_file = ctx.actions.declare_file("{}.args.txt".format(ctx.label.name))
     ctx.actions.write(
         output = args_file,
@@ -103,6 +107,9 @@ if the following environment variables are defined:
         ),
         "login_url": attr.string(
             doc = "The URL of the registry to use for `helm login`. E.g. `my.registry.io`",
+        ),
+        "opts": attr.string_list(
+            doc = "Additional arguments to pass to `helm` commands.",
         ),
         "package": attr.label(
             doc = "The helm package to push to the registry.",

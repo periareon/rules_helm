@@ -123,6 +123,7 @@ type Arguments struct {
 	StableStatusFile   string
 	VolatileStatusFile string
 	WorkspaceName      string
+	HelmArgs           []string
 }
 
 func parseArgs() Arguments {
@@ -146,6 +147,7 @@ func parseArgs() Arguments {
 	flag.StringVar(&args.VolatileStatusFile, "volatile_status_file", "", "The stable status file (`ctx.version_file`).")
 	flag.StringVar(&args.WorkspaceName, "workspace_name", "", "The name of the current Bazel workspace.")
 	flag.Parse()
+	args.HelmArgs = flag.CommandLine.Args()
 
 	return args
 }
@@ -1027,7 +1029,7 @@ func main() {
 	}
 
 	// Build the helm package
-	cmd, err := helm_utils.BuildHelmCommand(filepath.Join(cwd, args.Helm), []string{"package", "."}, filepath.Join(cwd, args.HelmPlugins))
+	cmd, err := helm_utils.BuildHelmCommand(filepath.Join(cwd, args.Helm), append([]string{"package", "."}, args.HelmArgs...), filepath.Join(cwd, args.HelmPlugins))
 	if err != nil {
 		log.Fatal(err)
 	}

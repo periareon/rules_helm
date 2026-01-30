@@ -56,6 +56,7 @@ func main() {
 
 	argsFilePath := helm_utils.GetRunfile(argsRlocation)
 
+	// Read args from the file
 	argv, err := helm_utils.ArgvWithFile(argsFilePath)
 	if err != nil {
 		log.Fatalf("Error loading command line args: %s", err)
@@ -72,6 +73,7 @@ func main() {
 
 	// Parse command line arguments
 	flag.CommandLine.Parse(argv)
+	helmArgs := flag.CommandLine.Args()
 
 	// Check required arguments
 	if *rawHelmPath == "" || *rawChartPath == "" || *registryURL == "" {
@@ -127,7 +129,7 @@ func main() {
 		}
 
 		log.Printf("Logging into Helm registry `%s`...\n", loginUrl)
-		runHelm(helmPath, []string{"registry", "login", "--username", helmUser, "--password-stdin", loginUrl}, helmPluginsPath, &helmPassword)
+		runHelm(helmPath, append([]string{"registry", "login", "--username", helmUser, "--password-stdin", loginUrl}, helmArgs...), helmPluginsPath, &helmPassword)
 	} else if helmUser != "" {
 		log.Printf("WARNING: A Helm registry username was set but no associated `HELM_REGISTRY_PASSWORD`/`HELM_REGISTRY_PASSWORD_FILE` var was found. Skipping `helm registry login`.")
 	} else if helmPassword != "" {
@@ -154,5 +156,5 @@ func main() {
 
 	// Subprocess helm push
 	log.Printf("Running helm %s...\n", *pushCmd)
-	runHelm(helmPath, []string{*pushCmd, chartPath, *registryURL}, helmPluginsPath, nil)
+	runHelm(helmPath, append([]string{*pushCmd, chartPath, *registryURL}, helmArgs...), helmPluginsPath, nil)
 }

@@ -24,6 +24,8 @@ def helm_chart(
         push_cmd = None,
         helm_opts = [],
         install_opts = [],
+        package_opts = [],
+        push_opts = [],
         upgrade_opts = [],
         uninstall_opts = [],
         data = [],
@@ -61,6 +63,8 @@ def helm_chart(
         push_cmd (str, optional): An alternative command to `push` for publishing helm charts.
         helm_opts (list, optional): Additional options to pass to helm.
         install_opts (list, optional): Additional options to pass to `helm install`.
+        package_opts (list, optional): Additional options to pass to `helm package`.
+        push_opts (list, optional): Additional options to pass to `helm push`.
         uninstall_opts (list, optional): Additional options to pass to `helm uninstall`.
         upgrade_opts (list, optional): Additional options to pass to `helm upgrade`.
         data (list, optional): Additional runtime data to pass to the helm install, upgrade, and uninstall targets.
@@ -100,6 +104,7 @@ def helm_chart(
         deps = deps,
         files = files,
         images = images,
+        opts = helm_opts + package_opts,
         stamp = stamp,
         substitutions = substitutions,
         templates = templates,
@@ -122,6 +127,7 @@ def helm_chart(
             include_images = False,
             registry_url = registry_url,
             login_url = login_url,
+            opts = helm_opts + push_opts,
             push_cmd = push_cmd,
             **kwargs
         )
@@ -132,6 +138,7 @@ def helm_chart(
             package = name,
             registry_url = registry_url,
             login_url = login_url,
+            opts = helm_opts + push_opts,
             push_cmd = push_cmd,
             **kwargs
         )

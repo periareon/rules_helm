@@ -30,6 +30,7 @@ type Arguments struct {
 	chart       string
 	values      stringSliceFlag
 	output      string
+	helmArgs    []string
 }
 
 func makeAbsolutePath(path string) string {
@@ -52,6 +53,7 @@ func parseArgs() Arguments {
 	flag.Var(&args.values, "values", "Values files to pass to helm's --values flag.")
 	flag.StringVar(&args.output, "output", "", "The output file to write.")
 	flag.Parse()
+	args.helmArgs = flag.CommandLine.Args()
 
 	return args
 }
@@ -70,6 +72,7 @@ func main() {
 	for _, v := range args.values {
 		helmArgs = append(helmArgs, "--values", makeAbsolutePath(v))
 	}
+	helmArgs = append(helmArgs, args.helmArgs...)
 	cmd, err := helm_utils.BuildHelmCommand(helm, helmArgs, helmPlugins)
 	if err != nil {
 		log.Fatal(err)
