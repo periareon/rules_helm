@@ -45,24 +45,6 @@ func replaceKeyValues(content string, stamps map[string]string) (string, error) 
 	return content, nil
 }
 
-func parseArgsUpToDashDash(argv []string) ([]string, []string) {
-	var before, after []string
-	foundSeparator := false
-
-	for _, arg := range argv {
-		if foundSeparator == false && arg == "--" {
-			foundSeparator = true
-			continue // Skip adding "--" itself to either list
-		}
-		if foundSeparator {
-			after = append(after, arg)
-		} else {
-			before = append(before, arg)
-		}
-	}
-	return before, after
-}
-
 // writeLines writes the given lines to the specified file, with each line separated by a newline.
 func writeLines(lines []string, filePath string) error {
 	// Create (or overwrite) the file
@@ -92,13 +74,12 @@ func writeLines(lines []string, filePath string) error {
 }
 
 func main() {
-	internalArgs, stampableArgs := parseArgsUpToDashDash(os.Args[1:])
-
 	output := flag.String("output", "", "The output file.")
 	stableStatusFile := flag.String("stable_status_file", "", "The path to the stable workspace status file.")
 	volatileStatusFile := flag.String("volatile_status_file", "", "The path to the volatile workspace status file.")
 
-	flag.CommandLine.Parse(internalArgs)
+	flag.Parse()
+	stampableArgs := flag.Args()
 
 	// Collect all stamp values
 	stamps, err := loadStamps(*stableStatusFile, *volatileStatusFile)

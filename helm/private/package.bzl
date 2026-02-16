@@ -164,6 +164,10 @@ def _helm_package_impl(ctx):
 
     args.add("-workspace_name", ctx.workspace_name)
 
+    if ctx.attr.opts:
+        args.add("--")
+        args.add_all(ctx.attr.opts)
+
     ctx.actions.run(
         executable = ctx.executable._packager,
         outputs = [output, metadata_output],
@@ -232,6 +236,9 @@ helm_package = rule(
                 [image_push](https://github.com/bazel-contrib/rules_img) \
                 targets.""",
             aspects = [image_push_repository_aspect],
+        ),
+        "opts": attr.string_list(
+            doc = "Additional arguments to pass to `helm package` commands.",
         ),
         "schema": attr.label(
             doc = "The `values.schema.json` file for the current package.",

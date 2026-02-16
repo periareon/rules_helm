@@ -36,6 +36,7 @@ type Arguments struct {
 	helmPlugins   string
 	pkg           string
 	output        string
+	helmArgs      []string
 }
 
 func makeAbsolutePath(path string) string {
@@ -60,18 +61,21 @@ func parse_args() Arguments {
 	flag.StringVar(&args.output, "output", "", "The path to the Bazel `HelmPackage` action output")
 	flag.StringVar(&args.pkg, "package", "", "The path to the helm package to lint.")
 
+	var argv []string
+
+	// Get the file path for args
 	args_file, found := os.LookupEnv("RULES_HELM_HELM_LINT_TEST_ARGS_PATH")
 	if found {
-		content, err := os.ReadFile(helm_utils.GetRunfile(args_file))
+		var err error
+		// Replace with args from the file
+		argv, err = helm_utils.ArgvWithFile(helm_utils.GetRunfile(args_file))
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		args := strings.Split(string(content), "\n")
-		os.Args = append(os.Args, args...)
 	}
 
-	flag.Parse()
+	flag.CommandLine.Parse(append(os.Args[1:], argv...))
+	args.helmArgs = flag.CommandLine.Args()
 
 	return args
 }
@@ -278,5 +282,5 @@ func main() {
 		helmArgs = append(helmArgs, "--values", v)
 	}
 
-	lint(dir, helm, helmArgs, helmPlugins, args.output)
+	lint(dir, helm, append(helmArgs, args.helmArgs...), helmPlugins, args.output)
 }
