@@ -23,15 +23,20 @@ jobs:
       contents: write
       actions: write
       attestations: write
+    outputs:
+      release_version: ${{ steps.version.outputs.release_version }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: main
       - name: Detect the current version
+        id: version
         run: |
           version="$(grep 'VERSION =' ./version.bzl | sed 's/VERSION = "//' | sed 's/"//')"
           echo "RELEASE_VERSION=${version}" >> $GITHUB_ENV
+          echo "release_version=${version}" >> $GITHUB_OUTPUT
+      # Ensure this does not exclude the module used for the .bcr presubmit job.
       - name: Create release artifact
         run: |
           tar -czf ${{ github.workspace }}/.github/rules_helm.tar.gz --exclude=".git" --exclude=".github" --exclude="examples" -C ${{ github.workspace }} .
@@ -60,3 +65,13 @@ jobs:
           asset_name: rules_helm-v${{ env.RELEASE_VERSION }}.tar.gz
           asset_path: ${{ github.workspace }}/.github/rules_helm.tar.gz
           asset_content_type: application/gzip
+
+  bcr-publish:
+    needs: [release]
+    permissions:
+      contents: write
+    uses: ./.github/workflows/bcr-publish.yaml
+    with:
+      release_version: ${{ needs.release.outputs.release_version }}
+    secrets:
+      BCR_PUBLISH_TOKEN: ${{ secrets.BCR_PUBLISH_TOKEN }}
