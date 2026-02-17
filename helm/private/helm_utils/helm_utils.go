@@ -163,18 +163,17 @@ func GetRunfile(runfile_path string) string {
 
 	runfiles, err := runfiles.New()
 	if err != nil {
-		log.Fatalf("Failed to load runfiles: %s", err)
+		log.Fatalf("Failed to load runfiles: %v", err)
 	}
 
 	// Use the runfiles library to locate files
 	runfile, err := runfiles.Rlocation(runfile_path)
-	if err != nil {
-		log.Fatalf("When reading file %s, got error %v", runfile, err)
-	}
-
-	// Check that the file actually exist
+	// Check that the file actually exists:
 	if _, err := os.Stat(runfile); errors.Is(err, os.ErrNotExist) {
-		log.Fatalf("File %s found by runfile doesn't exist", runfile)
+		log.Fatalf("File %s found by runfiles doesn't exist", runfile)
+	}
+	if err != nil {
+		log.Fatalf("When locating file %s, got error %v", runfile, err)
 	}
 
 	return runfile
