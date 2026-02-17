@@ -2,7 +2,7 @@
 
 module(
     name = "rules_helm",
-    version = "0.21.0",
+    version = "0.22.0",
     compatibility_level = 1,
 )
 
