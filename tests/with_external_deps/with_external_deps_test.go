@@ -131,16 +131,19 @@ func TestWithChartDepsTest(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to load main Chart.yaml: %v", err)
 	}
-	if len(chart.Dependencies) != 3 {
-		t.Fatalf("Expected 3 dependencies in main Chart.yaml, but found %d", len(chart.Dependencies))
+	if len(chart.Dependencies) != 6 {
+		t.Fatalf("Expected 6 dependencies in main Chart.yaml, but found %d", len(chart.Dependencies))
 	}
 
 	expectedDeps := map[string]HelmChartDependency{
-		"dep1":       {Name: "dep1", Repository: "", Version: "0.1.0"},
-		"dep2":       {Name: "dep2", Repository: "", Version: "0.1.0"},
-		"grafana":    {Name: "grafana", Repository: "https://charts.bitnami.com/bitnami", Version: "12.1.4"},
-		"redis":      {Name: "redis", Repository: "https://charts.bitnami.com/bitnami", Version: "21.2.5"},
-		"postgresql": {Name: "postgresql", Repository: "https://charts.bitnami.com/bitnami", Version: "14.0.5"},
+		"dep1":           {Name: "dep1", Repository: "", Version: "0.1.0"},
+		"dep2":           {Name: "dep2", Repository: "", Version: "0.1.0"},
+		"grafana":        {Name: "grafana", Repository: "https://charts.bitnami.com/bitnami", Version: "12.1.4"},
+		"vault-operator": {Name: "vault-operator", Repository: "oci://ghcr.io/bank-vaults/helm-charts", Version: "1.23.0"},
+		"karpenter":      {Name: "karpenter", Repository: "oci://public.ecr.aws/karpenter", Version: "1.9.0"},
+		"cert-manager":   {Name: "cert-manager", Repository: "oci://quay.io/jetstack/charts", Version: "v1.19.4"},
+		"redis":          {Name: "redis", Repository: "https://charts.bitnami.com/bitnami", Version: "21.2.5"},
+		"postgresql":     {Name: "postgresql", Repository: "https://charts.bitnami.com/bitnami", Version: "14.0.5"},
 	}
 
 	for _, dep := range chart.Dependencies {

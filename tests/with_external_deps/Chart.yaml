@@ -27,6 +27,15 @@ dependencies:
   - name: grafana
     repository: https://charts.bitnami.com/bitnami
     version: 12.1.4
+  - name: vault-operator
+    repository: oci://ghcr.io/bank-vaults/helm-charts
+    version: 1.23.0
+  - name: karpenter
+    repository: oci://public.ecr.aws/karpenter
+    version: 1.9.0
+  - name: cert-manager
+    repository: oci://quay.io/jetstack/charts
+    version: v1.19.4
   - name: redis
     repository: https://charts.bitnami.com/bitnami
     version: 21.2.5

@@ -40,6 +40,9 @@ common:no-bzlmod --noenable_bzlmod --enable_workspace
 # Disable the bzlmod lockfile, so we don't accidentally commit MODULE.bazel.lock
 common --lockfile_mode=off
 
+# Display log messages from unit tests that fail.
+test --test_output=errors
+
 ###############################################################################
 ## Custom user flags
 ##
