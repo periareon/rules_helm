@@ -1,4 +1,35 @@
+load("@buildifier_prebuilt//:rules.bzl", "buildifier")
 load("@gazelle//:def.bzl", "gazelle")
+
+buildifier(
+    name = "buildifier.check",
+    exclude_patterns = [
+        "./.git/*",
+    ],
+    lint_mode = "warn",
+    lint_warnings = ["all"],
+    mode = "check",
+)
+
+buildifier(
+    name = "buildifier.diff",
+    exclude_patterns = [
+        "./.git/*",
+    ],
+    lint_mode = "warn",
+    lint_warnings = ["all"],
+    mode = "diff",
+)
+
+buildifier(
+    name = "buildifier.fix",
+    exclude_patterns = [
+        "./.git/*",
+    ],
+    lint_mode = "fix",
+    lint_warnings = ["all"],
+    mode = "fix",
+)
 
 exports_files(
     [
