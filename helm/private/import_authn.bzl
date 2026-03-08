@@ -6,17 +6,17 @@ load("@bazel_lib//lib:repo_utils.bzl", "repo_utils")
 # Unfortunately bazel downloader doesn't let us sniff the WWW-Authenticate header, therefore we need to
 # keep a map of known registries that require us to acquire a temporary token for authentication.
 _WWW_AUTH = {
-    "registry-1.docker.io": {
-        "challenge": "Bearer",
-        "realm": "auth.docker.io/token",
-        "scope": "repository:{chart}:pull",
-        "service": "registry.docker.io",
-    },
     "ghcr.io": {
         "challenge": "Bearer",
         "realm": "https://ghcr.io/token",
         "scope": "repository:{chart}:pull",
         "service": "ghcr.io",
+    },
+    "public.ecr.aws": {
+        "challenge": "Bearer",
+        "realm": "public.ecr.aws/token",
+        "scope": "aws",
+        "service": "public.ecr.aws",
     },
     "quay.io": {
         "challenge": "Bearer",
@@ -24,11 +24,11 @@ _WWW_AUTH = {
         "scope": "repository:{chart}:pull",
         "service": "quay.io",
     },
-    "public.ecr.aws": {
+    "registry-1.docker.io": {
         "challenge": "Bearer",
-        "realm": "public.ecr.aws/token",
-        "scope": "aws",
-        "service": "public.ecr.aws",
+        "realm": "auth.docker.io/token",
+        "scope": "repository:{chart}:pull",
+        "service": "registry.docker.io",
     },
 }
 
