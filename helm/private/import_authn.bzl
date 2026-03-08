@@ -12,6 +12,24 @@ _WWW_AUTH = {
         "scope": "repository:{chart}:pull",
         "service": "registry.docker.io",
     },
+    "ghcr.io": {
+        "challenge": "Bearer",
+        "realm": "https://ghcr.io/token",
+        "scope": "repository:{chart}:pull",
+        "service": "ghcr.io",
+    },
+    "quay.io": {
+        "challenge": "Bearer",
+        "realm": "quay.io/v2/auth",
+        "scope": "repository:{chart}:pull",
+        "service": "quay.io",
+    },
+    "public.ecr.aws": {
+        "challenge": "Bearer",
+        "realm": "public.ecr.aws/token",
+        "scope": "aws",
+        "service": "public.ecr.aws",
+    },
 }
 
 def _strip_host(url):

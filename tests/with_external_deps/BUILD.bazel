@@ -6,7 +6,10 @@ exports_files(["Chart.lock"])
 helm_chart(
     name = "with_external_deps",
     deps = [
+        "@helm_test_deps__with_external_deps_bank_vaults//:vault-operator",
+        "@helm_test_deps__with_external_deps_cert_manager//:cert-manager",
         "@helm_test_deps__with_external_deps_grafana//:grafana",
+        "@helm_test_deps__with_external_deps_karpenter//:karpenter",
         "@helm_test_deps__with_external_deps_postgresql//:postgresql",
         "@helm_test_deps__with_external_deps_redis//:redis",
     ],
@@ -20,6 +23,7 @@ helm_lint_test(
 helm_template_test(
     name = "with_external_deps_template_test",
     chart = ":with_external_deps",
+    opts = ["--set=karpenter.settings.clusterName=test"],
 )
 
 go_test(
