@@ -15,6 +15,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/periareon/rules_helm/helm/private/helm_utils"
 	"gopkg.in/yaml.v3"
@@ -468,7 +469,7 @@ func copyFile(source string, dest string) error {
 	if err != nil {
 		return fmt.Errorf("Error creating destination file %s: %w", dest, err)
 	}
-
+	defer os.Chtimes(dest, zeroTime, zeroTime)
 	defer destFile.Close()
 
 	_, err = io.Copy(destFile, srcFile)
@@ -713,14 +714,14 @@ func installHelmContent(workingDir string, packagePath string, stampedChartConte
 	}
 
 	valuesYaml := filepath.Join(templatesParent, "values.yaml")
-	err = os.WriteFile(valuesYaml, []byte(stampedValuesContent), 0644)
+	err = writeFile(valuesYaml, []byte(stampedValuesContent), 0644)
 	if err != nil {
 		return "", fmt.Errorf("Error writing values file %s: %w", valuesYaml, err)
 	}
 
 	if stampedSchemaContent != "" {
 		schemaJson := filepath.Join(templatesParent, "values.schema.json")
-		err = os.WriteFile(schemaJson, []byte(stampedSchemaContent), 0644)
+		err = writeFile(schemaJson, []byte(stampedSchemaContent), 0644)
 		if err != nil {
 			return "", fmt.Errorf("Error writing schema file %s: %w", schemaJson, err)
 		}
@@ -866,7 +867,7 @@ func installHelmContent(workingDir string, packagePath string, stampedChartConte
 
 	// Write the Chart.yaml last because it may have been modified by the above steps
 	chartYaml := filepath.Join(templatesParent, "Chart.yaml")
-	err = os.WriteFile(chartYaml, []byte(stampedChartContent), 0644)
+	err = writeFile(chartYaml, []byte(stampedChartContent), 0644)
 	if err != nil {
 		return "", fmt.Errorf("Error writing chart file %s: %w", chartYaml, err)
 	}
@@ -912,7 +913,7 @@ func writeResultsMetadata(packageBase string, metadataOutput string) error {
 		return fmt.Errorf("Error marshalling metadata: %w", err)
 	}
 
-	err = os.WriteFile(metadataOutput, text, 0644)
+	err = writeFile(metadataOutput, text, 0644)
 	if err != nil {
 		return fmt.Errorf("Error writing metadata file: %w", err)
 	}
@@ -1060,4 +1061,17 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+var zeroTime = time.Unix(0, 0)
+
+func writeFile(path string, content []byte, mode os.FileMode) error {
+	if err := os.WriteFile(path, content, mode); err != nil {
+		return err
+	}
+	if err := os.Chtimes(path, zeroTime, zeroTime); err != nil {
+		return fmt.Errorf("failed to chtimes destination file %s: %w", path, err)
+	}
+
+	return nil
 }
