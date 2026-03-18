@@ -1,34 +1,18 @@
-load("@buildifier_prebuilt//:rules.bzl", "buildifier")
 load("@gazelle//:def.bzl", "gazelle")
 
-buildifier(
+alias(
     name = "buildifier.check",
-    exclude_patterns = [
-        "./.git/*",
-    ],
-    lint_mode = "warn",
-    lint_warnings = ["all"],
-    mode = "check",
+    actual = "//tools/buildifier:check",
 )
 
-buildifier(
+alias(
     name = "buildifier.diff",
-    exclude_patterns = [
-        "./.git/*",
-    ],
-    lint_mode = "warn",
-    lint_warnings = ["all"],
-    mode = "diff",
+    actual = "//tools/buildifier:diff",
 )
 
-buildifier(
+alias(
     name = "buildifier.fix",
-    exclude_patterns = [
-        "./.git/*",
-    ],
-    lint_mode = "fix",
-    lint_warnings = ["all"],
-    mode = "fix",
+    actual = "//tools/buildifier:fix",
 )
 
 exports_files(

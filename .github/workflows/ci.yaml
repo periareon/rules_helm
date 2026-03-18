@@ -123,7 +123,6 @@ jobs:
         env:
           USE_BAZEL_VERSION: 7.x
 
-
   ci-buildifier:
     runs-on: ubuntu-latest
     steps:
