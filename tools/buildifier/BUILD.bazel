@@ -1,0 +1,33 @@
+load("@buildifier_prebuilt//:rules.bzl", "buildifier")
+
+package(default_visibility = ["//:__subpackages__"])
+
+buildifier(
+    name = "check",
+    exclude_patterns = [
+        "./.git/*",
+    ],
+    lint_mode = "warn",
+    lint_warnings = ["all"],
+    mode = "check",
+)
+
+buildifier(
+    name = "diff",
+    exclude_patterns = [
+        "./.git/*",
+    ],
+    lint_mode = "warn",
+    lint_warnings = ["all"],
+    mode = "diff",
+)
+
+buildifier(
+    name = "fix",
+    exclude_patterns = [
+        "./.git/*",
+    ],
+    lint_mode = "fix",
+    lint_warnings = ["all"],
+    mode = "fix",
+)

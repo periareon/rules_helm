@@ -1,5 +1,20 @@
 load("@gazelle//:def.bzl", "gazelle")
 
+alias(
+    name = "buildifier.check",
+    actual = "//tools/buildifier:check",
+)
+
+alias(
+    name = "buildifier.diff",
+    actual = "//tools/buildifier:diff",
+)
+
+alias(
+    name = "buildifier.fix",
+    actual = "//tools/buildifier:fix",
+)
+
 exports_files(
     [
         "README.md",
