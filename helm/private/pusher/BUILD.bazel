@@ -1,14 +1,11 @@
-package(default_visibility = ["//visibility:public"])
+load("@rules_go//go:def.bzl", "go_binary")
 
-exports_files([
-    "helm_push.bat.template",
-    "helm_push.sh.template",
-])
-
-alias(
-    name = "template",
-    actual = select({
-        "@platforms//os:windows": ":helm_push.bat.template",
-        "//conditions:default": ":helm_push.sh.template",
-    }),
+go_binary(
+    name = "pusher",
+    srcs = ["pusher.go"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//helm/private/helm_utils",
+        "@rules_go//go/runfiles",
+    ],
 )
