@@ -33,7 +33,6 @@ use_repo(
 )
 
 helm = use_extension("@rules_helm//helm:extensions.bzl", "helm")
-helm.toolchain()
 helm.host_tools()
 use_repo(
     helm,

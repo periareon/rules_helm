@@ -163,8 +163,8 @@ exports_files(["helm{ext}"])
         ext = ext,
     ))
 
-    repository_ctx.symlink("../{name}_{platform}/helm{ext}".format(
-        name = repository_ctx.attr.name,
+    repository_ctx.symlink("../{prefix}_{platform}_bin/helm{ext}".format(
+        prefix = repository_ctx.attr.toolchain_repo_prefix,
         platform = _platform(repository_ctx),
         ext = ext,
     ), "helm{ext}".format(ext = ext))
@@ -174,6 +174,12 @@ helm_host_alias_repository = repository_rule(
     doc = """Creates a repository with a shorter name meant for the host platform, which contains
     a BUILD.bazel file that exports symlinks to the host platform's binaries
     """,
+    attrs = {
+        "toolchain_repo_prefix": attr.string(
+            doc = "The name prefix for binary repos to symlink to. The host alias constructs the full repo name as {prefix}_{platform}_bin.",
+            mandatory = True,
+        ),
+    },
 )
 
 _BUILD_FILE_FOR_TOOLCHAIN_HUB_TEMPLATE = """
@@ -181,6 +187,7 @@ toolchain(
     name = "{name}",
     exec_compatible_with = {exec_constraint_sets_serialized},
     target_compatible_with = {target_constraint_sets_serialized},
+    target_settings = {target_settings_serialized},
     toolchain = "{toolchain}",
     toolchain_type = "@rules_helm//helm:toolchain_type",
     visibility = ["//visibility:public"],
@@ -191,12 +198,14 @@ def _BUILD_for_toolchain_hub(
         toolchain_names,
         toolchain_labels,
         target_compatible_with,
-        exec_compatible_with):
+        exec_compatible_with,
+        target_settings):
     return "\n".join([_BUILD_FILE_FOR_TOOLCHAIN_HUB_TEMPLATE.format(
         name = toolchain_name,
         exec_constraint_sets_serialized = json.encode(exec_compatible_with.get(toolchain_name, [])),
         target_constraint_sets_serialized = json.encode(target_compatible_with.get(toolchain_name, [])),
         toolchain = toolchain_labels[toolchain_name],
+        target_settings_serialized = repr(target_settings.get(toolchain_name, None)),
     ) for toolchain_name in toolchain_names])
 
 def _helm_toolchain_repository_hub_impl(repository_ctx):
@@ -209,6 +218,7 @@ def _helm_toolchain_repository_hub_impl(repository_ctx):
         toolchain_labels = repository_ctx.attr.toolchain_labels,
         target_compatible_with = repository_ctx.attr.target_compatible_with,
         exec_compatible_with = repository_ctx.attr.exec_compatible_with,
+        target_settings = repository_ctx.attr.target_settings,
     ))
 
 helm_toolchain_repository_hub = repository_rule(
@@ -224,6 +234,10 @@ helm_toolchain_repository_hub = repository_rule(
         ),
         "target_compatible_with": attr.string_list_dict(
             doc = "A list of constraints for the target platform for this toolchain, keyed by toolchain name.",
+            mandatory = True,
+        ),
+        "target_settings": attr.string_list_dict(
+            doc = "A list of target settings for this toolchain, keyed by toolchain name.",
             mandatory = True,
         ),
         "toolchain_labels": attr.string_dict(

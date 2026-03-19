@@ -1,6 +1,5 @@
 """Bzlmod extensions"""
 
-load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 load(
     "//helm/private:repositories.bzl",
     "helm_host_alias_repository",
@@ -33,27 +32,17 @@ def _find_modules(module_ctx):
 def _helm_impl(module_ctx):
     root_mod, rules_mod = _find_modules(module_ctx)
 
-    toolchains = root_mod.tags.toolchain
-    if not toolchains:
-        toolchains = rules_mod.tags.toolchain
-
     host_tools = root_mod.tags.host_tools
     if not host_tools:
         host_tools = rules_mod.tags.host_tools
 
-    for attrs in toolchains:
-        if attrs.version not in HELM_VERSIONS:
-            fail("Helm toolchain hub `{}` was given unsupported version `{}`. Try: {}".format(
-                attrs.name,
-                attrs.version,
-                HELM_VERSIONS.keys(),
-            ))
-        available = HELM_VERSIONS[attrs.version]
-        toolchain_names = []
-        toolchain_labels = {}
-        target_compatible_with = {}
-        exec_compatible_with = {}
+    toolchain_names = []
+    toolchain_labels = {}
+    target_compatible_with = {}
+    exec_compatible_with = {}
+    target_settings = {}
 
+    for version, available in HELM_VERSIONS.items():
         for platform, integrity in available.items():
             if platform.startswith("windows"):
                 compression = "zip"
@@ -67,16 +56,14 @@ def _helm_impl(module_ctx):
             if url_platform == "linux-i386":
                 url_platform = "linux-386"
 
-            toolchain_repo_name = "{}__{}_{}_bin".format(attrs.name, attrs.version, platform.replace("-", "_"))
+            toolchain_repo_name = "helm_toolchains__{}_{}_bin".format(version, platform.replace("-", "_"))
 
-            # Create the hub-specific binary repository
-            maybe(
-                helm_toolchain_repository,
+            helm_toolchain_repository(
                 name = toolchain_repo_name,
                 urls = [
                     template.replace(
                         "{version}",
-                        attrs.version,
+                        version,
                     ).replace(
                         "{platform}",
                         url_platform,
@@ -84,11 +71,10 @@ def _helm_impl(module_ctx):
                         "{compression}",
                         compression,
                     )
-                    for template in attrs.helm_url_templates
+                    for template in DEFAULT_HELM_URL_TEMPLATES
                 ],
                 integrity = integrity,
                 strip_prefix = url_platform,
-                plugins = attrs.plugins,
                 platform = platform,
             )
 
@@ -96,69 +82,26 @@ def _helm_impl(module_ctx):
             toolchain_labels[toolchain_repo_name] = "@{}".format(toolchain_repo_name)
             target_compatible_with[toolchain_repo_name] = []
             exec_compatible_with[toolchain_repo_name] = CONSTRAINTS[platform]
+            target_settings[toolchain_repo_name] = ["@rules_helm//helm/settings:version_{}".format(version)]
 
-        maybe(
-            helm_toolchain_repository_hub,
-            name = attrs.name,
-            toolchain_labels = toolchain_labels,
-            toolchain_names = toolchain_names,
-            exec_compatible_with = exec_compatible_with,
-            target_compatible_with = target_compatible_with,
-        )
+    helm_toolchain_repository_hub(
+        name = "helm_toolchains",
+        toolchain_labels = toolchain_labels,
+        toolchain_names = toolchain_names,
+        exec_compatible_with = exec_compatible_with,
+        target_compatible_with = target_compatible_with,
+        target_settings = target_settings,
+    )
 
-    # Process host_tools tags
     for host_tools_attrs in host_tools:
-        maybe(
-            helm_host_alias_repository,
+        helm_host_alias_repository(
             name = host_tools_attrs.name,
+            toolchain_repo_prefix = "helm_toolchains__{}".format(host_tools_attrs.version),
         )
 
     return module_ctx.extension_metadata(
         reproducible = True,
     )
-
-_toolchain = tag_class(
-    doc = """\
-An extension for defining a `helm_toolchain` from a download archive.
-
-An example of defining and registering toolchains:
-
-```python
-helm = use_extension("@rules_helm//helm:extensions.bzl", "helm")
-helm.toolchain(
-    name = "helm_toolchains",
-    version = "3.14.4",
-)
-use_repo(helm, "helm_toolchains")
-
-register_toolchains(
-    "@helm_toolchains//:all",
-)
-```
-""",
-    attrs = {
-        "helm_url_templates": attr.string_list(
-            doc = (
-                "A url template used to download helm. The template can contain the following " +
-                "format strings `{platform}` for the helm platform, `{version}` for the helm " +
-                "version, and `{compression}` for the archive type containing the helm binary."
-            ),
-            default = DEFAULT_HELM_URL_TEMPLATES,
-        ),
-        "name": attr.string(
-            doc = "The name of the toolchain hub repository.",
-            default = "helm_toolchains",
-        ),
-        "plugins": attr.string_list(
-            doc = "A list of plugins to add to the generated toolchain.",
-            default = [],
-        ),
-        "version": attr.string(
-            doc = "The version of helm to download for the toolchain.",
-            default = DEFAULT_HELM_VERSION,
-        ),
-    },
-)
 
 _host_tools = tag_class(
     doc = """\
@@ -179,6 +122,10 @@ use_repo(helm, "helm")
             doc = "The name of the host alias repository.",
             default = "helm",
         ),
+        "version": attr.string(
+            doc = "The version of helm to use for host tools.",
+            default = DEFAULT_HELM_VERSION,
+        ),
     },
 )
 
@@ -186,6 +133,5 @@ helm = module_extension(
     implementation = _helm_impl,
     tag_classes = {
         "host_tools": _host_tools,
-        "toolchain": _toolchain,
     },
 )
