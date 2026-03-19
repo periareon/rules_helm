@@ -144,9 +144,16 @@ def _helm_push_images_impl(ctx):
     toolchain = ctx.toolchains[Label("//helm:toolchain_type")]
 
     if toolchain.helm.basename.endswith(".exe"):
-        pusher = ctx.actions.declare_file(ctx.label.name + ".bat")
+        pusher_wrapper = ctx.actions.declare_file(ctx.label.name + ".exe")
     else:
-        pusher = ctx.actions.declare_file(ctx.label.name + ".sh")
+        pusher_wrapper = ctx.actions.declare_file(ctx.label.name)
+
+    symlink(
+        ctx = ctx,
+        target_file = ctx.executable._pusher,
+        output = pusher_wrapper,
+        is_executable = True,
+    )
 
     pkg_info = ctx.attr.package[HelmPackageInfo]
 
@@ -155,27 +162,32 @@ def _helm_push_images_impl(ctx):
         pkg_info = pkg_info,
     )
 
-    image_commands = "\n".join([file.short_path for file in image_pushers])
+    args = ctx.actions.args()
+    args.set_param_file_format("multiline")
+    for p in image_pushers:
+        args.add(rlocationpath(p, ctx.workspace_name))
 
-    ctx.actions.expand_template(
-        template = ctx.file._pusher,
-        output = pusher,
-        substitutions = {
-            "{image_pushers}": image_commands,
-        },
-        is_executable = True,
+    args_file = ctx.actions.declare_file("{}.args.txt".format(ctx.label.name))
+    ctx.actions.write(
+        output = args_file,
+        content = args,
     )
 
-    runfiles = ctx.runfiles([pusher]).merge(image_runfiles)
+    runfiles = ctx.runfiles([
+        pusher_wrapper,
+        args_file,
+    ]).merge(image_runfiles)
 
     return [
         DefaultInfo(
-            files = depset([pusher]),
+            files = depset([pusher_wrapper]),
             runfiles = runfiles,
-            executable = pusher,
+            executable = pusher_wrapper,
         ),
         RunEnvironmentInfo(
-            environment = ctx.attr.env,
+            environment = ctx.attr.env | {
+                "RULES_HELM_PUSHER_ARGS_FILE": rlocationpath(args_file, ctx.workspace_name),
+            },
         ),
     ]
 
@@ -192,10 +204,16 @@ helm_push_images = rule(
             providers = [HelmPackageInfo],
             mandatory = True,
         ),
+        "_copier": attr.label(
+            cfg = "exec",
+            executable = True,
+            default = Label("//helm/private/copier"),
+        ),
         "_pusher": attr.label(
-            doc = "A template used to produce the pusher executable.",
-            allow_single_file = True,
-            default = Label("//helm/private/pusher:template"),
+            doc = "A process wrapper to use for pushing images.",
+            executable = True,
+            cfg = "exec",
+            default = Label("//helm/private/pusher"),
         ),
     },
     toolchains = [
