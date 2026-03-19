@@ -7,6 +7,7 @@ helm_chart(
         api_version = "v2",
         app_version = "1.16.0",
         description = "A Helm chart for Kubernetes by Bazel.",
+        icon = "https://helm.sh/img/helm.svg",
         type = "application",
         version = "0.1.0",
     ),

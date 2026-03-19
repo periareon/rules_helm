@@ -2,6 +2,7 @@ load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load(
     ":settings.bzl",
     "lint_default_strict",
+    "lint_promote_info",
     "version",
 )
 
@@ -16,5 +17,7 @@ bzl_library(
 )
 
 lint_default_strict()
+
+lint_promote_info()
 
 version()

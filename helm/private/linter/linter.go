@@ -31,6 +31,7 @@ func (i *stringSliceFlag) Set(value string) error {
 type Arguments struct {
 	helm          string
 	strict        bool
+	promoteInfo   bool
 	substitutions string
 	values        stringSliceFlag
 	helmPlugins   string
@@ -55,6 +56,7 @@ func parse_args() Arguments {
 
 	flag.StringVar(&args.helm, "helm", "", "The path to a helm executable")
 	flag.BoolVar(&args.strict, "strict", false, "Fail on lint warnings")
+	flag.BoolVar(&args.promoteInfo, "promote_info", false, "Fail on lint info diagnostics")
 	flag.StringVar(&args.substitutions, "substitutions", "", "Additional values to pass to helm's --set flag.")
 	flag.Var(&args.values, "values", "Values files to pass to helm's --values flag.")
 	flag.StringVar(&args.helmPlugins, "helm_plugins", "", "The path to a helm plugins directory")
@@ -167,7 +169,17 @@ func find_package_root(extract_dir string) string {
 	return file_info[0].Name()
 }
 
-func lint(directory string, helm string, helmArgs []string, helmPluginsDir string, output string) {
+func hasDiagnostics(output []byte) bool {
+	for _, line := range strings.Split(string(output), "\n") {
+		trimmed := strings.TrimSpace(line)
+		if strings.HasPrefix(trimmed, "[INFO]") || strings.HasPrefix(trimmed, "[WARNING]") || strings.HasPrefix(trimmed, "[ERROR]") {
+			return true
+		}
+	}
+	return false
+}
+
+func lint(directory string, helm string, helmArgs []string, helmPluginsDir string, output string, promoteInfo bool) {
 	cmd, err := helm_utils.BuildHelmCommand(helm, helmArgs, helmPluginsDir)
 	if err != nil {
 		log.Fatal(err)
@@ -179,6 +191,10 @@ func lint(directory string, helm string, helmArgs []string, helmPluginsDir strin
 	os.Stderr.WriteString(string(out))
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	if promoteInfo && hasDiagnostics(out) {
+		log.Fatal("helm lint produced [INFO] diagnostics which are promoted to errors via the promote_info flag")
 	}
 
 	if len(output) > 0 {
@@ -282,5 +298,5 @@ func main() {
 		helmArgs = append(helmArgs, "--values", v)
 	}
 
-	lint(dir, helm, append(helmArgs, args.helmArgs...), helmPlugins, args.output)
+	lint(dir, helm, append(helmArgs, args.helmArgs...), helmPlugins, args.output, args.promoteInfo)
 }

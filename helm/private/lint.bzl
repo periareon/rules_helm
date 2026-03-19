@@ -22,6 +22,7 @@ def _helm_lint_aspect_impl(target, ctx):
     helm_pkg_info = target[HelmPackageInfo]
     toolchain = ctx.toolchains[Label("//helm:toolchain_type")]
     strict = ctx.attr._strict_setting[BuildSettingInfo].value
+    promote_info = ctx.attr._promote_info_setting[BuildSettingInfo].value
 
     output = ctx.actions.declare_file(ctx.label.name + ".helm_lint.ok")
 
@@ -32,6 +33,8 @@ def _helm_lint_aspect_impl(target, ctx):
     args.add("-output", output)
     if strict:
         args.add("-strict")
+    if promote_info:
+        args.add("-promote_info")
 
     ctx.actions.run(
         outputs = [output],
@@ -58,6 +61,9 @@ helm_lint_aspect = aspect(
             executable = True,
             default = Label("//helm/private/linter:linter"),
         ),
+        "_promote_info_setting": attr.label(
+            default = Label("//helm/settings:lint_promote_info"),
+        ),
         "_strict_setting": attr.label(
             default = Label("//helm/settings:lint_default_strict"),
         ),
@@ -82,6 +88,10 @@ def _helm_lint_test_impl(ctx):
     strict = ctx.attr._strict_setting[BuildSettingInfo].value
     if strict:
         args.add("-strict")
+
+    promote_info = ctx.attr._promote_info_setting[BuildSettingInfo].value
+    if promote_info:
+        args.add("-promote_info")
 
     # Passed directly to --set flag of `helm lint`, but using -substitutions to match helm_package.bzl.
     args.add("-substitutions", ",".join(["%s=%s" % (k, v) for k, v in ctx.attr.substitutions.items()]))
@@ -156,6 +166,9 @@ helm_lint_test = rule(
             cfg = "exec",
             executable = True,
             default = Label("//helm/private/linter:linter"),
+        ),
+        "_promote_info_setting": attr.label(
+            default = Label("//helm/settings:lint_promote_info"),
         ),
         "_strict_setting": attr.label(
             default = Label("//helm/settings:lint_default_strict"),

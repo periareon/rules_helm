@@ -27,6 +27,7 @@ build --sandbox_default_allow_network=false
 # use the fully qualified aspect path: `@rules_helm//helm:defs.bzl%helm_lint_aspect`
 build:strict --aspects=//helm:helm_lint.bzl%helm_lint_aspect
 build:strict --output_groups=+helm_lint_checks
+build:strict --//helm/settings:lint_promote_info=True
 
 # Used for populating stamp data
 build --enable_platform_specific_config
