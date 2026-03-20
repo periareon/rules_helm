@@ -216,7 +216,7 @@
 <pre>
 load("@rules_helm//helm:defs.bzl", "chart_file")
 
-chart_file(<a href="rules.html#chart_file-name">name</a>, <a href="rules.html#chart_file-api_version">api_version</a>, <a href="rules.html#chart_file-app_version">app_version</a>, <a href="rules.html#chart_file-chart_name">chart_name</a>, <a href="rules.html#chart_file-description">description</a>, <a href="rules.html#chart_file-type">type</a>, <a href="rules.html#chart_file-version">version</a>)
+chart_file(<a href="rules.html#chart_file-name">name</a>, <a href="rules.html#chart_file-api_version">api_version</a>, <a href="rules.html#chart_file-app_version">app_version</a>, <a href="rules.html#chart_file-chart_name">chart_name</a>, <a href="rules.html#chart_file-description">description</a>, <a href="rules.html#chart_file-icon">icon</a>, <a href="rules.html#chart_file-type">type</a>, <a href="rules.html#chart_file-version">version</a>)
 </pre>
 <p>Create a Helm chart file.</p>
 <p><strong>ATTRIBUTES</strong></p>
@@ -226,6 +226,7 @@ chart_file(<a href="rules.html#chart_file-name">name</a>, <a href="rules.html#ch
 <tr><td style="text-align: left"><a id="chart_file-app_version"></a>app_version</td><td style="text-align: left">The version number of the application being deployed.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>"1.16.0"</code></td></tr>
 <tr><td style="text-align: left"><a id="chart_file-chart_name"></a>chart_name</td><td style="text-align: left">The name of the chart</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
 <tr><td style="text-align: left"><a id="chart_file-description"></a>description</td><td style="text-align: left">A descritpion of the chart.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>"A Helm chart for Kubernetes by Bazel."</code></td></tr>
+<tr><td style="text-align: left"><a id="chart_file-icon"></a>icon</td><td style="text-align: left">A URL to an SVG or PNG image to be used as an icon.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
 <tr><td style="text-align: left"><a id="chart_file-type"></a>type</td><td style="text-align: left">The chart type.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>"application"</code></td></tr>
 <tr><td style="text-align: left"><a id="chart_file-version"></a>version</td><td style="text-align: left">The chart version.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>"0.1.0"</code></td></tr>
 </tbody></table>
@@ -495,7 +496,7 @@ HelmPackageInfo(<a href="rules.html#HelmPackageInfo-chart">chart</a>, <a href="r
 <pre>
 load("@rules_helm//helm:defs.bzl", "chart_content")
 
-chart_content(<a href="rules.html#chart_content-name">name</a>, <a href="rules.html#chart_content-api_version">api_version</a>, <a href="rules.html#chart_content-description">description</a>, <a href="rules.html#chart_content-type">type</a>, <a href="rules.html#chart_content-version">version</a>, <a href="rules.html#chart_content-app_version">app_version</a>)
+chart_content(<a href="rules.html#chart_content-name">name</a>, <a href="rules.html#chart_content-api_version">api_version</a>, <a href="rules.html#chart_content-description">description</a>, <a href="rules.html#chart_content-type">type</a>, <a href="rules.html#chart_content-version">version</a>, <a href="rules.html#chart_content-app_version">app_version</a>, <a href="rules.html#chart_content-icon">icon</a>)
 </pre>
 <p>A convenience wrapper for defining Chart.yaml files with <a href="rules.html#helm_package-chart_json">helm_package.chart_json</a>.</p>
 <p><strong>PARAMETERS</strong></p>
@@ -506,6 +507,7 @@ chart_content(<a href="rules.html#chart_content-name">name</a>, <a href="rules.h
 <tr><td style="text-align: left"><a id="chart_content-type"></a>type</td><td style="text-align: left">The chart type.</td><td style="text-align: left"><code>"application"</code></td></tr>
 <tr><td style="text-align: left"><a id="chart_content-version"></a>version</td><td style="text-align: left">The chart version.</td><td style="text-align: left"><code>"0.1.0"</code></td></tr>
 <tr><td style="text-align: left"><a id="chart_content-app_version"></a>app_version</td><td style="text-align: left">The version number of the application being deployed.</td><td style="text-align: left"><code>"1.16.0"</code></td></tr>
+<tr><td style="text-align: left"><a id="chart_content-icon"></a>icon</td><td style="text-align: left">A URL to an SVG or PNG image to be used as an icon.</td><td style="text-align: left"><code>None</code></td></tr>
 </tbody></table>
 </div>
 <p><strong>RETURNS</strong></p>
