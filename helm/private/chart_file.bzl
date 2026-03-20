@@ -8,7 +8,8 @@ def chart_content(
         description = "A Helm chart for Kubernetes by Bazel.",
         type = "application",
         version = "0.1.0",
-        app_version = "1.16.0"):
+        app_version = "1.16.0",
+        icon = None):
     """A convenience wrapper for defining Chart.yaml files with [helm_package.chart_json](#helm_package-chart_json).
 
     Args:
@@ -18,18 +19,22 @@ def chart_content(
         type (str, optional): The chart type.
         version (str, optional): The chart version.
         app_version (str, optional): The version number of the application being deployed.
+        icon (str, optional): A URL to an SVG or PNG image to be used as an icon.
 
     Returns:
         str: A json encoded string which represents `Chart.yaml` contents.
     """
-    return json.encode({
+    content = {
         "apiVersion": api_version,
         "appVersion": app_version,
         "description": description,
         "name": name,
         "type": type,
         "version": version,
-    })
+    }
+    if icon:
+        content["icon"] = icon
+    return json.encode(content)
 
 def _chart_file_impl(ctx):
     """A rule for generating a `Chart.yaml` file."""
@@ -43,6 +48,7 @@ def _chart_file_impl(ctx):
         type = ctx.attr.type,
         version = ctx.attr.version,
         app_version = ctx.attr.app_version,
+        icon = ctx.attr.icon or None,
     )
 
     content_yaml = json_to_yaml(
@@ -73,6 +79,9 @@ chart_file = rule(
         "description": attr.string(
             default = "A Helm chart for Kubernetes by Bazel.",
             doc = "A descritpion of the chart.",
+        ),
+        "icon": attr.string(
+            doc = "A URL to an SVG or PNG image to be used as an icon.",
         ),
         "type": attr.string(
             default = "application",

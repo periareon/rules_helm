@@ -1,6 +1,7 @@
 apiVersion: v2
 name: with-crds
 description: A Helm chart for Kubernetes
+icon: https://helm.sh/img/helm.svg
 
 # A chart can be either an 'application' or a 'library' chart.
 #

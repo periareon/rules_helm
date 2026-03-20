@@ -1,6 +1,7 @@
 apiVersion: v2
 name: with_image_deps_img
 description: A Helm chart for Kubernetes (using rules_img)
+icon: https://helm.sh/img/helm.svg
 
 # A chart can be either an 'application' or a 'library' chart.
 #

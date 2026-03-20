@@ -18,6 +18,13 @@ def lint_default_strict():
         build_setting_default = True,
     )
 
+def lint_promote_info():
+    """A flag to control whether `helm_lint_*` rules promote `[INFO]` diagnostics to errors."""
+    bool_flag(
+        name = "lint_promote_info",
+        build_setting_default = False,
+    )
+
 def version(name = "version"):
     """The target version of helm"""
     string_flag(

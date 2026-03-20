@@ -3,6 +3,7 @@ load("//helm:defs.bzl", "chart_file", "helm_lint_test", "helm_package", "helm_te
 chart_file(
     name = "chart_file",
     chart_name = "inline-chart",
+    icon = "https://helm.sh/img/helm.svg",
 )
 
 helm_package(
