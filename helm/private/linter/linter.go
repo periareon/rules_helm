@@ -179,7 +179,7 @@ func hasDiagnostics(output []byte) bool {
 	return false
 }
 
-func lint(directory string, helm string, helmArgs []string, helmPluginsDir string, output string, promoteInfo bool) {
+func lint(directory string, helm string, helmArgs []string, helmPluginsDir string, output string, promoteInfo bool, quiet bool) {
 	cmd, err := helm_utils.BuildHelmCommand(helm, helmArgs, helmPluginsDir)
 	if err != nil {
 		log.Fatal(err)
@@ -188,12 +188,20 @@ func lint(directory string, helm string, helmArgs []string, helmPluginsDir strin
 	cmd.Dir = directory
 
 	out, err := cmd.Output()
-	os.Stderr.WriteString(string(out))
+	if !quiet {
+		os.Stderr.WriteString(string(out))
+	}
 	if err != nil {
+		if quiet {
+			os.Stderr.WriteString(string(out))
+		}
 		log.Fatal(err)
 	}
 
 	if promoteInfo && hasDiagnostics(out) {
+		if quiet {
+			os.Stderr.WriteString(string(out))
+		}
 		log.Fatal("helm lint produced [INFO] diagnostics which are promoted to errors via the promote_info flag")
 	}
 
@@ -298,5 +306,5 @@ func main() {
 		helmArgs = append(helmArgs, "--values", v)
 	}
 
-	lint(dir, helm, append(helmArgs, args.helmArgs...), helmPlugins, args.output, args.promoteInfo)
+	lint(dir, helm, append(helmArgs, args.helmArgs...), helmPlugins, args.output, args.promoteInfo, !is_test)
 }
