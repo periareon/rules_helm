@@ -16,6 +16,7 @@ def _image_push_repository_aspect_impl(target, ctx):
     # Handle rules_img image_push
     if hasattr(ctx.rule.attr, "registry") and ctx.rule.attr.registry:
         output = None
+        remote_tags_file = None
 
         # Handle rules_img image_push using push.json file
         if ctx.rule.kind == "image_push":
@@ -43,6 +44,17 @@ def _image_push_repository_aspect_impl(target, ctx):
                 output = ctx.actions.declare_file("{}.rules_helm.repository.txt".format(target.label.name))
                 json_extractor(ctx, push_json_file, output, template)
 
+                tags_template = """
+                {{- with index .operations 0 -}}
+                    {{- range $tag := .tags -}}
+                        {{- $tag | println -}}
+                    {{- end -}}
+                {{- end -}}
+                """
+
+                remote_tags_file = ctx.actions.declare_file("{}.rules_helm.tags.txt".format(target.label.name))
+                json_extractor(ctx, push_json_file, remote_tags_file, tags_template)
+
         # rules_img uses registry + repository attributes
         if hasattr(ctx.rule.attr, "repository") and ctx.rule.attr.repository:
             if output == None:
@@ -65,6 +77,25 @@ def _image_push_repository_aspect_impl(target, ctx):
         if output == None:
             fail("failed to get `registry` and `repository` for image_push target {}".format(target.label))
 
+        if remote_tags_file == None:
+            tag_list = None
+
+            # rules_img uses tags attribute (list of strings) instead of remote_tags file
+            if hasattr(ctx.rule.attr, "tags") and ctx.rule.attr.tags:
+                tag_list = ctx.rule.attr.tags
+
+            if hasattr(ctx.rule.attr, "tag_list") and ctx.rule.attr.tag_list:
+                tag_list = ctx.rule.attr.tag_list
+
+            if tag_list != None:
+                # Write tags to a file for consistency with rules_oci
+                tags_output = ctx.actions.declare_file("{}.rules_helm.tags.txt".format(target.label.name))
+                ctx.actions.write(
+                    output = tags_output,
+                    content = "\n".join(tag_list),
+                )
+                remote_tags_file = tags_output
+
         # rules_img image_push has 'image' attribute pointing to image_manifest
         if not hasattr(ctx.rule.attr, "image") or not ctx.rule.attr.image:
             fail("image_push target {} must have an `image` attribute".format(target.label))
@@ -77,17 +108,6 @@ def _image_push_repository_aspect_impl(target, ctx):
             image_file = ctx.rule.file.image
         else:
             fail("image_push target {} `image` attribute must provide files".format(target.label))
-
-        # rules_img uses tags attribute (list of strings) instead of remote_tags file
-        remote_tags_file = None
-        if hasattr(ctx.rule.attr, "tags") and ctx.rule.attr.tags:
-            # Write tags to a file for consistency with rules_oci
-            tags_output = ctx.actions.declare_file("{}.rules_helm.tags.txt".format(target.label.name))
-            ctx.actions.write(
-                output = tags_output,
-                content = "\n".join(ctx.rule.attr.tags),
-            )
-            remote_tags_file = tags_output
 
         return [ImagePushRepositoryInfo(
             repository_file = output,
