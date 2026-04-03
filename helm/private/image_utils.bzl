@@ -1,5 +1,7 @@
 """Utilities for container images"""
 
+load("//helm/private:json_extractor.bzl", "json_extractor")
+
 ImagePushRepositoryInfo = provider(
     doc = "Repository and image information for a given oci_push or image_push target",
     fields = {
@@ -13,23 +15,55 @@ ImagePushRepositoryInfo = provider(
 def _image_push_repository_aspect_impl(target, ctx):
     # Handle rules_img image_push
     if hasattr(ctx.rule.attr, "registry") and ctx.rule.attr.registry:
+        output = None
+
+        # Handle rules_img image_push using push.json file
+        if ctx.rule.kind == "image_push":
+            push_json_file = None
+
+            runfiles = target[DefaultInfo].default_runfiles
+            if hasattr(runfiles, "files") and runfiles.files:
+                files = runfiles.files.to_list()
+                for file in files:
+                    if file.basename == "{}.json".format(ctx.label.name):
+                        push_json_file = file
+                        break
+
+            if push_json_file:
+                template = """
+                {{- with index .operations 0 -}}
+                    {{- $registry := .registry -}}
+                    {{- $registry = trimPrefix $registry "https://" -}}
+                    {{- $registry = trimPrefix $registry "http://" -}}
+
+                    {{- $registry }}/{{ .repository -}}
+                {{- end -}}
+                """
+
+                output = ctx.actions.declare_file("{}.rules_helm.repository.txt".format(target.label.name))
+                json_extractor(ctx, push_json_file, output, template)
+
         # rules_img uses registry + repository attributes
         if hasattr(ctx.rule.attr, "repository") and ctx.rule.attr.repository:
-            # Combine registry and repository for full repository path
-            registry = ctx.rule.attr.registry
-            repo = ctx.rule.attr.repository
+            if output == None:
+                # Combine registry and repository for full repository path
+                registry = ctx.rule.attr.registry
+                repo = ctx.rule.attr.repository
 
-            # Remove protocol from registry if present
-            registry_clean = registry.replace("https://", "").replace("http://", "")
-            full_repo = "{}/{}".format(registry_clean, repo)
+                # Remove protocol from registry if present
+                registry_clean = registry.replace("https://", "").replace("http://", "")
+                full_repo = "{}/{}".format(registry_clean, repo)
 
-            output = ctx.actions.declare_file("{}.rules_helm.repository.txt".format(target.label.name))
-            ctx.actions.write(
-                output = output,
-                content = full_repo,
-            )
+                output = ctx.actions.declare_file("{}.rules_helm.repository.txt".format(target.label.name))
+                ctx.actions.write(
+                    output = output,
+                    content = full_repo,
+                )
         else:
             fail("image_push target {} must have a `repository` attribute".format(target.label))
+
+        if output == None:
+            fail("failed to get `registry` and `repository` for image_push target {}".format(target.label))
 
         # rules_img image_push has 'image' attribute pointing to image_manifest
         if not hasattr(ctx.rule.attr, "image") or not ctx.rule.attr.image:
@@ -100,4 +134,12 @@ def _image_push_repository_aspect_impl(target, ctx):
 image_push_repository_aspect = aspect(
     doc = "Provides the repository and image_root for a given oci_push or image_push target",
     implementation = _image_push_repository_aspect_impl,
+    attrs = {
+        "_json_extractor": attr.label(
+            doc = "Tool for extracting data from json files",
+            cfg = "exec",
+            executable = True,
+            default = Label("//helm/private/json_extractor"),
+        ),
+    },
 )
