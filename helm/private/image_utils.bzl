@@ -2,17 +2,86 @@
 
 load("//helm/private:json_extractor.bzl", "json_extractor")
 
-ImagePushRepositoryInfo = provider(
-    doc = "Repository and image information for a given oci_push or image_push target",
+ImageRepositoryInfo = provider(
+    doc = "Repository and image information for a given rules_oci or rules_img image target",
     fields = {
         "manifest_file": "File (optional): The manifest JSON file for rules_img images",
         "oci_layout": "File (optional): The OCI layout directory for rules_oci images (contains index.json)",
-        "remote_tags_file": "File (optional): The file containing remote tags (one per line) used for the push target",
-        "repository_file": "File: The file containing the repository path for the push target",
+        "remote_tags_file": "File (optional): The file containing remote tags (one per line) used for the target",
+        "repository_file": "File: The file containing the repository path for the target",
     },
 )
 
-def _image_push_repository_aspect_img(target, ctx):
+def _image_repository_aspect_img_pull(target, ctx):
+    repository_file = None
+    remote_tags_file = None
+    manifest_file = None
+
+    if hasattr(ctx.rule.attr, "digest") and ctx.rule.attr.digest:
+        digest = ctx.rule.attr.digest
+
+        if not hasattr(ctx.rule.attr, "data") or not ctx.rule.attr.data:
+            fail("image_pull target {} must have a `data` attribute".format(target.label))
+
+        data = ctx.rule.attr.data
+
+        if not digest in data or not data[digest]:
+            fail("manifest file not found in `data` of image_pull target {}".format(target.label))
+
+        manifest_file = ctx.actions.declare_file("{}.rules_helm.pull_manifest.txt".format(target.label.name))
+        ctx.actions.write(
+            output = manifest_file,
+            content = data[digest],
+        )
+    else:
+        fail("image_pull target {} must have a `digest` attribute".format(target.label))
+
+    registry = None
+
+    # The primary registry from which to pull the image
+    if hasattr(ctx.rule.attr, "registry") and ctx.rule.attr.registry:
+        registry = ctx.rule.attr.registry
+
+    # Additional registries can be provided. When rules_img pulls the image,
+    # these are tried in order, before the primary registry. To emulate this
+    # behaviour, if the list is set, the first element will be used as the
+    # registry to pull from
+    if hasattr(ctx.rule.attr, "registries") and ctx.rule.attr.registries:
+        registries = ctx.rule.attr.registries
+        if len(registries) > 0:
+            registry = registries[0]
+
+    if registry == None:
+        fail("image_pull target {} must have either a `registry` or `registries` attribute".format(target.label))
+
+    repository = None
+    if hasattr(ctx.rule.attr, "repository") and ctx.rule.attr.repository:
+        repository = ctx.rule.attr.repository
+    else:
+        fail("image_pull target {} must have a `repository` attribute".format(target.label))
+
+    registry_clean = registry.replace("https://", "").replace("http://", "")
+    repository_file = ctx.actions.declare_file("{}.rules_helm.repository.txt".format(target.label.name))
+    ctx.actions.write(
+        output = repository_file,
+        content = "{}/{}".format(registry_clean, repository),
+    )
+
+    if hasattr(ctx.rule.attr, "tag") and ctx.rule.attr.tag:
+        remote_tags_file = ctx.actions.declare_file("{}.rules_helm.tags.txt".format(target.label.name))
+        ctx.actions.write(
+            output = remote_tags_file,
+            content = ctx.rule.attr.tag,
+        )
+
+    return [ImageRepositoryInfo(
+        repository_file = repository_file,
+        manifest_file = manifest_file,
+        oci_layout = None,
+        remote_tags_file = remote_tags_file,
+    )]
+
+def _image_repository_aspect_img_push(target, ctx):
     repository_file = None
     remote_tags_file = None
     manifest_file = None
@@ -118,14 +187,14 @@ def _image_push_repository_aspect_img(target, ctx):
             # it
             remote_tags_file = ctx.rule.file.tag_file
 
-    return [ImagePushRepositoryInfo(
+    return [ImageRepositoryInfo(
         repository_file = repository_file,
         manifest_file = manifest_file,
         oci_layout = None,
         remote_tags_file = remote_tags_file,
     )]
 
-def _image_push_repository_aspect_oci(target, ctx):
+def _image_repository_aspect_oci_push(target, ctx):
     repository_file = None
     remote_tags_file = None
 
@@ -148,27 +217,30 @@ def _image_push_repository_aspect_oci(target, ctx):
     if not hasattr(ctx.rule.file, "image"):
         fail("oci_push target {} must have an `image` attribute".format(target.label))
 
-    return [ImagePushRepositoryInfo(
+    return [ImageRepositoryInfo(
         repository_file = repository_file,
         oci_layout = ctx.rule.file.image,
         manifest_file = None,
         remote_tags_file = remote_tags_file,
     )]
 
-def _image_push_repository_aspect_impl(target, ctx):
-    if ctx.rule.kind == "image_push" or hasattr(ctx.rule.attr, "registry"):
-        return _image_push_repository_aspect_img(target, ctx)
+def _image_repository_aspect_impl(target, ctx):
+    if ctx.rule.kind == "image_import":
+        return _image_repository_aspect_img_pull(target, ctx)
 
-    return _image_push_repository_aspect_oci(target, ctx)
+    if ctx.rule.kind == "image_push" or hasattr(ctx.rule.attr, "registry"):
+        return _image_repository_aspect_img_push(target, ctx)
+
+    return _image_repository_aspect_oci_push(target, ctx)
 
 # This aspect exists because rules_oci and rules_img don't provide a provider
 # that cleanly publishes this information but for the helm rules, it's
 # absolutely necessary that an image's repository and digest are knowable.
 # If rules_oci/rules_img decide to define their own provider for this (which they should)
 # then this should be deleted in favor of that.
-image_push_repository_aspect = aspect(
-    doc = "Provides the repository and image_root for a given oci_push or image_push target",
-    implementation = _image_push_repository_aspect_impl,
+image_repository_aspect = aspect(
+    doc = "Provides the repository and image_root for a given oci_{push,pull} or image_{push-pull} target",
+    implementation = _image_repository_aspect_impl,
     attrs = {
         "_json_extractor": attr.label(
             doc = "Tool for extracting data from json files",

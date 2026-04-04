@@ -21,6 +21,10 @@ bazel_produced_images:
     url: "{@//tests/with_image_deps_img:image_d.push.repository}:{@//tests/with_image_deps_img:image_d.push.tag}"
   image_e:
     url: "{@//tests/with_image_deps_img:image_e.push.repository}:{@//tests/with_image_deps_img:image_e.push.tag}"
+  image_pull:
+    url: "{@+helm_test+rules_helm_test_img_container_base//:image}"
+  image_pull_tag:
+    url: "{@+helm_test+rules_helm_test_img_container_base//:image.repository}:{@+helm_test+rules_helm_test_img_container_base//:image.tag}"
 
 imagePullSecrets: []
 nameOverride: ""

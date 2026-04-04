@@ -21,6 +21,7 @@ helm_chart(
         ":image_c.push",
         ":image_d.push",
         ":image_e.push",
+        "@rules_helm_test_img_container_base",
     ],
     target_compatible_with = EXCLUDE_WINDOWS,
 )
@@ -47,6 +48,8 @@ helm_package_regex_test(
         r"image_c:\s+url:\s+\"docker.io/rules_helm/test_img/image_c:1.2.3\"",
         r"image_d:\s+url:\s+\"docker.io/rules_helm/test_img/image_d:4.5.6\"",
         r"image_e:\s+url:\s+\"docker.io/rules_helm/test_img/image_e:7.8.9\"",
+        r"image_pull:\s+url:\s+\"index.docker.io/library/alpine@sha256:[a-z0-9]{64}\"",
+        r"image_pull_tag:\s+url:\s+\"index.docker.io/library/alpine:3.23.3\"",
     ],
 )
 
