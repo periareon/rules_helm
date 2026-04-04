@@ -22,9 +22,9 @@ bazel_produced_images:
   image_e:
     url: "{@//tests/with_image_deps_img:image_e.push.repository}:{@//tests/with_image_deps_img:image_e.push.tag}"
   image_pull:
-    url: "{@+helm_test+rules_helm_test_img_container_base//:image}"
+    url: "{@{base_container_label}}"
   image_pull_tag:
-    url: "{@+helm_test+rules_helm_test_img_container_base//:image.repository}:{@+helm_test+rules_helm_test_img_container_base//:image.tag}"
+    url: "{@{base_container_label}.repository}:{@{base_container_label}.tag}"
 
 imagePullSecrets: []
 nameOverride: ""
