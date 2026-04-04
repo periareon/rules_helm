@@ -1,3 +1,4 @@
+load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
 load("@rules_img//img:image.bzl", "image_manifest")
 load("@rules_img//img:layer.bzl", "image_layer")
 load("@rules_img//img:push.bzl", "image_push")
@@ -18,6 +19,8 @@ helm_chart(
         ":image_a.push",
         ":image_b.push",
         ":image_c.push",
+        ":image_d.push",
+        ":image_e.push",
     ],
     target_compatible_with = EXCLUDE_WINDOWS,
 )
@@ -42,6 +45,8 @@ helm_package_regex_test(
         r"image_a:\s+url:\s+\"docker.io/rules_helm/test_img/image_a@sha256:[a-z0-9]{64}\"",
         r"image_b:\s+url:\s+\"docker.io/rules_helm/test_img/image_b@sha256:[a-z0-9]{64}\"",
         r"image_c:\s+url:\s+\"docker.io/rules_helm/test_img/image_c:1.2.3\"",
+        r"image_d:\s+url:\s+\"docker.io/rules_helm/test_img/image_d:4.5.6\"",
+        r"image_e:\s+url:\s+\"docker.io/rules_helm/test_img/image_e:7.8.9\"",
     ],
 )
 
@@ -49,6 +54,8 @@ _IMAGES = [
     "image_a",
     "image_b",
     "image_c",
+    "image_d",
+    "image_e",
 ]
 
 # Create simple image layers and manifests for each test image
@@ -99,6 +106,49 @@ image_push(
     image = ":image_c",
     registry = "docker.io",
     repository = "rules_helm/test_img/image_c",
-    tags = ["1.2.3"],
+    tag = "1.2.3",
+    target_compatible_with = EXCLUDE_WINDOWS,
+)
+
+# Image D: Push with specific version tag (using tag_list)
+image_push(
+    name = "image_d.push",
+    image = ":image_d",
+    registry = "docker.io",
+    repository = "rules_helm/test_img/image_d",
+    tag_list = ["4.5.6"],
+    target_compatible_with = EXCLUDE_WINDOWS,
+)
+
+# Image E: Push with templated parameters
+string_flag(
+    name = "registry",
+    build_setting_default = "docker.io",
+    visibility = [":__pkg__"],
+)
+
+string_flag(
+    name = "repository",
+    build_setting_default = "rules_helm/test_img/image_e",
+    visibility = [":__pkg__"],
+)
+
+string_flag(
+    name = "tag",
+    build_setting_default = "7.8.9",
+    visibility = [":__pkg__"],
+)
+
+image_push(
+    name = "image_e.push",
+    build_settings = {
+        "registry": ":registry",
+        "repository": ":repository",
+        "tag": ":tag",
+    },
+    image = ":image_e",
+    registry = "{{ .registry }}",
+    repository = "{{ .repository }}",
+    tag = "{{ .tag }}",
     target_compatible_with = EXCLUDE_WINDOWS,
 )
