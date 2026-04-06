@@ -239,7 +239,7 @@ def _image_repository_aspect_impl(target, ctx):
 # If rules_oci/rules_img decide to define their own provider for this (which they should)
 # then this should be deleted in favor of that.
 image_repository_aspect = aspect(
-    doc = "Provides the repository and image_root for a given oci_{push,pull} or image_{push-pull} target",
+    doc = "Provides the repository and image_root for a given oci_push, image_push or image_import target",
     implementation = _image_repository_aspect_impl,
     attrs = {
         "_json_extractor": attr.label(
