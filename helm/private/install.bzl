@@ -78,8 +78,10 @@ def _helm_install_impl(ctx, subcommand = "install"):
     image_pushers = []
     image_runfiles = []
     for image in pkg_info.images:
-        image_pushers.append(image[DefaultInfo].files_to_run.executable)
-        image_runfiles.append(image[DefaultInfo].default_runfiles)
+        executable = image[DefaultInfo].files_to_run.executable
+        if executable:
+            image_pushers.append(executable)
+            image_runfiles.append(image[DefaultInfo].default_runfiles)
 
     args = ctx.actions.args()
     args.add_all(_expand_opts(ctx, ctx.attr.helm_opts, ctx.attr.data))
