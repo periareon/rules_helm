@@ -20,6 +20,7 @@ def helm_chart(
         deps = None,
         install_name = None,
         registry_url = None,
+        registry_url_file = None,
         login_url = None,
         push_cmd = None,
         helm_opts = [],
@@ -58,7 +59,9 @@ def helm_chart(
         deps (list, optional): A list of helm package dependencies.
         install_name (str, optional): The `helm install` name to use. `name` will be used if unset.
         registry_url (str, Optional): The registry url for the helm chart. `{name}.push_registry`
-            is only defined when a value is passed here.
+            is defined when a value is passed here.
+        registry_url_file (str, Optional): Label of a file containing the registry url for the helm chart. `{name}.push_registry`
+            is defined when a value is passed here.
         login_url (str, optional): The registry url to log into for publishing helm charts.
         push_cmd (str, optional): An alternative command to `push` for publishing helm charts.
         helm_opts (list, optional): Additional options to pass to helm.
@@ -120,12 +123,17 @@ def helm_chart(
         **kwargs
     )
 
-    if registry_url:
+    registry_url_file_label = None
+    if registry_url_file:
+        registry_url_file_label = Label(registry_url_file)
+
+    if registry_url or registry_url_file_label:
         helm_push(
             name = name + ".push_registry",
             package = name,
             include_images = False,
             registry_url = registry_url,
+            registry_url_file = registry_url_file_label,
             login_url = login_url,
             opts = helm_opts + push_opts,
             push_cmd = push_cmd,
@@ -137,6 +145,7 @@ def helm_chart(
             include_images = True,
             package = name,
             registry_url = registry_url,
+            registry_url_file = registry_url_file_label,
             login_url = login_url,
             opts = helm_opts + push_opts,
             push_cmd = push_cmd,

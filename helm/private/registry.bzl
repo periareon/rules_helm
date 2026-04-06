@@ -37,7 +37,15 @@ def _helm_push_impl(ctx):
     args.add("-helm", rlocationpath(toolchain.helm, ctx.workspace_name))
     args.add("-helm_plugins", rlocationpath(toolchain.helm_plugins, ctx.workspace_name))
     args.add("-chart", rlocationpath(pkg_info.chart, ctx.workspace_name))
-    args.add("-registry_url", ctx.attr.registry_url)
+
+    registry_runfiles = ctx.runfiles()
+    if hasattr(ctx.attr, "registry_url") and ctx.attr.registry_url:
+        args.add("-registry_url", ctx.attr.registry_url)
+    elif hasattr(ctx.attr, "registry_url_file") and ctx.attr.registry_url_file:
+        args.add("-registry_url_file", rlocationpath(ctx.file.registry_url_file, ctx.workspace_name))
+        registry_runfiles = ctx.runfiles(files = [ctx.file.registry_url_file])
+    else:
+        fail("Either `registry_url` or `registry_url_file` must be set for helm_push target")
 
     if ctx.attr.login_url:
         args.add("-login_url", ctx.attr.login_url)
@@ -71,7 +79,7 @@ def _helm_push_impl(ctx):
         toolchain.helm,
         toolchain.helm_plugins,
         pkg_info.chart,
-    ]).merge(image_runfiles)
+    ]).merge(image_runfiles).merge(registry_runfiles)
 
     return [
         DefaultInfo(
@@ -120,8 +128,11 @@ if the following environment variables are defined:
             doc = "An alternative command to `push` for publishing the helm chart. E.g. `cm-push`",
         ),
         "registry_url": attr.string(
-            doc = "The registry URL at which to push the helm chart to. E.g. `oci://my.registry.io/chart-name`",
-            mandatory = True,
+            doc = "The registry URL at which to push the helm chart to. E.g. `oci://my.registry.io/chart-name`. Either this or `registry_url_file` needs to be set. If both are set, this setting takes precedence.",
+        ),
+        "registry_url_file": attr.label(
+            doc = "A file containing the registry URL to push the Helm chart to. E.g. `oci://my.registry.io/chart-name`. Either this or `registry_url` needs to be set.",
+            allow_single_file = True,
         ),
         "_copier": attr.label(
             cfg = "exec",
