@@ -82,6 +82,8 @@ def _helm_push_impl(ctx):
         RunEnvironmentInfo(
             environment = ctx.attr.env | {
                 "RULES_HELM_HELM_PUSH_ARGS_FILE": rlocationpath(args_file, ctx.workspace_name),
+                # Force UTC so Helm produces reproducible OCI digests.
+                "TZ": "UTC",
             },
         ),
     ]
