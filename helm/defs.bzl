@@ -30,6 +30,15 @@ load(
     _helm_package = "helm_package",
 )
 load(
+    ":helm_oci_digest.bzl",
+    _HelmOCIDigestInfo = "HelmOCIDigestInfo",
+    _helm_oci_digest = "helm_oci_digest",
+)
+load(
+    ":helm_oci_push.bzl",
+    _helm_oci_push = "helm_oci_push",
+)
+load(
     ":helm_package_info.bzl",
     _HelmPackageInfo = "HelmPackageInfo",
 )
@@ -71,4 +80,7 @@ helm_template_test = _helm_template_test
 helm_toolchain = _helm_toolchain
 helm_uninstall = _helm_uninstall
 helm_upgrade = _helm_upgrade
+HelmOCIDigestInfo = _HelmOCIDigestInfo
+helm_oci_digest = _helm_oci_digest
+helm_oci_push = _helm_oci_push
 HelmPackageInfo = _HelmPackageInfo

@@ -1,6 +1,8 @@
 """Helm rules"""
 
 load(":install.bzl", "helm_install", "helm_uninstall", "helm_upgrade")
+load(":oci_digest.bzl", "helm_oci_digest")
+load(":oci_push.bzl", "helm_oci_push")
 load(":package.bzl", "helm_package")
 load(":registry.bzl", "helm_push", "helm_push_images")
 
@@ -20,6 +22,7 @@ def helm_chart(
         deps = None,
         install_name = None,
         registry_url = None,
+        oci_push = False,
         login_url = None,
         push_cmd = None,
         helm_opts = [],
@@ -37,8 +40,11 @@ def helm_chart(
     | --- | --- | --- |
     | `{name}` | [helm_package](#helm_package) | `None` |
     | `{name}.push_images` | [helm_push_images](#helm_push_images) | `None` |
-    | `{name}.push_registry` | [helm_push](#helm_push) (`include_images = False`) | `registry_url` is defined. |
-    | `{name}.push` | [helm_push](#helm_push) (`include_images = True`) | `registry_url` is defined. |
+    | `{name}.push_registry` | [helm_push](#helm_push) (`include_images = False`) | `registry_url` is defined and `oci_push` is `False`. |
+    | `{name}.push` | [helm_push](#helm_push) (`include_images = True`) | `registry_url` is defined and `oci_push` is `False`. |
+    | `{name}.oci_digest` | [helm_oci_digest](#helm_oci_digest) | `registry_url` is defined and `oci_push` is `True`. |
+    | `{name}.push_registry` | [helm_oci_push](#helm_oci_push) (`include_images = False`) | `registry_url` is defined and `oci_push` is `True`. |
+    | `{name}.push` | [helm_oci_push](#helm_oci_push) (`include_images = True`) | `registry_url` is defined and `oci_push` is `True`. |
     | `{name}.install` | [helm_install](#helm_install) | `None` |
     | `{name}.uninstall` | [helm_uninstall](#helm_uninstall) | `None` |
     | `{name}.upgrade` | [helm_upgrade](#helm_upgrade) | `None` |
@@ -59,6 +65,8 @@ def helm_chart(
         install_name (str, optional): The `helm install` name to use. `name` will be used if unset.
         registry_url (str, Optional): The registry url for the helm chart. `{name}.push_registry`
             is only defined when a value is passed here.
+        oci_push (bool, optional): If True, use crane-based OCI push instead of helm push.
+            Requires registry_url to be set. The oci:// prefix is stripped automatically.
         login_url (str, optional): The registry url to log into for publishing helm charts.
         push_cmd (str, optional): An alternative command to `push` for publishing helm charts.
         helm_opts (list, optional): Additional options to pass to helm.
@@ -120,28 +128,68 @@ def helm_chart(
         **kwargs
     )
 
-    if registry_url:
-        helm_push(
-            name = name + ".push_registry",
-            package = name,
-            include_images = False,
-            registry_url = registry_url,
-            login_url = login_url,
-            opts = helm_opts + push_opts,
-            push_cmd = push_cmd,
-            **kwargs
-        )
+    if oci_push and not registry_url:
+        fail("oci_push = True requires registry_url to be set")
 
-        helm_push(
-            name = name + ".push",
-            include_images = True,
-            package = name,
-            registry_url = registry_url,
-            login_url = login_url,
-            opts = helm_opts + push_opts,
-            push_cmd = push_cmd,
-            **kwargs
-        )
+    if oci_push and push_opts:
+        fail("push_opts is not supported with oci_push = True; crane push options can be passed at runtime via 'bazel run ... -- --flags'")
+
+    if oci_push and login_url:
+        fail("login_url is not supported with oci_push = True; crane uses implicit credential discovery (Docker config, credential helpers)")
+
+    if oci_push and push_cmd:
+        fail("push_cmd is not supported with oci_push = True; the push is performed by crane, not helm")
+
+    if registry_url:
+        if oci_push:
+            # Strip oci:// prefix for crane-based push
+            repository = registry_url
+            if repository.startswith("oci://"):
+                repository = repository[len("oci://"):]
+
+            helm_oci_digest(
+                name = name + ".oci_digest",
+                chart = name,
+                **kwargs
+            )
+
+            helm_oci_push(
+                name = name + ".push_registry",
+                chart = name + ".oci_digest",
+                repository = repository,
+                include_images = False,
+                **kwargs
+            )
+
+            helm_oci_push(
+                name = name + ".push",
+                chart = name + ".oci_digest",
+                repository = repository,
+                include_images = True,
+                **kwargs
+            )
+        else:
+            helm_push(
+                name = name + ".push_registry",
+                package = name,
+                include_images = False,
+                registry_url = registry_url,
+                login_url = login_url,
+                opts = helm_opts + push_opts,
+                push_cmd = push_cmd,
+                **kwargs
+            )
+
+            helm_push(
+                name = name + ".push",
+                include_images = True,
+                package = name,
+                registry_url = registry_url,
+                login_url = login_url,
+                opts = helm_opts + push_opts,
+                push_cmd = push_cmd,
+                **kwargs
+            )
 
     if not install_name:
         install_name = name.replace("_", "-")

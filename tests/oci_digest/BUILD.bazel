@@ -1,0 +1,42 @@
+load("@rules_shell//shell:sh_test.bzl", "sh_test")
+load("//helm:defs.bzl", "helm_chart", "helm_oci_digest")
+
+helm_chart(
+    name = "test_chart",
+    registry_url = "oci://localhost/helm-registry",
+)
+
+helm_oci_digest(
+    name = "test_digest",
+    chart = ":test_chart",
+)
+
+filegroup(
+    name = "test_oci_layout",
+    srcs = [":test_digest"],
+    output_group = "oci_layout",
+)
+
+sh_test(
+    name = "oci_layout_spec_test",
+    srcs = ["oci_layout_spec_test.sh"],
+    data = [
+        ":test_digest",
+        ":test_oci_layout",
+    ],
+    env = {
+        "DIGEST_FILE": "$(rootpath :test_digest)",
+    },
+)
+
+sh_test(
+    name = "oci_digest_determinism_test",
+    srcs = ["oci_digest_determinism_test.sh"],
+    data = [
+        ":test_digest",
+        ":test_oci_layout",
+    ],
+    env = {
+        "DIGEST_FILE": "$(rootpath :test_digest)",
+    },
+)

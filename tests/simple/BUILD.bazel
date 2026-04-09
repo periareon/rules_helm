@@ -1,4 +1,4 @@
-load("//helm:defs.bzl", "helm_chart", "helm_lint_test", "helm_template", "helm_template_test")
+load("//helm:defs.bzl", "helm_chart", "helm_lint_test", "helm_oci_digest", "helm_oci_push", "helm_template", "helm_template_test")
 
 helm_chart(
     name = "simple",
@@ -19,4 +19,22 @@ helm_template(
 helm_template_test(
     name = "simple_template_test",
     chart = ":simple",
+)
+
+helm_oci_digest(
+    name = "simple_oci_digest",
+    chart = ":simple",
+)
+
+helm_oci_push(
+    name = "simple_oci_push",
+    chart = ":simple_oci_digest",
+    repository = "localhost:5000/helm-test/simple",
+    tags = ["manual"],
+)
+
+helm_chart(
+    name = "simple_oci",
+    registry_url = "oci://localhost:5000/helm-test/simple",
+    oci_push = True,
 )

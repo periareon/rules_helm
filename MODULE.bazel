@@ -11,6 +11,7 @@ bazel_dep(name = "bazel_skylib", version = "1.8.2")
 bazel_dep(name = "rules_go", version = "0.59.0")
 bazel_dep(name = "gazelle", version = "0.47.0")
 bazel_dep(name = "bazel_lib", version = "3.0.0")
+bazel_dep(name = "crane.bzl", version = "0.1.0")
 
 # TODO: https://github.com/bazel-contrib/rules_oci/issues/575
 # `aspect_bazel_lib` is unfortunately required by `rules_oci`
@@ -45,6 +46,13 @@ register_toolchains(
     "@helm_toolchains//:all",
 )
 
+crane_toolchains = use_extension("@crane.bzl//crane:extensions.bzl", "toolchains")
+use_repo(crane_toolchains, "crane_toolchains")
+
+register_toolchains(
+    "@crane_toolchains//:all",
+)
+
 helm_test = use_extension("@rules_helm//tests:test_extensions.bzl", "helm_test", dev_dependency = True)
 use_repo(
     helm_test,
@@ -59,4 +67,9 @@ use_repo(
     "helm_test_deps__with_external_deps_redis",
     "rules_helm_test_img_container_base",
     "rules_helm_test_oci_container_base",
+)
+
+local_path_override(
+    module_name = "crane.bzl",
+    path = "/Users/cristi/development/crane.bzl",
 )

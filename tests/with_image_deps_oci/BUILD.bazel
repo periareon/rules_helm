@@ -1,6 +1,6 @@
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load("@rules_oci//oci:defs.bzl", "oci_image", "oci_push")
-load("//helm:defs.bzl", "helm_chart", "helm_lint_test", "helm_template_test")
+load("//helm:defs.bzl", "helm_chart", "helm_lint_test", "helm_oci_digest", "helm_oci_push", "helm_template_test")
 load("//tests:test_defs.bzl", "helm_package_regex_test")
 
 exports_files(["Chart.lock"])
@@ -88,5 +88,20 @@ oci_push(
     image = ":image_c",
     remote_tags = ["1.2.3"],
     repository = "docker.io/rules_helm/test/image_c",
+    target_compatible_with = EXCLUDE_WINDOWS,
+)
+
+helm_oci_digest(
+    name = "with_image_deps_oci_digest",
+    chart = ":with_image_deps",
+    target_compatible_with = EXCLUDE_WINDOWS,
+)
+
+helm_oci_push(
+    name = "with_image_deps_oci_push",
+    chart = ":with_image_deps_oci_digest",
+    repository = "localhost:5000/helm-test/with-image-deps",
+    include_images = True,
+    tags = ["manual"],
     target_compatible_with = EXCLUDE_WINDOWS,
 )

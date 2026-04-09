@@ -7,3 +7,5 @@ filegroup(
     srcs = glob(["**/*.bzl"]),
     visibility = ["//:__subpackages__"],
 )
+
+exports_files(["oci_push.sh.tpl"])
