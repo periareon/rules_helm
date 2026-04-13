@@ -26,13 +26,13 @@ load(
     _helm_lint_test = "helm_lint_test",
 )
 load(
-    ":helm_package.bzl",
-    _helm_package = "helm_package",
-)
-load(
     ":helm_oci_digest.bzl",
     _HelmOCIDigestInfo = "HelmOCIDigestInfo",
     _helm_oci_digest = "helm_oci_digest",
+)
+load(
+    ":helm_package.bzl",
+    _helm_package = "helm_package",
 )
 load(
     ":helm_package_info.bzl",

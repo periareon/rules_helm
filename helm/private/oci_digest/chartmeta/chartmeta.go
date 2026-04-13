@@ -84,14 +84,14 @@ type Maintainer struct {
 
 // Dependency describes a chart upon which another chart depends.
 type Dependency struct {
-	Name        string        `json:"name" yaml:"name"`
-	Version     string        `json:"version,omitempty" yaml:"version,omitempty"`
-	Repository  string        `json:"repository" yaml:"repository"`
-	Condition   string        `json:"condition,omitempty" yaml:"condition,omitempty"`
-	Tags        []string      `json:"tags,omitempty" yaml:"tags,omitempty"`
-	Enabled     bool          `json:"enabled,omitempty" yaml:"enabled,omitempty"`
+	Name         string        `json:"name" yaml:"name"`
+	Version      string        `json:"version,omitempty" yaml:"version,omitempty"`
+	Repository   string        `json:"repository" yaml:"repository"`
+	Condition    string        `json:"condition,omitempty" yaml:"condition,omitempty"`
+	Tags         []string      `json:"tags,omitempty" yaml:"tags,omitempty"`
+	Enabled      bool          `json:"enabled,omitempty" yaml:"enabled,omitempty"`
 	ImportValues []interface{} `json:"import-values,omitempty" yaml:"import-values,omitempty"`
-	Alias       string        `json:"alias,omitempty" yaml:"alias,omitempty"`
+	Alias        string        `json:"alias,omitempty" yaml:"alias,omitempty"`
 }
 
 // ---------- Copied from helm.sh/helm/v4@v4.1.4/pkg/chart/v2/metadata.go ----------

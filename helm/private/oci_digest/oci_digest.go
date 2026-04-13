@@ -35,7 +35,6 @@ const (
 	HelmChartMediaType  = "application/vnd.cncf.helm.chart.content.v1.tar+gzip"
 )
 
-
 func sha256Digest(data []byte) godigest.Digest {
 	h := sha256.Sum256(data)
 	return godigest.NewDigestFromEncoded(godigest.SHA256, hex.EncodeToString(h[:]))
