@@ -1,6 +1,7 @@
 """Helm rules"""
 
 load(":install.bzl", "helm_install", "helm_uninstall", "helm_upgrade")
+load(":oci_digest.bzl", "helm_oci_digest")
 load(":package.bzl", "helm_package")
 load(":registry.bzl", "helm_push", "helm_push_images")
 
@@ -37,6 +38,7 @@ def helm_chart(
     | --- | --- | --- |
     | `{name}` | [helm_package](#helm_package) | `None` |
     | `{name}.push_images` | [helm_push_images](#helm_push_images) | `None` |
+    | `{name}.oci_digest` | [helm_oci_digest](#helm_oci_digest) | `None` |
     | `{name}.push_registry` | [helm_push](#helm_push) (`include_images = False`) | `registry_url` is defined. |
     | `{name}.push` | [helm_push](#helm_push) (`include_images = True`) | `registry_url` is defined. |
     | `{name}.install` | [helm_install](#helm_install) | `None` |
@@ -117,6 +119,12 @@ def helm_chart(
     helm_push_images(
         name = name + ".push_images",
         package = name,
+        **kwargs
+    )
+
+    helm_oci_digest(
+        name = name + ".oci_digest",
+        chart = name,
         **kwargs
     )
 
