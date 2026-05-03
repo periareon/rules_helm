@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"net/url"
 	"os"
@@ -67,6 +68,7 @@ func main() {
 	rawHelmPluginsPath := flag.String("helm_plugins", "", "The path to helm plugins.")
 	rawChartPath := flag.String("chart", "", "Path to Helm .tgz file")
 	registryURL := flag.String("registry_url", "", "URL of registry to upload helm chart")
+	registryURLFile := flag.String("registry_url_file", "", "Path of the file containing the registry URL of where to upload the chart")
 	rawLoginURL := flag.String("login_url", "", "URL of registry to login to.")
 	pushCmd := flag.String("push_cmd", "push", "Command to publish helm chart.")
 	rawImagePushers := flag.String("image_pushers", "", "Comma-separated list of image pusher executables")
@@ -76,8 +78,28 @@ func main() {
 	helmArgs := flag.CommandLine.Args()
 
 	// Check required arguments
-	if *rawHelmPath == "" || *rawChartPath == "" || *registryURL == "" {
-		log.Fatalf("Missing required arguments: helm, chart, registry_url")
+	if *rawHelmPath == "" || *rawChartPath == "" {
+		log.Fatalf("Missing required arguments: helm, chart")
+	}
+
+	var pushRegistryURL string
+	if *registryURL != "" {
+		pushRegistryURL = *registryURL
+	} else if *registryURLFile != "" {
+		path := helm_utils.GetRunfile(*registryURLFile)
+		r, err := os.Open(path)
+		if err != nil {
+			log.Fatalf("Failed to open registry url file: %v\n", err)
+		}
+
+		defer r.Close()
+		if data, err := io.ReadAll(r); err == nil {
+			pushRegistryURL = string(data)
+		} else {
+			log.Fatalf("Failed to read registry url file: %v\n", err)
+		}
+	} else {
+		log.Fatalf("Missing required arguments: either registry_url or registry_url_file needs to be set")
 	}
 
 	helmPath := helm_utils.GetRunfile(*rawHelmPath)
@@ -120,9 +142,9 @@ func main() {
 	if helmUser != "" && helmPassword != "" {
 		loginUrl := *rawLoginURL
 
-		// If an explicit login url was not set, attempt to parse it from registryURL.
+		// If an explicit login url was not set, attempt to parse it from pushRegistryURL.
 		if loginUrl == "" {
-			host, err := getHostFromURL(*registryURL)
+			host, err := getHostFromURL(pushRegistryURL)
 			if err == nil {
 				loginUrl = host
 			}
@@ -156,5 +178,5 @@ func main() {
 
 	// Subprocess helm push
 	log.Printf("Running helm %s...\n", *pushCmd)
-	runHelm(helmPath, append([]string{*pushCmd, chartPath, *registryURL}, helmArgs...), helmPluginsPath, nil)
+	runHelm(helmPath, append([]string{*pushCmd, chartPath, pushRegistryURL}, helmArgs...), helmPluginsPath, nil)
 }
