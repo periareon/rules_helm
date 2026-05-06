@@ -231,7 +231,7 @@ helm_import(<a href="#helm_import-name">name</a>, <a href="#helm_import-chart">c
 <pre>
 load("@rules_helm//helm:defs.bzl", "helm_install")
 
-helm_install(<a href="#helm_install-name">name</a>, <a href="#helm_install-data">data</a>, <a href="#helm_install-helm_opts">helm_opts</a>, <a href="#helm_install-install_name">install_name</a>, <a href="#helm_install-opts">opts</a>, <a href="#helm_install-package">package</a>)
+helm_install(<a href="#helm_install-name">name</a>, <a href="#helm_install-data">data</a>, <a href="#helm_install-helm_opts">helm_opts</a>, <a href="#helm_install-install_name">install_name</a>, <a href="#helm_install-opts">opts</a>, <a href="#helm_install-package">package</a>, <a href="#helm_install-values">values</a>)
 </pre>
 <p>Produce an executable for performing a <code>helm install</code> operation.</p>
 <p><strong>ATTRIBUTES</strong></p>
@@ -242,6 +242,7 @@ helm_install(<a href="#helm_install-name">name</a>, <a href="#helm_install-data"
 <tr><td style="text-align: left"><a id="helm_install-install_name"></a>install_name</td><td style="text-align: left">The name to use for the <code>helm install</code> command. The target name will be used if unset.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
 <tr><td style="text-align: left"><a id="helm_install-opts"></a>opts</td><td style="text-align: left">Additional arguments to pass to <code>helm install</code>.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
 <tr><td style="text-align: left"><a id="helm_install-package"></a>package</td><td style="text-align: left">The helm package to install.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm_install-values"></a>values</td><td style="text-align: left">Values files to pass to <code>helm install --values</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
 </tbody></table>
 </div>
 <p><a id="helm_lint_test"></a></p>
@@ -443,7 +444,7 @@ helm_uninstall(<a href="#helm_uninstall-name">name</a>, <a href="#helm_uninstall
 <pre>
 load("@rules_helm//helm:defs.bzl", "helm_upgrade")
 
-helm_upgrade(<a href="#helm_upgrade-name">name</a>, <a href="#helm_upgrade-data">data</a>, <a href="#helm_upgrade-helm_opts">helm_opts</a>, <a href="#helm_upgrade-install_name">install_name</a>, <a href="#helm_upgrade-opts">opts</a>, <a href="#helm_upgrade-package">package</a>)
+helm_upgrade(<a href="#helm_upgrade-name">name</a>, <a href="#helm_upgrade-data">data</a>, <a href="#helm_upgrade-helm_opts">helm_opts</a>, <a href="#helm_upgrade-install_name">install_name</a>, <a href="#helm_upgrade-opts">opts</a>, <a href="#helm_upgrade-package">package</a>, <a href="#helm_upgrade-values">values</a>)
 </pre>
 <p>Produce an executable for performing a <code>helm upgrade</code> operation.</p>
 <p><strong>ATTRIBUTES</strong></p>
@@ -454,6 +455,7 @@ helm_upgrade(<a href="#helm_upgrade-name">name</a>, <a href="#helm_upgrade-data"
 <tr><td style="text-align: left"><a id="helm_upgrade-install_name"></a>install_name</td><td style="text-align: left">The name to use for the <code>helm upgrade</code> command. The target name will be used if unset.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
 <tr><td style="text-align: left"><a id="helm_upgrade-opts"></a>opts</td><td style="text-align: left">Additional arguments to pass to <code>helm upgrade</code>.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
 <tr><td style="text-align: left"><a id="helm_upgrade-package"></a>package</td><td style="text-align: left">The helm package to upgrade.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm_upgrade-values"></a>values</td><td style="text-align: left">Values files to pass to <code>helm upgrade --values</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
 </tbody></table>
 </div>
 <p><a id="HelmPackageInfo"></a></p>
