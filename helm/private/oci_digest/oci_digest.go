@@ -137,15 +137,11 @@ func main() {
 		log.Fatal("Required flags: -chart, -metadata, -digest_output")
 	}
 
-	// Determine the creation timestamp.
-	// Helm v4 uses stat.ModTime().Format(time.RFC3339) on the .tgz file
-	// (see pkg/pusher/ocipusher.go). We format in UTC so the digest is
-	// timezone-independent (the push side sets TZ=UTC too).
-	info, err := os.Stat(*chartTgz)
-	if err != nil {
-		log.Fatalf("Error stat'ing chart .tgz: %v", err)
-	}
-	creationTime := info.ModTime().UTC().Format(time.RFC3339)
+	// Use the canonical chart mtime that packager.go (copyFile, L472) pins
+	// on output. registrar.go re-pins the same value on disk before helm
+	// push reads it, so both sides of the digest contract see this exact
+	// timestamp regardless of intermediate materialisation.
+	creationTime := time.Unix(0, 0).UTC().Format(time.RFC3339)
 
 	// Read Chart.yaml from the .tgz
 	chartYAML, err := readChartYAMLFromTgz(*chartTgz)

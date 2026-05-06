@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 
 	"github.com/bazelbuild/rules_go/go/runfiles"
 	"github.com/periareon/rules_helm/helm/private/helm_utils"
@@ -152,6 +153,14 @@ func main() {
 		if err := cmd.Run(); err != nil {
 			log.Fatalf("Failed to run image pusher %s: %v", pusher, err)
 		}
+	}
+
+	// Re-pin the chart's disk mtime to the Unix epoch before pushing.
+	// packager.go (copyFile, L472) sets it on output, but downstream
+	// materialisation (e.g. GitHub Actions cache extraction via tar) can
+	// strip it; re-applying here keeps the published digest stable.
+	if err := os.Chtimes(chartPath, time.Unix(0, 0), time.Unix(0, 0)); err != nil {
+		log.Fatalf("Error pinning chart mtime: %v", err)
 	}
 
 	// Subprocess helm push
