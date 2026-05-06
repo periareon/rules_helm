@@ -17,6 +17,7 @@ def _stamp_args_file(
         raw_args,
         output,
         chart = None,
+        values = [],
         image_pushers = []):
     inputs = []
 
@@ -38,6 +39,9 @@ def _stamp_args_file(
 
     runner_args.add("-helm", rlocationpath(helm_toolchain.helm, ctx.workspace_name))
     runner_args.add("-helm_plugins", rlocationpath(helm_toolchain.helm_plugins, ctx.workspace_name))
+
+    for values in values:
+        runner_args.add("-values", rlocationpath(values, ctx.workspace_name))
 
     if image_pushers:
         runner_args.add("-image_pushers", ",".join([rlocationpath(p, ctx.workspace_name) for p in image_pushers]))
@@ -94,6 +98,7 @@ def _helm_install_impl(ctx, subcommand = "install"):
         chart = pkg_info.chart,
         image_pushers = image_pushers,
         raw_args = args,
+        values = ctx.files.values,
         output = ctx.actions.declare_file("{}.args.txt".format(ctx.label.name)),
     )
 
@@ -104,7 +109,7 @@ def _helm_install_impl(ctx, subcommand = "install"):
         toolchain.helm,
         toolchain.helm_plugins,
         pkg_info.chart,
-    ] + image_pushers + ctx.files.data)
+    ] + image_pushers + ctx.files.data + ctx.files.values)
 
     for ir in image_runfiles:
         runfiles = runfiles.merge(ir)
@@ -148,6 +153,10 @@ helm_install = rule(
             doc = "The helm package to install.",
             providers = [HelmPackageInfo],
             mandatory = True,
+        ),
+        "values": attr.label_list(
+            doc = "Values files to pass to `helm install --values`.",
+            allow_files = True,
         ),
         "_copier": attr.label(
             cfg = "exec",
@@ -201,6 +210,10 @@ helm_upgrade = rule(
             doc = "The helm package to upgrade.",
             providers = [HelmPackageInfo],
             mandatory = True,
+        ),
+        "values": attr.label_list(
+            doc = "Values files to pass to `helm upgrade --values`.",
+            allow_files = True,
         ),
         "_copier": attr.label(
             cfg = "exec",
