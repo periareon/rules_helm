@@ -1,3 +1,4 @@
+load("@bazel_skylib//rules:diff_test.bzl", "diff_test")
 load("//helm:defs.bzl", "helm_chart", "helm_lint_test", "helm_template", "helm_template_test")
 
 helm_chart(
@@ -19,4 +20,12 @@ helm_template(
 helm_template_test(
     name = "simple_template_test",
     chart = ":simple",
+)
+
+# Baseline regression test: locks the OCI manifest digest computed from this
+# chart to a known-good value.
+diff_test(
+    name = "simple_oci_digest_test",
+    file1 = "simple.oci_digest.golden",
+    file2 = ":simple.oci_digest",
 )

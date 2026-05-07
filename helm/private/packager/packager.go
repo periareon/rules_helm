@@ -469,7 +469,7 @@ func copyFile(source string, dest string) error {
 	if err != nil {
 		return fmt.Errorf("Error creating destination file %s: %w", dest, err)
 	}
-	defer os.Chtimes(dest, zeroTime, zeroTime)
+	defer os.Chtimes(dest, chartTime, chartTime)
 	defer destFile.Close()
 
 	_, err = io.Copy(destFile, srcFile)
@@ -890,7 +890,7 @@ func findGeneratedPackage(logging string) (string, error) {
 	return "", errors.New("failed to find package")
 }
 
-func writeResultsMetadata(packageBase string, metadataOutput string) error {
+func writeResultsMetadata(packageBase string, metadataOutput string, created time.Time) error {
 	re := regexp.MustCompile(`(.*)-([\d][\d\w\-\.+]+)\.tgz`)
 	match := re.FindAllStringSubmatch(packageBase, 2)
 
@@ -907,6 +907,8 @@ func writeResultsMetadata(packageBase string, metadataOutput string) error {
 	var serializable = make(map[string]string)
 	serializable["name"] = resultMetadata.Name
 	serializable["version"] = resultMetadata.Version
+	// Canonical timestamp shared with oci_digest and registrar.
+	serializable["created"] = created.UTC().Format(time.RFC3339)
 
 	text, err := json.MarshalIndent(serializable, "", "    ")
 	if err != nil {
@@ -939,6 +941,12 @@ func main() {
 	var args = parseArgs()
 
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
+
+	// Stamped builds embed wall-clock time into the OCI `created` annotation
+	// so the published manifest reflects build time.
+	if args.VolatileStatusFile != "" {
+		chartTime = time.Now().UTC()
+	}
 
 	cwd, err := os.Getwd()
 	if err != nil {
@@ -1057,19 +1065,19 @@ func main() {
 	}
 
 	// Write output metadata to retain information about the helm package
-	err = writeResultsMetadata(filepath.Base(pkg), args.MetadataOutput)
+	err = writeResultsMetadata(filepath.Base(pkg), args.MetadataOutput, chartTime)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-var zeroTime = time.Unix(0, 0)
+var chartTime = time.Unix(0, 0).UTC()
 
 func writeFile(path string, content []byte, mode os.FileMode) error {
 	if err := os.WriteFile(path, content, mode); err != nil {
 		return err
 	}
-	if err := os.Chtimes(path, zeroTime, zeroTime); err != nil {
+	if err := os.Chtimes(path, chartTime, chartTime); err != nil {
 		return fmt.Errorf("failed to chtimes destination file %s: %w", path, err)
 	}
 
