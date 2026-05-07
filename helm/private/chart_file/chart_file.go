@@ -77,7 +77,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	chartVersionFile, err := NewFileFlag("version", "", "Chart version")
+	chartVersionFile, err := NewFileFlag("version", "0.16.0", "Chart version")
 
 	if err != nil {
 		log.Fatal(err)
@@ -87,6 +87,7 @@ func main() {
 	description := flag.String("description", "", "Chart description")
 	chartName := flag.String("name", "", "Chart name")
 	chartType := flag.String("type", "application", "Chart type")
+	icon := flag.String("icon", "", "Chart icon")
 	output := flag.String("output", "", "Output file")
 
 	flag.Parse()
@@ -108,6 +109,11 @@ func main() {
 		descriptionPtr = description
 	}
 
+	var iconPtr *string
+	if *icon != "" {
+		iconPtr = icon
+	}
+
 	chartFile := &ChartFile{
 		Name:        *chartName,
 		Version:     chartVersionFile.String(),
@@ -115,6 +121,7 @@ func main() {
 		AppVersion:  appVersion.String(),
 		Description: descriptionPtr,
 		Type:        *chartType,
+		Icon:        iconPtr,
 	}
 
 	outFile, err := os.Create(*output)

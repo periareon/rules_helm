@@ -1,4 +1,4 @@
-load("//helm:defs.bzl", "chart_content", "helm_chart", "helm_lint_test", "helm_template_test")
+load("//helm:defs.bzl", "chart_content", "chart_file", "helm_chart", "helm_lint_test", "helm_template_test")
 
 helm_chart(
     name = "chart_json",
@@ -23,4 +23,41 @@ helm_lint_test(
 helm_template_test(
     name = "chart_json_template_test",
     chart = ":chart_json",
+)
+
+genrule(
+    name = "version_file",
+    outs = ["version.txt"],
+    cmd = "echo 0.1.0 > $@",
+)
+
+genrule(
+    name = "app_version_file",
+    outs = ["app_version.txt"],
+    cmd = "echo 1.16.0 > $@",
+)
+
+chart_file(
+    name = "chart_file_with_files",
+    app_version_file = ":app_version_file",
+    chart_name = "chart-file-with-files",
+    description = "A Helm chart for Kubernetes by Bazel (chart_file with files).",
+    icon = "https://helm.sh/img/helm.svg",
+    version_file = ":version_file",
+)
+
+helm_chart(
+    name = "chart_with_files",
+    chart = ":chart_file_with_files",
+    values = "values.yaml",
+)
+
+helm_lint_test(
+    name = "chart_with_files_lint_test",
+    chart = ":chart_with_files",
+)
+
+helm_template_test(
+    name = "chart_with_files_template_test",
+    chart = ":chart_with_files",
 )
