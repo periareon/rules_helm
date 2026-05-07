@@ -1,9 +1,7 @@
 // oci_digest computes the OCI manifest digest for a Helm chart .tgz.
 //
 // It constructs the OCI manifest that `helm push` (Helm v4) would create
-// and outputs the sha256 digest. In reproducible mode, a fixed epoch
-// timestamp is used; otherwise the .tgz file's mtime is used, matching
-// what `helm push` produces.
+// and outputs the sha256 digest.
 package main
 
 import (
@@ -19,7 +17,6 @@ import (
 	"log"
 	"os"
 	"strings"
-	"time"
 
 	godigest "github.com/opencontainers/go-digest"
 	specs "github.com/opencontainers/image-spec/specs-go"
@@ -128,7 +125,7 @@ func generateAnnotations(meta *chartmeta.Metadata, creationTime string) map[stri
 
 func main() {
 	chartTgz := flag.String("chart", "", "Path to the Helm chart .tgz file")
-	metadataJSON := flag.String("metadata", "", "Path to the chart metadata JSON file (name + version)")
+	metadataJSON := flag.String("metadata", "", "Path to the chart metadata JSON file")
 	digestOutput := flag.String("digest_output", "", "Path to write the manifest digest (sha256:...)")
 
 	flag.Parse()
@@ -137,11 +134,20 @@ func main() {
 		log.Fatal("Required flags: -chart, -metadata, -digest_output")
 	}
 
-	// Use the canonical chart mtime that packager.go (copyFile, L472) pins
-	// on output. registrar.go re-pins the same value on disk before helm
-	// push reads it, so both sides of the digest contract see this exact
-	// timestamp regardless of intermediate materialisation.
-	creationTime := time.Unix(0, 0).UTC().Format(time.RFC3339)
+	metadataBytes, err := os.ReadFile(*metadataJSON)
+	if err != nil {
+		log.Fatalf("Error reading metadata file: %v", err)
+	}
+	var metadata struct {
+		Created string `json:"created"`
+	}
+	if err := json.Unmarshal(metadataBytes, &metadata); err != nil {
+		log.Fatalf("Error parsing metadata JSON: %v", err)
+	}
+	if metadata.Created == "" {
+		log.Fatalf("metadata.json missing required `created` field")
+	}
+	creationTime := metadata.Created
 
 	// Read Chart.yaml from the .tgz
 	chartYAML, err := readChartYAMLFromTgz(*chartTgz)

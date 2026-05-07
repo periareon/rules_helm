@@ -37,6 +37,7 @@ def _helm_push_impl(ctx):
     args.add("-helm", rlocationpath(toolchain.helm, ctx.workspace_name))
     args.add("-helm_plugins", rlocationpath(toolchain.helm_plugins, ctx.workspace_name))
     args.add("-chart", rlocationpath(pkg_info.chart, ctx.workspace_name))
+    args.add("-metadata", rlocationpath(pkg_info.metadata, ctx.workspace_name))
     args.add("-registry_url", ctx.attr.registry_url)
 
     if ctx.attr.login_url:
@@ -71,6 +72,7 @@ def _helm_push_impl(ctx):
         toolchain.helm,
         toolchain.helm_plugins,
         pkg_info.chart,
+        pkg_info.metadata,
     ]).merge(image_runfiles)
 
     return [

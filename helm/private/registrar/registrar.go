@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
@@ -67,6 +68,7 @@ func main() {
 	rawHelmPath := flag.String("helm", "", "Path to helm binary")
 	rawHelmPluginsPath := flag.String("helm_plugins", "", "The path to helm plugins.")
 	rawChartPath := flag.String("chart", "", "Path to Helm .tgz file")
+	rawMetadataPath := flag.String("metadata", "", "Path to the chart metadata JSON file (with `created` field)")
 	registryURL := flag.String("registry_url", "", "URL of registry to upload helm chart")
 	rawLoginURL := flag.String("login_url", "", "URL of registry to login to.")
 	pushCmd := flag.String("push_cmd", "push", "Command to publish helm chart.")
@@ -77,13 +79,14 @@ func main() {
 	helmArgs := flag.CommandLine.Args()
 
 	// Check required arguments
-	if *rawHelmPath == "" || *rawChartPath == "" || *registryURL == "" {
-		log.Fatalf("Missing required arguments: helm, chart, registry_url")
+	if *rawHelmPath == "" || *rawChartPath == "" || *rawMetadataPath == "" || *registryURL == "" {
+		log.Fatalf("Missing required arguments: helm, chart, metadata, registry_url")
 	}
 
 	helmPath := helm_utils.GetRunfile(*rawHelmPath)
 	helmPluginsPath := helm_utils.GetRunfile(*rawHelmPluginsPath)
 	chartPath := helm_utils.GetRunfile(*rawChartPath)
+	metadataPath := helm_utils.GetRunfile(*rawMetadataPath)
 
 	var imagePushers []string
 	if *rawImagePushers != "" {
@@ -155,11 +158,23 @@ func main() {
 		}
 	}
 
-	// Re-pin the chart's disk mtime to the Unix epoch before pushing.
-	// packager.go (copyFile, L472) sets it on output, but downstream
-	// materialisation (e.g. GitHub Actions cache extraction via tar) can
-	// strip it; re-applying here keeps the published digest stable.
-	if err := os.Chtimes(chartPath, time.Unix(0, 0), time.Unix(0, 0)); err != nil {
+	// Pin the chart's mtime to the `created` timestamp from metadata.json,
+	// ensuring that the same OCI manifest + digest is generated across multiple runs.
+	metadataBytes, err := os.ReadFile(metadataPath)
+	if err != nil {
+		log.Fatalf("Error reading metadata file: %v", err)
+	}
+	var metadata struct {
+		Created string `json:"created"`
+	}
+	if err := json.Unmarshal(metadataBytes, &metadata); err != nil {
+		log.Fatalf("Error parsing metadata JSON: %v", err)
+	}
+	chartCreated, err := time.Parse(time.RFC3339, metadata.Created)
+	if err != nil {
+		log.Fatalf("Error parsing chart created time %q: %v", metadata.Created, err)
+	}
+	if err := os.Chtimes(chartPath, chartCreated, chartCreated); err != nil {
 		log.Fatalf("Error pinning chart mtime: %v", err)
 	}
 
