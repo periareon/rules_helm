@@ -163,6 +163,7 @@
 <li><a href="#helm_import">helm_import</a></li>
 <li><a href="#helm_install">helm_install</a></li>
 <li><a href="#helm_lint_test">helm_lint_test</a></li>
+<li><a href="#helm_oci_digest">helm_oci_digest</a></li>
 <li><a href="#helm_package">helm_package</a></li>
 <li><a href="#helm_plugin">helm_plugin</a></li>
 <li><a href="#helm_push">helm_push</a></li>
@@ -176,6 +177,7 @@
 </ul>
 <h2 id="providers"><a class="header" href="#providers">Providers</a></h2>
 <ul>
+<li><a href="#HelmOCIDigestInfo">HelmOCIDigestInfo</a></li>
 <li><a href="#HelmPackageInfo">HelmPackageInfo</a></li>
 </ul>
 <h2 id="functions"><a class="header" href="#functions">Functions</a></h2>
@@ -260,6 +262,24 @@ helm_lint_test(<a href="#helm_lint_test-name">name</a>, <a href="#helm_lint_test
 <tr><td style="text-align: left"><a id="helm_lint_test-opts"></a>opts</td><td style="text-align: left">Additional arguments to pass to <code>helm lint</code>.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
 <tr><td style="text-align: left"><a id="helm_lint_test-substitutions"></a>substitutions</td><td style="text-align: left">A dictionary of substitutions passed to `helm lint --set flag.</td><td style="text-align: left"><a href="https://bazel.build/rules/lib/core/dict">Dictionary: String -&gt; String</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>{}</code></td></tr>
 <tr><td style="text-align: left"><a id="helm_lint_test-values"></a>values</td><td style="text-align: left">A list of files passed to `helm lint --values flag.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+</tbody></table>
+</div>
+<p><a id="helm_oci_digest"></a></p>
+<h2 id="helm_oci_digest"><a class="header" href="#helm_oci_digest">helm_oci_digest</a></h2>
+<pre>
+load("@rules_helm//helm:defs.bzl", "helm_oci_digest")
+
+helm_oci_digest(<a href="#helm_oci_digest-name">name</a>, <a href="#helm_oci_digest-chart">chart</a>)
+</pre>
+<p>Compute the OCI manifest digest for a Helm chart at build time.</p>
+<p>This rule constructs the OCI manifest that <code>helm push</code> (Helm v4) would
+create and computes its sha256 digest. The .tgz file's mtime is used for
+the creation annotation, formatted in UTC to match the push side.</p>
+<p>The digest file contains a single line: <code>sha256:&lt;hex&gt;</code>.</p>
+<p><strong>ATTRIBUTES</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="helm_oci_digest-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm_oci_digest-chart"></a>chart</td><td style="text-align: left">A helm_chart target providing HelmPackageInfo.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
 </tbody></table>
 </div>
 <p><a id="helm_package"></a></p>
@@ -458,6 +478,19 @@ helm_upgrade(<a href="#helm_upgrade-name">name</a>, <a href="#helm_upgrade-data"
 <tr><td style="text-align: left"><a id="helm_upgrade-values"></a>values</td><td style="text-align: left">Values files to pass to <code>helm upgrade --values</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
 </tbody></table>
 </div>
+<p><a id="HelmOCIDigestInfo"></a></p>
+<h2 id="helmocidigestinfo"><a class="header" href="#helmocidigestinfo">HelmOCIDigestInfo</a></h2>
+<pre>
+load("@rules_helm//helm:defs.bzl", "HelmOCIDigestInfo")
+
+HelmOCIDigestInfo(<a href="#HelmOCIDigestInfo-digest">digest</a>)
+</pre>
+<p>OCI manifest digest for a Helm chart, computed at build time.</p>
+<p><strong>FIELDS</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="HelmOCIDigestInfo-digest"></a>digest</td><td style="text-align: left">File: Text file containing the OCI manifest digest (sha256:...)</td></tr>
+</tbody></table>
+</div>
 <p><a id="HelmPackageInfo"></a></p>
 <h2 id="helmpackageinfo"><a class="header" href="#helmpackageinfo">HelmPackageInfo</a></h2>
 <pre>
@@ -507,6 +540,7 @@ helm_chart(*, <a href="#helm_chart-name">name</a>, <a href="#helm_chart-chart">c
 <div class="table-wrapper"><table><thead><tr><th>target</th><th>rule</th><th>condition</th></tr></thead><tbody>
 <tr><td><code>{name}</code></td><td><a href="#helm_package">helm_package</a></td><td><code>None</code></td></tr>
 <tr><td><code>{name}.push_images</code></td><td><a href="#helm_push_images">helm_push_images</a></td><td><code>None</code></td></tr>
+<tr><td><code>{name}.oci_digest</code></td><td><a href="#helm_oci_digest">helm_oci_digest</a></td><td><code>None</code></td></tr>
 <tr><td><code>{name}.push_registry</code></td><td><a href="#helm_push">helm_push</a> (<code>include_images = False</code>)</td><td><code>registry_url</code> is defined.</td></tr>
 <tr><td><code>{name}.push</code></td><td><a href="#helm_push">helm_push</a> (<code>include_images = True</code>)</td><td><code>registry_url</code> is defined.</td></tr>
 <tr><td><code>{name}.install</code></td><td><a href="#helm_install">helm_install</a></td><td><code>None</code></td></tr>
