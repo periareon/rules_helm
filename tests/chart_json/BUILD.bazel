@@ -1,4 +1,12 @@
-load("//helm:defs.bzl", "chart_content", "chart_file", "helm_chart", "helm_lint_test", "helm_template_test")
+load("@bazel_skylib//rules:write_file.bzl", "write_file")
+load(
+    "//helm:defs.bzl",
+    "chart_content",
+    "chart_file",
+    "helm_chart",
+    "helm_lint_test",
+    "helm_template_test",
+)
 
 helm_chart(
     name = "chart_json",
@@ -25,16 +33,22 @@ helm_template_test(
     chart = ":chart_json",
 )
 
-genrule(
+write_file(
     name = "version_file",
-    outs = ["version.txt"],
-    cmd = "echo 0.1.0 > $@",
+    out = "version.txt",
+    content = [
+        "0.1.0",
+        "",
+    ],
 )
 
-genrule(
+write_file(
     name = "app_version_file",
-    outs = ["app_version.txt"],
-    cmd = "echo 1.16.0 > $@",
+    out = "app_version.txt",
+    content = [
+        "1.16.0",
+        "",
+    ],
 )
 
 chart_file(
