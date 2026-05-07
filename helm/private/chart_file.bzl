@@ -1,7 +1,5 @@
 """Rules for generating Helm charts."""
 
-load("//helm/private:json_to_yaml.bzl", "json_to_yaml")
-
 def chart_content(
         name,
         api_version = "v2",
@@ -40,25 +38,43 @@ def _chart_file_impl(ctx):
     """A rule for generating a `Chart.yaml` file."""
 
     name = ctx.attr.chart_name or ctx.label.name
+    output = ctx.actions.declare_file("Chart.yaml")
 
-    content = chart_content(
-        name = name,
-        api_version = ctx.attr.api_version,
-        description = ctx.attr.description,
-        type = ctx.attr.type,
-        version = ctx.attr.version,
-        app_version = ctx.attr.app_version,
-        icon = ctx.attr.icon or None,
-    )
+    args = ctx.actions.args()
+    args.add("-name", name)
+    args.add("-api-version", ctx.attr.api_version)
+    args.add("-description", ctx.attr.description)
+    args.add("-type", ctx.attr.type)
+    args.add("-output", output)
 
-    content_yaml = json_to_yaml(
-        ctx = ctx,
-        name = ctx.label.name,
-        json_content = content,
+    inputs = []
+
+    if ctx.file.version_file:
+        args.add("-version-file", ctx.file.version_file)
+        inputs.append(ctx.file.version_file)
+    else:
+        args.add("-version", ctx.attr.version)
+
+    if ctx.file.app_version_file:
+        args.add("-app-version-file", ctx.file.app_version_file)
+        inputs.append(ctx.file.app_version_file)
+    else:
+        args.add("-app-version", ctx.attr.app_version)
+
+    if ctx.attr.icon:
+        args.add("-icon", ctx.attr.icon)
+
+    ctx.actions.run(
+        executable = ctx.executable._tool,
+        arguments = [args],
+        inputs = inputs,
+        outputs = [output],
+        mnemonic = "HelmChartFile",
+        progress_message = "Generating Chart.yaml for %s" % name,
     )
 
     return [DefaultInfo(
-        files = depset([content_yaml]),
+        files = depset([output]),
     )]
 
 chart_file = rule(
@@ -72,6 +88,10 @@ chart_file = rule(
         "app_version": attr.string(
             default = "1.16.0",
             doc = "The version number of the application being deployed.",
+        ),
+        "app_version_file": attr.label(
+            allow_single_file = True,
+            doc = "A file containing the version number of the application being deployed.",
         ),
         "chart_name": attr.string(
             doc = "The name of the chart",
@@ -91,11 +111,15 @@ chart_file = rule(
             default = "0.1.0",
             doc = "The chart version.",
         ),
-        "_json_to_yaml": attr.label(
-            doc = "A tools for converting json files to yaml files.",
+        "version_file": attr.label(
+            allow_single_file = True,
+            doc = "A file containing the chart version.",
+        ),
+        "_tool": attr.label(
+            doc = "The chart_file tool.",
             cfg = "exec",
             executable = True,
-            default = Label("//helm/private/json_to_yaml"),
+            default = Label("//helm/private/chart_file"),
         ),
     },
 )
