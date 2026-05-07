@@ -218,7 +218,8 @@
 <pre>
 load("@rules_helm//helm:defs.bzl", "chart_file")
 
-chart_file(<a href="rules.html#chart_file-name">name</a>, <a href="rules.html#chart_file-api_version">api_version</a>, <a href="rules.html#chart_file-app_version">app_version</a>, <a href="rules.html#chart_file-chart_name">chart_name</a>, <a href="rules.html#chart_file-description">description</a>, <a href="rules.html#chart_file-icon">icon</a>, <a href="rules.html#chart_file-type">type</a>, <a href="rules.html#chart_file-version">version</a>)
+chart_file(<a href="rules.html#chart_file-name">name</a>, <a href="rules.html#chart_file-api_version">api_version</a>, <a href="rules.html#chart_file-app_version">app_version</a>, <a href="rules.html#chart_file-app_version_file">app_version_file</a>, <a href="rules.html#chart_file-chart_name">chart_name</a>, <a href="rules.html#chart_file-description">description</a>, <a href="rules.html#chart_file-icon">icon</a>, <a href="rules.html#chart_file-type">type</a>,
+           <a href="rules.html#chart_file-version">version</a>, <a href="rules.html#chart_file-version_file">version_file</a>)
 </pre>
 <p>Create a Helm chart file.</p>
 <p><strong>ATTRIBUTES</strong></p>
@@ -226,11 +227,13 @@ chart_file(<a href="rules.html#chart_file-name">name</a>, <a href="rules.html#ch
 <tr><td style="text-align: left"><a id="chart_file-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
 <tr><td style="text-align: left"><a id="chart_file-api_version"></a>api_version</td><td style="text-align: left">The Helm API version</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>"v2"</code></td></tr>
 <tr><td style="text-align: left"><a id="chart_file-app_version"></a>app_version</td><td style="text-align: left">The version number of the application being deployed.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>"1.16.0"</code></td></tr>
+<tr><td style="text-align: left"><a id="chart_file-app_version_file"></a>app_version_file</td><td style="text-align: left">A file containing the version number of the application being deployed.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
 <tr><td style="text-align: left"><a id="chart_file-chart_name"></a>chart_name</td><td style="text-align: left">The name of the chart</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
 <tr><td style="text-align: left"><a id="chart_file-description"></a>description</td><td style="text-align: left">A descritpion of the chart.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>"A Helm chart for Kubernetes by Bazel."</code></td></tr>
 <tr><td style="text-align: left"><a id="chart_file-icon"></a>icon</td><td style="text-align: left">A URL to an SVG or PNG image to be used as an icon.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
 <tr><td style="text-align: left"><a id="chart_file-type"></a>type</td><td style="text-align: left">The chart type.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>"application"</code></td></tr>
 <tr><td style="text-align: left"><a id="chart_file-version"></a>version</td><td style="text-align: left">The chart version.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>"0.1.0"</code></td></tr>
+<tr><td style="text-align: left"><a id="chart_file-version_file"></a>version_file</td><td style="text-align: left">A file containing the chart version.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
 </tbody></table>
 </div>
 <p><a id="helm_import"></a></p>
