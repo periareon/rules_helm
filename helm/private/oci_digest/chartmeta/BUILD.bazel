@@ -1,0 +1,8 @@
+load("@rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "chartmeta",
+    srcs = ["chartmeta.go"],
+    importpath = "github.com/periareon/rules_helm/helm/private/oci_digest/chartmeta",
+    visibility = ["//helm/private/oci_digest:__pkg__"],
+)
