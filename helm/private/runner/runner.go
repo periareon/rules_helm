@@ -12,6 +12,7 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/bazelbuild/rules_go/go/runfiles"
 	"github.com/periareon/rules_helm/helm/private/helm_utils"
 )
 
@@ -141,12 +142,17 @@ func main() {
 		}
 	}
 
-	// Subprocess image pushers
-	if !is_test {
+	// Subprocess image pushers.
+	if !is_test && len(imagePushers) > 0 {
+		r, err := runfiles.New()
+		if err != nil {
+			log.Fatalf("Failed to load runfiles: %v", err)
+		}
 		for _, pusher := range imagePushers {
 			cmd := exec.Command(pusher)
 			cmd.Stdout = os.Stdout
 			cmd.Stderr = os.Stderr
+			cmd.Env = append(os.Environ(), r.Env()...)
 
 			if err := cmd.Run(); err != nil {
 				log.Fatalf("Failed to run image pusher %s: %v", pusher, err)
