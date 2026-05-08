@@ -12,6 +12,7 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/bazelbuild/rules_go/go/runfiles"
 	"github.com/periareon/rules_helm/helm/private/helm_utils"
 )
 
@@ -142,25 +143,16 @@ func main() {
 	}
 
 	// Subprocess image pushers.
-	//
-	// Forward the wrapper's runfiles env to each pusher.
 	if !is_test && len(imagePushers) > 0 {
-		runfilesEnv := []string{}
-		if d := os.Getenv("RUNFILES_DIR"); d != "" {
-			runfilesEnv = append(runfilesEnv, "RUNFILES_DIR="+d)
-		}
-		if m := os.Getenv("RUNFILES_MANIFEST_FILE"); m != "" {
-			runfilesEnv = append(runfilesEnv, "RUNFILES_MANIFEST_FILE="+m)
-		}
-		if len(runfilesEnv) == 0 {
-			// Fallback for callers that didn't set the env vars.
-			runfilesEnv = append(runfilesEnv, "RUNFILES_DIR="+os.Args[0]+".runfiles")
+		r, err := runfiles.New()
+		if err != nil {
+			log.Fatalf("Failed to load runfiles: %v", err)
 		}
 		for _, pusher := range imagePushers {
 			cmd := exec.Command(pusher)
 			cmd.Stdout = os.Stdout
 			cmd.Stderr = os.Stderr
-			cmd.Env = append(os.Environ(), runfilesEnv...)
+			cmd.Env = append(os.Environ(), r.Env()...)
 
 			if err := cmd.Run(); err != nil {
 				log.Fatalf("Failed to run image pusher %s: %v", pusher, err)
