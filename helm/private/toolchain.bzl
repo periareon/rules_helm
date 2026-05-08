@@ -95,7 +95,7 @@ def _helm_toolchain_impl(ctx):
     })
 
     default_info = DefaultInfo(
-        files = depset([binary]),
+        files = depset([binary, plugins_dir]),
         runfiles = ctx.runfiles(files = [binary, plugins_dir]),
     )
 

@@ -1,0 +1,22 @@
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+
+# Asserts that a plugin declared via the `helm.plugin` bzlmod tag is wired into
+# the helm toolchain. The genrule runs `helm plugin list` through the active
+# toolchain; if the plugin is missing, `grep` fails the action.
+genrule(
+    name = "cm_push_plugin_listed",
+    outs = ["cm_push_plugin_list.txt"],
+    cmd = "HELM_PLUGINS=$$PWD/$(HELM_PLUGINS) $(HELM_BIN) plugin list > $@ && grep -q '^cm-push' $@",
+    target_compatible_with = select({
+        "@platforms//os:linux": [],
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    testonly = True,
+    toolchains = ["@rules_helm//helm:current_toolchain"],
+)
+
+build_test(
+    name = "cm_push_plugin_listed_test",
+    targets = [":cm_push_plugin_listed"],
+)
