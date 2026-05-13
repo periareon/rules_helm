@@ -53,6 +53,33 @@ register_toolchains(
     "@helm_toolchains//:all",
 )
 
+# Test-only: exercise the `helm.plugin` extension by wiring helm-cm-push into all
+# generated toolchains. Consumed by `//tests/bzlmod_plugin`. dev_dependency keeps
+# this out of downstream builds.
+helm_dev = use_extension(
+    "@rules_helm//helm:extensions.bzl",
+    "helm",
+    dev_dependency = True,
+)
+helm_dev.plugin(
+    name = "cm-push",
+    integrity = {
+        "darwin-amd64": "sha256-zUUHz8RskD/Oq5n1qKSmvRXp5FZek6CSkd8w9awSQas=",
+        "darwin-arm64": "sha256-oKyCvUYCHt/LPcIj99ZaVP6PlpGPy7dgwTl/yo43SqI=",
+        "linux-amd64": "sha256-KfH3E2mbR+PJwY1gtQVffA6LzBIh1mOcBX54fgi2Vqg=",
+        "linux-arm64": "sha256-Y92zov8e7yjSH6X0aYY2xVtCAxUr2cbM+stO8JFBsNI=",
+        "windows-amd64": "sha256-aFkN3IJXd8TVlJ/NY3v2sZ4Rerp644e02u0HNqboELw=",
+    },
+    url_templates = {
+        "darwin-amd64": ["https://github.com/chartmuseum/helm-push/releases/download/v{version}/helm-push_{version}_darwin_amd64.tar.gz"],
+        "darwin-arm64": ["https://github.com/chartmuseum/helm-push/releases/download/v{version}/helm-push_{version}_darwin_arm64.tar.gz"],
+        "linux-amd64": ["https://github.com/chartmuseum/helm-push/releases/download/v{version}/helm-push_{version}_linux_amd64.tar.gz"],
+        "linux-arm64": ["https://github.com/chartmuseum/helm-push/releases/download/v{version}/helm-push_{version}_linux_arm64.tar.gz"],
+        "windows-amd64": ["https://github.com/chartmuseum/helm-push/releases/download/v{version}/helm-push_{version}_windows_amd64.tar.gz"],
+    },
+    version = "0.10.4",
+)
+
 helm_test = use_extension("@rules_helm//tests:test_extensions.bzl", "helm_test", dev_dependency = True)
 use_repo(
     helm_test,

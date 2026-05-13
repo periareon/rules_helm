@@ -105,6 +105,70 @@ If all downloads fail, the rule will fail.
     },
 )
 
+_HELM_PLUGIN_BUILD_CONTENT = """\
+load("@rules_helm//helm:helm_plugin.bzl", "helm_plugin")
+
+package(default_visibility = ["//visibility:public"])
+
+helm_plugin(
+    name = "{name}",
+    yaml = "{yaml}",
+    data = glob(
+        include = ["**"],
+        exclude = [
+            "BUILD",
+            "BUILD.bazel",
+            "WORKSPACE",
+            "WORKSPACE.bazel",
+            "{yaml}",
+        ],
+    ),
+    plugin_name = "{name}",
+)
+"""
+
+def _helm_plugin_repository_impl(repository_ctx):
+    repository_ctx.download_and_extract(
+        repository_ctx.attr.urls,
+        integrity = repository_ctx.attr.integrity,
+        stripPrefix = repository_ctx.attr.strip_prefix,
+    )
+
+    repository_ctx.file("BUILD.bazel", _HELM_PLUGIN_BUILD_CONTENT.format(
+        name = repository_ctx.attr.plugin_name,
+        yaml = repository_ctx.attr.yaml,
+    ))
+
+    repository_ctx.file("WORKSPACE.bazel", _HELM_WORKSPACE_CONTENT.format(
+        repository_ctx.name,
+    ))
+
+helm_plugin_repository = repository_rule(
+    implementation = _helm_plugin_repository_impl,
+    doc = "A repository rule for downloading a Helm plugin and generating a helm_plugin target.",
+    attrs = {
+        "integrity": attr.string(
+            doc = "Expected checksum in Subresource Integrity format.",
+            mandatory = True,
+        ),
+        "plugin_name": attr.string(
+            doc = "The name of the helm plugin.",
+            mandatory = True,
+        ),
+        "strip_prefix": attr.string(
+            doc = "A directory prefix to strip from the extracted files.",
+        ),
+        "urls": attr.string_list(
+            doc = "URLs to download the plugin archive from.",
+            mandatory = True,
+        ),
+        "yaml": attr.string(
+            doc = "Relative path to plugin.yaml within the extracted archive (after strip_prefix).",
+            default = "plugin.yaml",
+        ),
+    },
+)
+
 def _platform(rctx):
     """Returns a normalized name of the host os and CPU architecture.
 

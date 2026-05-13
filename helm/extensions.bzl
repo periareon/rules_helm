@@ -3,6 +3,7 @@
 load(
     "//helm/private:repositories.bzl",
     "helm_host_alias_repository",
+    "helm_plugin_repository",
     "helm_toolchain_repository",
     "helm_toolchain_repository_hub",
 )
@@ -35,6 +36,35 @@ def _helm_impl(module_ctx):
     host_tools = root_mod.tags.host_tools
     if not host_tools:
         host_tools = rules_mod.tags.host_tools
+
+    plugins = root_mod.tags.plugin
+
+    # Create plugin repos and build a map of platform -> plugin labels.
+    platform_plugins = {}
+    for plugin_attrs in plugins:
+        for platform, integrity in plugin_attrs.integrity.items():
+            plugin_repo_name = "helm_plugin_{}_{}".format(
+                plugin_attrs.name,
+                platform.replace("-", "_"),
+            )
+
+            helm_plugin_repository(
+                name = plugin_repo_name,
+                plugin_name = plugin_attrs.name,
+                urls = [
+                    template.replace("{version}", plugin_attrs.version)
+                    for template in plugin_attrs.url_templates[platform]
+                ],
+                integrity = integrity,
+                strip_prefix = plugin_attrs.strip_prefix,
+                yaml = plugin_attrs.yaml,
+            )
+
+            if platform not in platform_plugins:
+                platform_plugins[platform] = []
+            platform_plugins[platform].append(
+                "@{}//:{}".format(plugin_repo_name, plugin_attrs.name),
+            )
 
     toolchain_names = []
     toolchain_labels = {}
@@ -76,6 +106,7 @@ def _helm_impl(module_ctx):
                 integrity = integrity,
                 strip_prefix = url_platform,
                 platform = platform,
+                plugins = platform_plugins.get(platform, []),
             )
 
             toolchain_names.append(toolchain_repo_name)
@@ -129,9 +160,67 @@ use_repo(helm, "helm")
     },
 )
 
+_plugin = tag_class(
+    doc = """\
+An extension tag for declaring Helm plugins to include in all toolchains.
+
+Plugins are downloaded per-platform and wired into each generated helm_toolchain.
+Only platforms listed in `integrity` (and `url_templates`) will receive the plugin.
+
+An example of declaring the helm-diff plugin:
+
+```python
+helm = use_extension("@rules_helm//helm:extensions.bzl", "helm")
+helm.host_tools()
+helm.plugin(
+    name = "diff",
+    version = "3.15.5",
+    strip_prefix = "diff",
+    url_templates = {
+        "darwin-arm64": ["https://github.com/databus23/helm-diff/releases/download/v{version}/helm-diff-macos-arm64.tgz"],
+        "darwin-amd64": ["https://github.com/databus23/helm-diff/releases/download/v{version}/helm-diff-macos-amd64.tgz"],
+        "linux-amd64": ["https://github.com/databus23/helm-diff/releases/download/v{version}/helm-diff-linux-amd64.tgz"],
+        "linux-arm64": ["https://github.com/databus23/helm-diff/releases/download/v{version}/helm-diff-linux-arm64.tgz"],
+    },
+    integrity = {
+        "darwin-arm64": "sha256-KJmZ7wY3gAcWFzK5R9+TfQlaRfEXzJ7hDNRC8NgIDog=",
+        "linux-amd64": "sha256-ToJjCrKyMxfAOeezsWYF95qKwPPSKHPg1G6pzZgN2o4=",
+        "linux-arm64": "sha256-4tu/93Bo2T7VYgYj6oHyTYah7UQAuRmE1jgvSAEfaaM=",
+    },
+)
+```
+""",
+    attrs = {
+        "integrity": attr.string_dict(
+            doc = "A mapping of helm platform name to integrity hash. Only platforms listed here will receive the plugin.",
+            mandatory = True,
+        ),
+        "name": attr.string(
+            doc = "The name of the plugin.",
+            mandatory = True,
+        ),
+        "strip_prefix": attr.string(
+            doc = "A directory prefix to strip from the extracted plugin archive.",
+        ),
+        "url_templates": attr.string_list_dict(
+            doc = "Mapping of helm platform name to a list of URL templates for downloading the plugin on that platform. Only `{version}` is substituted; spell the platform name into the URL string directly. Every key in `integrity` must have a matching entry here.",
+            mandatory = True,
+        ),
+        "version": attr.string(
+            doc = "The version of the plugin to download.",
+            mandatory = True,
+        ),
+        "yaml": attr.string(
+            doc = "Relative path to plugin.yaml within the extracted archive (after strip_prefix).",
+            default = "plugin.yaml",
+        ),
+    },
+)
+
 helm = module_extension(
     implementation = _helm_impl,
     tag_classes = {
         "host_tools": _host_tools,
+        "plugin": _plugin,
     },
 )
