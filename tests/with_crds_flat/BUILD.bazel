@@ -1,0 +1,32 @@
+load("@rules_go//go:def.bzl", "go_test")
+load("//helm:defs.bzl", "helm_chart", "helm_lint_test", "helm_template_test")
+
+# Regression coverage for an infinite loop in the packager's CRDs root finder:
+# when a CRD input has no `crds/` ancestor in its Bazel shortpath, the loop
+# at packager.go used to spin forever on `filepath.Dir(".")` returning `"."`.
+# Passing `my_crd.yaml` (a flat file at the package root) reproduces the case.
+helm_chart(
+    name = "with_crds_flat",
+    crds = ["my_crd.yaml"],
+    registry_url = "oci://localhost/helm-registry",
+)
+
+helm_lint_test(
+    name = "with_crds_flat_lint_test",
+    chart = ":with_crds_flat",
+)
+
+helm_template_test(
+    name = "with_crds_flat_template_test",
+    chart = ":with_crds_flat",
+)
+
+go_test(
+    name = "with_crds_flat_test",
+    srcs = ["with_crds_flat_test.go"],
+    data = [":with_crds_flat"],
+    env = {"HELM_CHART": "$(rlocationpath :with_crds_flat)"},
+    deps = [
+        "@rules_go//go/runfiles",
+    ],
+)

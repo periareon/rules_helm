@@ -1,0 +1,10 @@
+apiVersion: v2
+name: with-crds-flat
+description: A Helm chart whose CRD inputs sit outside any `crds/` directory.
+icon: https://helm.sh/img/helm.svg
+
+type: application
+
+version: 0.1.0
+
+appVersion: "1.16.0"

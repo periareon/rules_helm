@@ -1,0 +1,5 @@
+# Minimal values.yaml — this chart exists only to exercise the packager's
+# handling of CRD inputs that have no `crds/` parent directory in their
+# Bazel shortpath. See //tests/with_crds_flat:with_crds_flat_test for the
+# assertion.
+replicaCount: 1
