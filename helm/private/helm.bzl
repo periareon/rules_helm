@@ -21,6 +21,7 @@ def helm_chart(
         deps = None,
         install_name = None,
         registry_url = None,
+        registry_url_file = None,
         login_url = None,
         push_cmd = None,
         helm_opts = [],
@@ -39,8 +40,8 @@ def helm_chart(
     | `{name}` | [helm_package](#helm_package) | `None` |
     | `{name}.push_images` | [helm_push_images](#helm_push_images) | `None` |
     | `{name}.oci_digest` | [helm_oci_digest](#helm_oci_digest) | `None` |
-    | `{name}.push_registry` | [helm_push](#helm_push) (`include_images = False`) | `registry_url` is defined. |
-    | `{name}.push` | [helm_push](#helm_push) (`include_images = True`) | `registry_url` is defined. |
+    | `{name}.push_registry` | [helm_push](#helm_push) (`include_images = False`) | `registry_url` or `registry_url_file` is defined. |
+    | `{name}.push` | [helm_push](#helm_push) (`include_images = True`) | `registry_url` or `registry_url_file` is defined. |
     | `{name}.install` | [helm_install](#helm_install) | `None` |
     | `{name}.uninstall` | [helm_uninstall](#helm_uninstall) | `None` |
     | `{name}.upgrade` | [helm_upgrade](#helm_upgrade) | `None` |
@@ -60,7 +61,9 @@ def helm_chart(
         deps (list, optional): A list of helm package dependencies.
         install_name (str, optional): The `helm install` name to use. `name` will be used if unset.
         registry_url (str, Optional): The registry url for the helm chart. `{name}.push_registry`
-            is only defined when a value is passed here.
+            is only defined when a value is passed here. Mutually exclusive with `registry_url_file`.
+        registry_url_file (Label, Optional): A file containing the registry url for the helm chart.
+            `{name}.push_registry` is only defined when a value is passed here. Mutually exclusive with `registry_url`.
         login_url (str, optional): The registry url to log into for publishing helm charts.
         push_cmd (str, optional): An alternative command to `push` for publishing helm charts.
         helm_opts (list, optional): Additional options to pass to helm.
@@ -128,12 +131,16 @@ def helm_chart(
         **kwargs
     )
 
-    if registry_url:
+    if registry_url and registry_url_file:
+        fail("`registry_url` and `registry_url_file` are mutually exclusive. Only one may be specified for `helm_chart` target `{}`.".format(name))
+
+    if registry_url or registry_url_file:
         helm_push(
             name = name + ".push_registry",
             package = name,
             include_images = False,
             registry_url = registry_url,
+            registry_url_file = registry_url_file,
             login_url = login_url,
             opts = helm_opts + push_opts,
             push_cmd = push_cmd,
@@ -145,6 +152,7 @@ def helm_chart(
             include_images = True,
             package = name,
             registry_url = registry_url,
+            registry_url_file = registry_url_file,
             login_url = login_url,
             opts = helm_opts + push_opts,
             push_cmd = push_cmd,
