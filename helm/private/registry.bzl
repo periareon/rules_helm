@@ -32,13 +32,26 @@ def _helm_push_impl(ctx):
 
     pkg_info = ctx.attr.package[HelmPackageInfo]
 
+    if ctx.attr.registry_url and ctx.attr.registry_url_file:
+        fail("`registry_url` and `registry_url_file` are mutually exclusive. Only one may be specified for target `{}`.".format(ctx.label))
+    if not ctx.attr.registry_url and not ctx.attr.registry_url_file:
+        fail("Either `registry_url` or `registry_url_file` must be specified for target `{}`.".format(ctx.label))
+
+    extra_runfiles = []
+
     args = ctx.actions.args()
     args.set_param_file_format("multiline")
     args.add("-helm", rlocationpath(toolchain.helm, ctx.workspace_name))
     args.add("-helm_plugins", rlocationpath(toolchain.helm_plugins, ctx.workspace_name))
     args.add("-chart", rlocationpath(pkg_info.chart, ctx.workspace_name))
     args.add("-metadata", rlocationpath(pkg_info.metadata, ctx.workspace_name))
-    args.add("-registry_url", ctx.attr.registry_url)
+
+    if ctx.attr.registry_url:
+        args.add("-registry_url", ctx.attr.registry_url)
+    if ctx.attr.registry_url_file:
+        registry_url_file = ctx.file.registry_url_file
+        args.add("-registry_url_file", rlocationpath(registry_url_file, ctx.workspace_name))
+        extra_runfiles.append(registry_url_file)
 
     if ctx.attr.login_url:
         args.add("-login_url", ctx.attr.login_url)
@@ -73,7 +86,7 @@ def _helm_push_impl(ctx):
         toolchain.helm_plugins,
         pkg_info.chart,
         pkg_info.metadata,
-    ]).merge(image_runfiles)
+    ] + extra_runfiles).merge(image_runfiles)
 
     return [
         DefaultInfo(
@@ -124,8 +137,11 @@ if the following environment variables are defined:
             doc = "An alternative command to `push` for publishing the helm chart. E.g. `cm-push`",
         ),
         "registry_url": attr.string(
-            doc = "The registry URL at which to push the helm chart to. E.g. `oci://my.registry.io/chart-name`",
-            mandatory = True,
+            doc = "The registry URL at which to push the helm chart to. E.g. `oci://my.registry.io/chart-name`. Mutually exclusive with `registry_url_file`.",
+        ),
+        "registry_url_file": attr.label(
+            doc = "A file containing the registry URL at which to push the helm chart to. Mutually exclusive with `registry_url`.",
+            allow_single_file = True,
         ),
         "_copier": attr.label(
             cfg = "exec",

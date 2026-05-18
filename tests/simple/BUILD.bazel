@@ -1,9 +1,23 @@
 load("@bazel_skylib//rules:diff_test.bzl", "diff_test")
-load("//helm:defs.bzl", "helm_chart", "helm_lint_test", "helm_template", "helm_template_test")
+load("//helm:defs.bzl", "helm_chart", "helm_lint_test", "helm_push", "helm_template", "helm_template_test")
 
 helm_chart(
     name = "simple",
     registry_url = "oci://localhost/helm-registry",
+)
+
+# Smoke-test for the `registry_url_file` attribute. Ensures the rule analyzes
+# and builds correctly when a file is used instead of a literal URL.
+genrule(
+    name = "simple_registry_url_file",
+    outs = ["simple_registry_url.txt"],
+    cmd = "echo oci://localhost/helm-registry > $@",
+)
+
+helm_push(
+    name = "simple.push_from_file",
+    package = ":simple",
+    registry_url_file = ":simple_registry_url_file",
 )
 
 helm_lint_test(
