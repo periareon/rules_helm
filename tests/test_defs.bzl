@@ -78,3 +78,6 @@ helm_package_regex_test = rule(
     },
     test = True,
 )
+
+def label_to_str(label):
+    return str(Label(label))

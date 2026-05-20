@@ -1,7 +1,7 @@
 """Helm rules"""
 
 load(":helm_utils.bzl", "is_stamping_enabled")
-load(":image_utils.bzl", "ImagePushRepositoryInfo", "image_push_repository_aspect")
+load(":image_utils.bzl", "ImageRepositoryInfo", "image_repository_aspect")
 load(":json_to_yaml.bzl", "json_to_yaml")
 load(":providers.bzl", "HelmPackageInfo")
 
@@ -105,13 +105,13 @@ def _helm_package_impl(ctx):
     image_inputs = []
     single_image_manifests = []
     for image in ctx.attr.images:
-        image_inputs.append(image[ImagePushRepositoryInfo].repository_file)
+        image_inputs.append(image[ImageRepositoryInfo].repository_file)
 
         # Add the appropriate image file based on format
-        if image[ImagePushRepositoryInfo].oci_layout:
-            image_inputs.append(image[ImagePushRepositoryInfo].oci_layout)
-        elif image[ImagePushRepositoryInfo].manifest_file:
-            image_inputs.append(image[ImagePushRepositoryInfo].manifest_file)
+        if image[ImageRepositoryInfo].oci_layout:
+            image_inputs.append(image[ImageRepositoryInfo].oci_layout)
+        elif image[ImageRepositoryInfo].manifest_file:
+            image_inputs.append(image[ImageRepositoryInfo].manifest_file)
         single_image_manifest = ctx.actions.declare_file("{}/{}".format(
             ctx.label.name,
             str(image.label).strip("@").replace("/", "_").replace(":", "_") + ".image_manifest",
@@ -119,17 +119,17 @@ def _helm_package_impl(ctx):
         push_info = image[DefaultInfo]
 
         remote_tags_path = None
-        if image[ImagePushRepositoryInfo].remote_tags_file:
-            remote_tags_path = image[ImagePushRepositoryInfo].remote_tags_file.path
-            image_inputs.append(image[ImagePushRepositoryInfo].remote_tags_file)
+        if image[ImageRepositoryInfo].remote_tags_file:
+            remote_tags_path = image[ImageRepositoryInfo].remote_tags_file.path
+            image_inputs.append(image[ImageRepositoryInfo].remote_tags_file)
 
         # Set mutually exclusive fields based on image format
         oci_layout_dir = None
         manifest_file = None
-        if image[ImagePushRepositoryInfo].oci_layout:
-            oci_layout_dir = image[ImagePushRepositoryInfo].oci_layout.path
-        elif image[ImagePushRepositoryInfo].manifest_file:
-            manifest_file = image[ImagePushRepositoryInfo].manifest_file.path
+        if image[ImageRepositoryInfo].oci_layout:
+            oci_layout_dir = image[ImageRepositoryInfo].oci_layout.path
+        elif image[ImageRepositoryInfo].manifest_file:
+            manifest_file = image[ImageRepositoryInfo].manifest_file.path
         else:
             fail("Unable to determine repository info for {}".format(image.label))
 
@@ -138,7 +138,7 @@ def _helm_package_impl(ctx):
             content = json.encode_indent(
                 struct(
                     label = str(image.label),
-                    repository_path = image[ImagePushRepositoryInfo].repository_file.path,
+                    repository_path = image[ImageRepositoryInfo].repository_file.path,
                     oci_layout_dir = oci_layout_dir,
                     manifest_file = manifest_file,
                     remote_tags_path = remote_tags_path,
@@ -232,10 +232,11 @@ helm_package = rule(
         "images": attr.label_list(
             doc = """\
                 A list of \
-                [oci_push](https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags) or \
-                [image_push](https://github.com/bazel-contrib/rules_img) \
+                [oci_push](https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags), \
+                [image_push](https://github.com/bazel-contrib/rules_img) or \
+                [image_import](https://github.com/bazel-contrib/rules_img) \
                 targets.""",
-            aspects = [image_push_repository_aspect],
+            aspects = [image_repository_aspect],
         ),
         "opts": attr.string_list(
             doc = "Additional arguments to pass to `helm package` commands.",

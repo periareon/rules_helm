@@ -75,6 +75,7 @@ def helm_test_deps():
         img_pull,
         name = "rules_helm_test_img_container_base",
         digest = "sha256:25109184c71bdad752c8312a8623239686a9a2071e8825f20acb8f2198c3f659",
+        tag = "3.23.3",
         registry = "index.docker.io",
         repository = "library/alpine",
     )

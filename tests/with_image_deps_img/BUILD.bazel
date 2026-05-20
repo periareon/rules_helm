@@ -3,7 +3,7 @@ load("@rules_img//img:image.bzl", "image_manifest")
 load("@rules_img//img:layer.bzl", "image_layer")
 load("@rules_img//img:push.bzl", "image_push")
 load("//helm:defs.bzl", "helm_chart", "helm_lint_test", "helm_template_test")
-load("//tests:test_defs.bzl", "helm_package_regex_test")
+load("//tests:test_defs.bzl", "helm_package_regex_test", "label_to_str")
 
 exports_files(["Chart.lock"])
 
@@ -21,7 +21,16 @@ helm_chart(
         ":image_c.push",
         ":image_d.push",
         ":image_e.push",
+        "@rules_helm_test_img_container_base",
     ],
+    substitutions = {
+        # This goofy workaround is needed because Bazel 7 has '~' characters in
+        # the label string, while newer versions have '+'. Relying on the fact
+        # that the substitutions are handled before image stamps, we can do a
+        # double replacement, and thus avoid hardcoding either character into
+        # the values file ensuring compatibility with both versions
+        "base_container_label": label_to_str("@rules_helm_test_img_container_base//:image"),
+    },
     target_compatible_with = EXCLUDE_WINDOWS,
 )
 
@@ -47,6 +56,8 @@ helm_package_regex_test(
         r"image_c:\s+url:\s+\"docker.io/rules_helm/test_img/image_c:1.2.3\"",
         r"image_d:\s+url:\s+\"docker.io/rules_helm/test_img/image_d:4.5.6\"",
         r"image_e:\s+url:\s+\"docker.io/rules_helm/test_img/image_e:7.8.9\"",
+        r"image_pull:\s+url:\s+\"index.docker.io/library/alpine@sha256:[a-z0-9]{64}\"",
+        r"image_pull_tag:\s+url:\s+\"index.docker.io/library/alpine:3.23.3\"",
     ],
 )
 
