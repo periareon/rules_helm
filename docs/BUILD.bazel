@@ -1,29 +1,13 @@
-load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@rules_rust_mdbook//:defs.bzl", "mdbook", "mdbook_server")
 load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 load("@stardoc//stardoc:stardoc.bzl", "stardoc")
 
-bzl_library(
-    name = "bzl_lib",
-    srcs = [
-        "//:bzl_srcs",
-        "@bazel_tools//tools:bzl_srcs",
-    ],
-    visibility = ["//visibility:public"],
-    deps = [
-        "//helm/settings:settings_bzl",
-        "@bazel_lib//lib:base64",
-        "@bazel_lib//lib:repo_utils",
-        "@bazel_skylib//rules:common_settings",
-    ],
-)
-
 stardoc(
-    name = "rules",
-    out = "src/rules.md",
+    name = "defs",
+    out = "src/defs.md",
     input = "//helm:defs.bzl",
     table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
-    deps = [":bzl_lib"],
+    deps = ["//helm:defs_bzl"],
 )
 
 stardoc(
@@ -32,13 +16,153 @@ stardoc(
     func_template = "settings_func.vm",
     input = "//helm/settings:settings.bzl",
     tags = ["manual"],
-    deps = [":bzl_lib"],
+    deps = ["//helm/settings:settings_bzl"],
+)
+
+stardoc(
+    name = "chart_file",
+    out = "src/chart_file.md",
+    input = "//helm:chart_file.bzl",
+    table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
+    tags = ["manual"],
+    deps = ["//helm:chart_file_bzl"],
+)
+
+stardoc(
+    name = "extensions",
+    out = "src/extensions.md",
+    input = "//helm:extensions.bzl",
+    table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
+    tags = ["manual"],
+    deps = ["//helm:extensions_bzl"],
+)
+
+stardoc(
+    name = "helm_chart",
+    out = "src/helm_chart.md",
+    input = "//helm:helm_chart.bzl",
+    table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
+    tags = ["manual"],
+    deps = ["//helm:helm_chart_bzl"],
+)
+
+stardoc(
+    name = "helm_command",
+    out = "src/helm_command.md",
+    input = "//helm:helm_command.bzl",
+    table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
+    tags = ["manual"],
+    deps = ["//helm:helm_command_bzl"],
+)
+
+stardoc(
+    name = "helm_import",
+    out = "src/helm_import.md",
+    input = "//helm:helm_import.bzl",
+    table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
+    tags = ["manual"],
+    deps = ["//helm:helm_import_bzl"],
+)
+
+stardoc(
+    name = "helm_install",
+    out = "src/helm_install.md",
+    input = "//helm:helm_install.bzl",
+    table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
+    tags = ["manual"],
+    deps = ["//helm:helm_install_bzl"],
+)
+
+stardoc(
+    name = "helm_lint",
+    out = "src/helm_lint.md",
+    input = "//helm:helm_lint.bzl",
+    table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
+    tags = ["manual"],
+    deps = ["//helm:helm_lint_bzl"],
+)
+
+stardoc(
+    name = "helm_oci_digest",
+    out = "src/helm_oci_digest.md",
+    input = "//helm:helm_oci_digest.bzl",
+    table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
+    tags = ["manual"],
+    deps = ["//helm:helm_oci_digest_bzl"],
+)
+
+stardoc(
+    name = "helm_package",
+    out = "src/helm_package.md",
+    input = "//helm:helm_package.bzl",
+    table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
+    tags = ["manual"],
+    deps = ["//helm:helm_package_bzl"],
+)
+
+stardoc(
+    name = "helm_package_info",
+    out = "src/helm_package_info.md",
+    input = "//helm:helm_package_info.bzl",
+    table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
+    tags = ["manual"],
+    deps = ["//helm:helm_package_info_bzl"],
+)
+
+stardoc(
+    name = "helm_plugin",
+    out = "src/helm_plugin.md",
+    input = "//helm:helm_plugin.bzl",
+    table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
+    tags = ["manual"],
+    deps = ["//helm:helm_plugin_bzl"],
+)
+
+stardoc(
+    name = "helm_push",
+    out = "src/helm_push.md",
+    input = "//helm:helm_push.bzl",
+    table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
+    tags = ["manual"],
+    deps = ["//helm:helm_push_bzl"],
+)
+
+stardoc(
+    name = "helm_template",
+    out = "src/helm_template.md",
+    input = "//helm:helm_template.bzl",
+    table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
+    tags = ["manual"],
+    deps = ["//helm:helm_template_bzl"],
+)
+
+stardoc(
+    name = "helm_toolchain",
+    out = "src/helm_toolchain.md",
+    input = "//helm:helm_toolchain.bzl",
+    table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
+    tags = ["manual"],
+    deps = ["//helm:helm_toolchain_bzl"],
 )
 
 mdbook(
     name = "book",
     srcs = glob(["src/**/*.md"]) + [
-        ":rules",
+        ":chart_file",
+        ":defs",
+        ":extensions",
+        ":helm_chart",
+        ":helm_command",
+        ":helm_import",
+        ":helm_install",
+        ":helm_lint",
+        ":helm_oci_digest",
+        ":helm_package",
+        ":helm_package_info",
+        ":helm_plugin",
+        ":helm_push",
+        ":helm_template",
+        ":helm_toolchain",
         ":settings",
     ],
     book = "book.toml",

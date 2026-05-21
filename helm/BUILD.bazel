@@ -1,7 +1,24 @@
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("//helm/private:current_toolchain.bzl", "current_helm_toolchain")
 
 exports_files(
-    glob(["**/*.bzl"]),
+    [
+        "chart_file.bzl",
+        "defs.bzl",
+        "extensions.bzl",
+        "helm_chart.bzl",
+        "helm_command.bzl",
+        "helm_import.bzl",
+        "helm_install.bzl",
+        "helm_lint.bzl",
+        "helm_oci_digest.bzl",
+        "helm_package_info.bzl",
+        "helm_package.bzl",
+        "helm_plugin.bzl",
+        "helm_push.bzl",
+        "helm_template.bzl",
+        "helm_toolchain.bzl",
+    ],
     visibility = ["//visibility:public"],
 )
 
@@ -24,4 +41,124 @@ filegroup(
         "//helm/private:bzl_srcs",
     ],
     visibility = ["//:__subpackages__"],
+)
+
+bzl_library(
+    name = "chart_file_bzl",
+    srcs = ["chart_file.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["//helm/private:bzl_lib"],
+)
+
+bzl_library(
+    name = "defs_bzl",
+    srcs = ["defs.bzl"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":chart_file_bzl",
+        ":extensions_bzl",
+        ":helm_chart_bzl",
+        ":helm_command_bzl",
+        ":helm_import_bzl",
+        ":helm_install_bzl",
+        ":helm_lint_bzl",
+        ":helm_oci_digest_bzl",
+        ":helm_package_bzl",
+        ":helm_package_info_bzl",
+        ":helm_plugin_bzl",
+        ":helm_push_bzl",
+        ":helm_template_bzl",
+        ":helm_toolchain_bzl",
+    ],
+)
+
+bzl_library(
+    name = "extensions_bzl",
+    srcs = ["extensions.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["//helm/private:bzl_lib"],
+)
+
+bzl_library(
+    name = "helm_chart_bzl",
+    srcs = ["helm_chart.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["//helm/private:bzl_lib"],
+)
+
+bzl_library(
+    name = "helm_command_bzl",
+    srcs = ["helm_command.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["//helm/private:bzl_lib"],
+)
+
+bzl_library(
+    name = "helm_import_bzl",
+    srcs = ["helm_import.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["//helm/private:bzl_lib"],
+)
+
+bzl_library(
+    name = "helm_install_bzl",
+    srcs = ["helm_install.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["//helm/private:bzl_lib"],
+)
+
+bzl_library(
+    name = "helm_lint_bzl",
+    srcs = ["helm_lint.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["//helm/private:bzl_lib"],
+)
+
+bzl_library(
+    name = "helm_oci_digest_bzl",
+    srcs = ["helm_oci_digest.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["//helm/private:bzl_lib"],
+)
+
+bzl_library(
+    name = "helm_package_info_bzl",
+    srcs = ["helm_package_info.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["//helm/private:bzl_lib"],
+)
+
+bzl_library(
+    name = "helm_package_bzl",
+    srcs = ["helm_package.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["//helm/private:bzl_lib"],
+)
+
+bzl_library(
+    name = "helm_plugin_bzl",
+    srcs = ["helm_plugin.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["//helm/private:bzl_lib"],
+)
+
+bzl_library(
+    name = "helm_push_bzl",
+    srcs = ["helm_push.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["//helm/private:bzl_lib"],
+)
+
+bzl_library(
+    name = "helm_template_bzl",
+    srcs = ["helm_template.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["//helm/private:bzl_lib"],
+)
+
+bzl_library(
+    name = "helm_toolchain_bzl",
+    srcs = ["helm_toolchain.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["//helm/private:bzl_lib"],
 )

@@ -12,6 +12,7 @@ bzl_library(
     name = "settings_bzl",
     srcs = glob(["*.bzl"]),
     deps = [
+        "//helm/private:bzl_lib",
         "@bazel_skylib//rules:common_settings",
     ],
 )

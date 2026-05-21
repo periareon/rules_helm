@@ -1,3 +1,4 @@
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load(":helm_utils.bzl", "stamp_build_setting")
 
 stamp_build_setting(name = "stamp")
@@ -6,4 +7,15 @@ filegroup(
     name = "bzl_srcs",
     srcs = glob(["**/*.bzl"]),
     visibility = ["//:__subpackages__"],
+)
+
+bzl_library(
+    name = "bzl_lib",
+    srcs = ["bzl_srcs"],
+    visibility = ["//helm:__subpackages__"],
+    deps = [
+        "@bazel_lib//lib:base64",
+        "@bazel_lib//lib:repo_utils",
+        "@bazel_skylib//rules:common_settings",
+    ],
 )
