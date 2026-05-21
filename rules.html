@@ -160,6 +160,7 @@
 <h2 id="rules"><a class="header" href="#rules">Rules</a></h2>
 <ul>
 <li><a href="#chart_file">chart_file</a></li>
+<li><a href="#helm_command">helm_command</a></li>
 <li><a href="#helm_import">helm_import</a></li>
 <li><a href="#helm_install">helm_install</a></li>
 <li><a href="#helm_lint_test">helm_lint_test</a></li>
@@ -214,6 +215,37 @@ chart_file(<a href="#chart_file-name">name</a>, <a href="#chart_file-api_version
 <tr><td style="text-align: left"><a id="chart_file-type"></a>type</td><td style="text-align: left">The chart type.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>"application"</code></td></tr>
 <tr><td style="text-align: left"><a id="chart_file-version"></a>version</td><td style="text-align: left">The chart version.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>"0.1.0"</code></td></tr>
 <tr><td style="text-align: left"><a id="chart_file-version_file"></a>version_file</td><td style="text-align: left">A file containing the chart version.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
+</tbody></table>
+</div>
+<p><a id="helm_command"></a></p>
+<h2 id="helm_command"><a class="header" href="#helm_command">helm_command</a></h2>
+<pre>
+load("@rules_helm//helm:defs.bzl", "helm_command")
+
+helm_command(<a href="#helm_command-name">name</a>, <a href="#helm_command-data">data</a>, <a href="#helm_command-command">command</a>, <a href="#helm_command-helm_opts">helm_opts</a>, <a href="#helm_command-install_name">install_name</a>, <a href="#helm_command-opts">opts</a>, <a href="#helm_command-package">package</a>, <a href="#helm_command-values">values</a>)
+</pre>
+<p>Produce an executable that invokes <code>helm</code> with an arbitrary subcommand. Useful for wrapping helm plugins (e.g. <a href="https://github.com/databus23/helm-diff">helm-diff</a>) without requiring a dedicated rule for each plugin.</p>
+<p>Example:</p>
+<pre><code class="language-python">load("@rules_helm//helm:defs.bzl", "helm_command")
+
+helm_command(
+    name = "my_chart.diff",
+    command = ["diff", "upgrade"],
+    install_name = "my-chart",
+    package = ":my_chart",
+)
+</code></pre>
+<p>Any helm plugin referenced by <code>command</code> must be registered in the active helm toolchain (see <a href="#helm_plugin">helm_plugin</a> / <a href="#helm_toolchain">helm_toolchain</a>).</p>
+<p><strong>ATTRIBUTES</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="helm_command-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm_command-data"></a>data</td><td style="text-align: left">Additional data to pass to the helm invocation.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_command-command"></a>command</td><td style="text-align: left">Subcommand tokens placed between <code>helm_opts</code> and <code>opts</code> (e.g. <code>["diff", "upgrade"]</code>).</td><td style="text-align: left">List of strings</td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm_command-helm_opts"></a>helm_opts</td><td style="text-align: left">Additional arguments to pass to <code>helm</code> before the subcommand.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_command-install_name"></a>install_name</td><td style="text-align: left">Release name appended as a positional after <code>opts</code>. Omitted when unset.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_command-opts"></a>opts</td><td style="text-align: left">Additional arguments to pass after the subcommand.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_command-package"></a>package</td><td style="text-align: left">Optional helm package. When set, its chart path is appended as the final positional argument.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_command-values"></a>values</td><td style="text-align: left">Values files to pass to the subcommand via <code>--values</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
 </tbody></table>
 </div>
 <p><a id="helm_import"></a></p>
