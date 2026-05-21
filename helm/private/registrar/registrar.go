@@ -70,6 +70,7 @@ func main() {
 	rawChartPath := flag.String("chart", "", "Path to Helm .tgz file")
 	rawMetadataPath := flag.String("metadata", "", "Path to the chart metadata JSON file (with `created` field)")
 	registryURL := flag.String("registry_url", "", "URL of registry to upload helm chart")
+	rawRegistryURLFile := flag.String("registry_url_file", "", "Path to a file containing the URL of registry to upload helm chart")
 	rawLoginURL := flag.String("login_url", "", "URL of registry to login to.")
 	pushCmd := flag.String("push_cmd", "push", "Command to publish helm chart.")
 	rawImagePushers := flag.String("image_pushers", "", "Comma-separated list of image pusher executables")
@@ -79,8 +80,27 @@ func main() {
 	helmArgs := flag.CommandLine.Args()
 
 	// Check required arguments
-	if *rawHelmPath == "" || *rawChartPath == "" || *rawMetadataPath == "" || *registryURL == "" {
-		log.Fatalf("Missing required arguments: helm, chart, metadata, registry_url")
+	if *rawHelmPath == "" || *rawChartPath == "" || *rawMetadataPath == "" {
+		log.Fatalf("Missing required arguments: helm, chart, metadata")
+	}
+	if *registryURL != "" && *rawRegistryURLFile != "" {
+		log.Fatalf("`registry_url` and `registry_url_file` are mutually exclusive; only one may be specified")
+	}
+	if *registryURL == "" && *rawRegistryURLFile == "" {
+		log.Fatalf("Missing required argument: either `registry_url` or `registry_url_file` must be specified")
+	}
+
+	if *rawRegistryURLFile != "" {
+		registryURLFilePath := helm_utils.GetRunfile(*rawRegistryURLFile)
+		contents, err := os.ReadFile(registryURLFilePath)
+		if err != nil {
+			log.Fatalf("Failed to read registry_url_file %q: %v", registryURLFilePath, err)
+		}
+		registryURLValue := strings.TrimSpace(string(contents))
+		if registryURLValue == "" {
+			log.Fatalf("registry_url_file %q is empty", registryURLFilePath)
+		}
+		registryURL = &registryURLValue
 	}
 
 	helmPath := helm_utils.GetRunfile(*rawHelmPath)
