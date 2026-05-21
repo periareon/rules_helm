@@ -30,6 +30,24 @@ def _find_modules(module_ctx):
 
     return root, rules_module
 
+def _helm_url(version, platform):
+    """Return the URL and compression for a helm binary."""
+    if platform.startswith("windows"):
+        compression = "zip"
+    else:
+        compression = "tar.gz"
+
+    url_platform = platform
+    if url_platform == "linux-i386":
+        url_platform = "linux-386"
+
+    urls = [
+        template.replace("{version}", version).replace("{platform}", url_platform).replace("{compression}", compression)
+        for template in DEFAULT_HELM_URL_TEMPLATES
+    ]
+
+    return urls, url_platform
+
 def _helm_impl(module_ctx):
     root_mod, rules_mod = _find_modules(module_ctx)
 
@@ -38,10 +56,12 @@ def _helm_impl(module_ctx):
         host_tools = rules_mod.tags.host_tools
 
     plugins = root_mod.tags.plugin
+    toolchains = root_mod.tags.toolchain
 
-    # Create plugin repos and build a map of platform -> plugin labels.
-    platform_plugins = {}
+    # Create plugin repos and build a map of name -> {platform -> label}.
+    plugin_by_name = {}
     for plugin_attrs in plugins:
+        per_platform = {}
         for platform, integrity in plugin_attrs.integrity.items():
             plugin_repo_name = "helm_plugin_{}_{}".format(
                 plugin_attrs.name,
@@ -60,69 +80,114 @@ def _helm_impl(module_ctx):
                 yaml = plugin_attrs.yaml,
             )
 
-            if platform not in platform_plugins:
-                platform_plugins[platform] = []
-            platform_plugins[platform].append(
-                "@{}//:{}".format(plugin_repo_name, plugin_attrs.name),
-            )
+            per_platform[platform] = "@{}//:{}".format(plugin_repo_name, plugin_attrs.name)
 
-    toolchain_names = []
-    toolchain_labels = {}
-    target_compatible_with = {}
-    exec_compatible_with = {}
-    target_settings = {}
+        plugin_by_name[plugin_attrs.name] = per_platform
 
-    for version, available in HELM_VERSIONS.items():
+    # --- Named toolchains ---
+
+    created_hubs = {}
+    for tc_attrs in toolchains:
+        tc_name = tc_attrs.name
+        hub_name = "{}_toolchains".format(tc_name)
+
+        if hub_name in created_hubs:
+            fail("Duplicate helm.toolchain name: \"{}\"".format(tc_name))
+
+        for pname in tc_attrs.plugins:
+            if pname not in plugin_by_name:
+                fail("helm.toolchain(name = \"{}\") references unknown plugin \"{}\"".format(tc_name, pname))
+
+        version = DEFAULT_HELM_VERSION
+        available = HELM_VERSIONS[version]
+
+        tc_toolchain_names = []
+        tc_toolchain_labels = {}
+        tc_target_compatible_with = {}
+        tc_exec_compatible_with = {}
+        tc_target_settings = {}
+
         for platform, integrity in available.items():
-            if platform.startswith("windows"):
-                compression = "zip"
-            else:
-                compression = "tar.gz"
+            platform_plugin_labels = []
+            skip = False
+            for pname in tc_attrs.plugins:
+                label = plugin_by_name[pname].get(platform)
+                if label == None:
+                    skip = True
+                    break
+                platform_plugin_labels.append(label)
 
-            # The URLs for linux-i386 artifacts are actually published under
-            # a different name. The check below accounts for this.
-            # https://github.com/periareon/rules_helm/issues/76
-            url_platform = platform
-            if url_platform == "linux-i386":
-                url_platform = "linux-386"
+            if skip:
+                continue
 
-            toolchain_repo_name = "helm_toolchains__{}_{}_bin".format(version, platform.replace("-", "_"))
+            urls, url_platform = _helm_url(version, platform)
 
+            toolchain_repo_name = "{}__{}_{}_{}_bin".format(tc_name, version, platform.replace("-", "_"), "helm")
             helm_toolchain_repository(
                 name = toolchain_repo_name,
-                urls = [
-                    template.replace(
-                        "{version}",
-                        version,
-                    ).replace(
-                        "{platform}",
-                        url_platform,
-                    ).replace(
-                        "{compression}",
-                        compression,
-                    )
-                    for template in DEFAULT_HELM_URL_TEMPLATES
-                ],
+                urls = urls,
                 integrity = integrity,
                 strip_prefix = url_platform,
                 platform = platform,
-                plugins = platform_plugins.get(platform, []),
+                plugins = platform_plugin_labels,
             )
 
-            toolchain_names.append(toolchain_repo_name)
-            toolchain_labels[toolchain_repo_name] = "@{}".format(toolchain_repo_name)
-            target_compatible_with[toolchain_repo_name] = []
-            exec_compatible_with[toolchain_repo_name] = CONSTRAINTS[platform]
-            target_settings[toolchain_repo_name] = ["@rules_helm//helm/settings:version_{}".format(version)]
+            tc_toolchain_names.append(toolchain_repo_name)
+            tc_toolchain_labels[toolchain_repo_name] = "@{}".format(toolchain_repo_name)
+            tc_target_compatible_with[toolchain_repo_name] = []
+            tc_exec_compatible_with[toolchain_repo_name] = CONSTRAINTS[platform]
+            tc_target_settings[toolchain_repo_name] = ["@rules_helm//helm/settings:version_{}".format(version)]
 
-    helm_toolchain_repository_hub(
-        name = "helm_toolchains",
-        toolchain_labels = toolchain_labels,
-        toolchain_names = toolchain_names,
-        exec_compatible_with = exec_compatible_with,
-        target_compatible_with = target_compatible_with,
-        target_settings = target_settings,
-    )
+        helm_toolchain_repository_hub(
+            name = hub_name,
+            toolchain_labels = tc_toolchain_labels,
+            toolchain_names = tc_toolchain_names,
+            exec_compatible_with = tc_exec_compatible_with,
+            target_compatible_with = tc_target_compatible_with,
+            target_settings = tc_target_settings,
+        )
+        created_hubs[hub_name] = True
+
+    # --- Default toolchains (fallback when no toolchain tag claimed "helm_toolchains") ---
+
+    if "helm_toolchains" not in created_hubs:
+        toolchain_names = []
+        toolchain_labels = {}
+        target_compatible_with = {}
+        exec_compatible_with = {}
+        target_settings = {}
+
+        for version, available in HELM_VERSIONS.items():
+            for platform, integrity in available.items():
+                urls, url_platform = _helm_url(version, platform)
+
+                toolchain_repo_name = "helm_toolchains__{}_{}_bin".format(version, platform.replace("-", "_"))
+
+                helm_toolchain_repository(
+                    name = toolchain_repo_name,
+                    urls = urls,
+                    integrity = integrity,
+                    strip_prefix = url_platform,
+                    platform = platform,
+                    plugins = [],
+                )
+
+                toolchain_names.append(toolchain_repo_name)
+                toolchain_labels[toolchain_repo_name] = "@{}".format(toolchain_repo_name)
+                target_compatible_with[toolchain_repo_name] = []
+                exec_compatible_with[toolchain_repo_name] = CONSTRAINTS[platform]
+                target_settings[toolchain_repo_name] = ["@rules_helm//helm/settings:version_{}".format(version)]
+
+        helm_toolchain_repository_hub(
+            name = "helm_toolchains",
+            toolchain_labels = toolchain_labels,
+            toolchain_names = toolchain_names,
+            exec_compatible_with = exec_compatible_with,
+            target_compatible_with = target_compatible_with,
+            target_settings = target_settings,
+        )
+
+    # --- Host tools ---
 
     for host_tools_attrs in host_tools:
         helm_host_alias_repository(
@@ -162,12 +227,13 @@ use_repo(helm, "helm")
 
 _plugin = tag_class(
     doc = """\
-An extension tag for declaring Helm plugins to include in all toolchains.
+An extension tag for declaring Helm plugins.
 
-Plugins are downloaded per-platform and wired into each generated helm_toolchain.
-Only platforms listed in `integrity` (and `url_templates`) will receive the plugin.
+Plugins are downloaded per-platform and made available to `helm.toolchain()` tags \
+that reference them by name. Only platforms listed in `integrity` (and `url_templates`) \
+will receive the plugin.
 
-An example of declaring the helm-diff plugin:
+An example of declaring the helm-diff plugin and wiring it into a named toolchain:
 
 ```python
 helm = use_extension("@rules_helm//helm:extensions.bzl", "helm")
@@ -178,16 +244,19 @@ helm.plugin(
     strip_prefix = "diff",
     url_templates = {
         "darwin-arm64": ["https://github.com/databus23/helm-diff/releases/download/v{version}/helm-diff-macos-arm64.tgz"],
-        "darwin-amd64": ["https://github.com/databus23/helm-diff/releases/download/v{version}/helm-diff-macos-amd64.tgz"],
         "linux-amd64": ["https://github.com/databus23/helm-diff/releases/download/v{version}/helm-diff-linux-amd64.tgz"],
-        "linux-arm64": ["https://github.com/databus23/helm-diff/releases/download/v{version}/helm-diff-linux-arm64.tgz"],
     },
     integrity = {
         "darwin-arm64": "sha256-KJmZ7wY3gAcWFzK5R9+TfQlaRfEXzJ7hDNRC8NgIDog=",
         "linux-amd64": "sha256-ToJjCrKyMxfAOeezsWYF95qKwPPSKHPg1G6pzZgN2o4=",
-        "linux-arm64": "sha256-4tu/93Bo2T7VYgYj6oHyTYah7UQAuRmE1jgvSAEfaaM=",
     },
 )
+helm.toolchain(
+    name = "with_diff",
+    plugins = ["diff"],
+)
+use_repo(helm, "helm", "helm_toolchains", "with_diff_toolchains")
+register_toolchains("@helm_toolchains//:all")
 ```
 """,
     attrs = {
@@ -217,10 +286,45 @@ helm.plugin(
     },
 )
 
+_toolchain = tag_class(
+    doc = """\
+Define a named set of helm toolchains with specific plugins.
+
+Creates an independent hub repository `@{name}_toolchains` containing toolchains \
+for the default helm version with the specified plugins baked in. Only platforms \
+where all referenced plugins are available will have toolchains generated.
+
+The hub is **not** registered automatically — call `register_toolchains` explicitly, \
+or use a Starlark transition to override toolchain resolution.
+
+```python
+helm = use_extension("@rules_helm//helm:extensions.bzl", "helm")
+helm.plugin(name = "diff", ...)
+helm.toolchain(
+    name = "with_diff",
+    plugins = ["diff"],
+)
+use_repo(helm, "with_diff_toolchains")
+register_toolchains("@with_diff_toolchains//:all")
+```
+""",
+    attrs = {
+        "name": attr.string(
+            doc = "Name prefix for the hub repository. Produces `@{name}_toolchains`.",
+            mandatory = True,
+        ),
+        "plugins": attr.string_list(
+            doc = "Plugin names (from `helm.plugin()` tags) to include in these toolchains.",
+            default = [],
+        ),
+    },
+)
+
 helm = module_extension(
     implementation = _helm_impl,
     tag_classes = {
         "host_tools": _host_tools,
         "plugin": _plugin,
+        "toolchain": _toolchain,
     },
 )

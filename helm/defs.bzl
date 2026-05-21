@@ -10,13 +10,16 @@ load(
     _helm_chart = "helm_chart",
 )
 load(
+    ":helm_command.bzl",
+    _helm_command = "helm_command",
+)
+load(
     ":helm_import.bzl",
     _helm_import = "helm_import",
     _helm_import_repository = "helm_import_repository",
 )
 load(
     ":helm_install.bzl",
-    _helm_command = "helm_command",
     _helm_install = "helm_install",
     _helm_uninstall = "helm_uninstall",
     _helm_upgrade = "helm_upgrade",

@@ -1,0 +1,21 @@
+load("//helm:defs.bzl", "helm_command")
+load("//tests/command:defs.bzl", "helm_command_output", "helm_command_output_test")
+
+helm_command(
+    name = "plugin_list",
+    command = [
+        "plugin",
+        "list",
+    ],
+)
+
+helm_command_output(
+    name = "plugin_list_output",
+    command = ":plugin_list",
+)
+
+helm_command_output_test(
+    name = "plugin_list_test",
+    expected_pattern = "cm-push",
+    output = ":plugin_list_output",
+)

@@ -3,7 +3,6 @@ load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load(
     "//helm:defs.bzl",
     "helm_chart",
-    "helm_command",
     "helm_lint_test",
     "helm_push",
     "helm_template",
@@ -46,20 +45,6 @@ helm_template(
 helm_template_test(
     name = "simple_template_test",
     chart = ":simple",
-)
-
-# Builds (but does not run) a helm_command target that wraps `helm diff upgrade`.
-# This exercises the helm_command rule's analysis path; the helm-diff plugin
-# itself is not bundled with the toolchain in this test.
-helm_command(
-    name = "simple.diff",
-    command = [
-        "diff",
-        "upgrade",
-    ],
-    install_name = "simple",
-    package = ":simple",
-    tags = ["manual"],
 )
 
 # Baseline regression test: locks the OCI manifest digest computed from this
