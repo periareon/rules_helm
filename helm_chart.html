@@ -1,0 +1,266 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>helm_chart - rules_helm</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">rules_helm</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/periareon/rules_helm/" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <!-- Generated with Stardoc: http://skydoc.bazel.build -->
+<h1 id="helm_chart-rule"><a class="header" href="#helm_chart-rule">helm_chart rule.</a></h1>
+<h2 id="functions"><a class="header" href="#functions">Functions</a></h2>
+<ul>
+<li><a href="#helm_chart">helm_chart</a></li>
+</ul>
+<p><a id="helm_chart"></a></p>
+<h2 id="helm_chart"><a class="header" href="#helm_chart">helm_chart</a></h2>
+<pre>
+load("@rules_helm//helm:helm_chart.bzl", "helm_chart")
+
+helm_chart(*, <a href="#helm_chart-name">name</a>, <a href="#helm_chart-chart">chart</a>, <a href="#helm_chart-chart_json">chart_json</a>, <a href="#helm_chart-crds">crds</a>, <a href="#helm_chart-values">values</a>, <a href="#helm_chart-values_json">values_json</a>, <a href="#helm_chart-substitutions">substitutions</a>, <a href="#helm_chart-templates">templates</a>, <a href="#helm_chart-schema">schema</a>,
+           <a href="#helm_chart-files">files</a>, <a href="#helm_chart-images">images</a>, <a href="#helm_chart-deps">deps</a>, <a href="#helm_chart-install_name">install_name</a>, <a href="#helm_chart-registry_url">registry_url</a>, <a href="#helm_chart-registry_url_file">registry_url_file</a>, <a href="#helm_chart-login_url">login_url</a>, <a href="#helm_chart-push_cmd">push_cmd</a>,
+           <a href="#helm_chart-helm_opts">helm_opts</a>, <a href="#helm_chart-install_opts">install_opts</a>, <a href="#helm_chart-package_opts">package_opts</a>, <a href="#helm_chart-push_opts">push_opts</a>, <a href="#helm_chart-upgrade_opts">upgrade_opts</a>, <a href="#helm_chart-uninstall_opts">uninstall_opts</a>, <a href="#helm_chart-data">data</a>,
+           <a href="#helm_chart-stamp">stamp</a>, <a href="#helm_chart-kwargs">**kwargs</a>)
+</pre>
+<p>Rules for producing a helm package and some convenience targets.</p>
+<div class="table-wrapper"><table><thead><tr><th>target</th><th>rule</th><th>condition</th></tr></thead><tbody>
+<tr><td><code>{name}</code></td><td><a href="#helm_package">helm_package</a></td><td><code>None</code></td></tr>
+<tr><td><code>{name}.push_images</code></td><td><a href="#helm_push_images">helm_push_images</a></td><td><code>None</code></td></tr>
+<tr><td><code>{name}.oci_digest</code></td><td><a href="#helm_oci_digest">helm_oci_digest</a></td><td><code>None</code></td></tr>
+<tr><td><code>{name}.push_registry</code></td><td><a href="#helm_push">helm_push</a> (<code>include_images = False</code>)</td><td><code>registry_url</code> or <code>registry_url_file</code> is defined.</td></tr>
+<tr><td><code>{name}.push</code></td><td><a href="#helm_push">helm_push</a> (<code>include_images = True</code>)</td><td><code>registry_url</code> or <code>registry_url_file</code> is defined.</td></tr>
+<tr><td><code>{name}.install</code></td><td><a href="#helm_install">helm_install</a></td><td><code>None</code></td></tr>
+<tr><td><code>{name}.uninstall</code></td><td><a href="#helm_uninstall">helm_uninstall</a></td><td><code>None</code></td></tr>
+<tr><td><code>{name}.upgrade</code></td><td><a href="#helm_upgrade">helm_upgrade</a></td><td><code>None</code></td></tr>
+</tbody></table>
+</div>
+<p><strong>PARAMETERS</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Default Value</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="helm_chart-name"></a>name</td><td style="text-align: left">The name of the <a href="#helm_package">helm_package</a> target.</td><td style="text-align: left">none</td></tr>
+<tr><td style="text-align: left"><a id="helm_chart-chart"></a>chart</td><td style="text-align: left">The path to the chart directory. Defaults to <code>Chart.yaml</code>.</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_chart-chart_json"></a>chart_json</td><td style="text-align: left">The json encoded contents of <code>Chart.yaml</code>.</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_chart-crds"></a>crds</td><td style="text-align: left">A list of crd files to include in the package.</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_chart-values"></a>values</td><td style="text-align: left">The path to the values file. Defaults to <code>values.yaml</code>.</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_chart-values_json"></a>values_json</td><td style="text-align: left">The json encoded contents of <code>values.yaml</code>.</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_chart-substitutions"></a>substitutions</td><td style="text-align: left">A dictionary of substitutions to apply to <code>values.yaml</code>.</td><td style="text-align: left"><code>{}</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_chart-templates"></a>templates</td><td style="text-align: left">A list of template files to include in the package.</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_chart-schema"></a>schema</td><td style="text-align: left">A JSON Schema file for values. Defaults to <code>values.schema.json</code>.</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_chart-files"></a>files</td><td style="text-align: left">Files accessed in templates via the <a href="https://helm.sh/docs/chart_template_guide/accessing_files/"><code>.Files</code> api</a>.</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_chart-images"></a>images</td><td style="text-align: left">A list of <a href="https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags">oci_push</a> or <a href="https://github.com/bazel-contrib/rules_img">image_push</a> targets</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_chart-deps"></a>deps</td><td style="text-align: left">A list of helm package dependencies.</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_chart-install_name"></a>install_name</td><td style="text-align: left">The <code>helm install</code> name to use. <code>name</code> will be used if unset.</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_chart-registry_url"></a>registry_url</td><td style="text-align: left">The registry url for the helm chart. <code>{name}.push_registry</code> is only defined when a value is passed here. Mutually exclusive with <code>registry_url_file</code>.</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_chart-registry_url_file"></a>registry_url_file</td><td style="text-align: left">A file containing the registry url for the helm chart. <code>{name}.push_registry</code> is only defined when a value is passed here. Mutually exclusive with <code>registry_url</code>.</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_chart-login_url"></a>login_url</td><td style="text-align: left">The registry url to log into for publishing helm charts.</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_chart-push_cmd"></a>push_cmd</td><td style="text-align: left">An alternative command to <code>push</code> for publishing helm charts.</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_chart-helm_opts"></a>helm_opts</td><td style="text-align: left">Additional options to pass to helm.</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_chart-install_opts"></a>install_opts</td><td style="text-align: left">Additional options to pass to <code>helm install</code>.</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_chart-package_opts"></a>package_opts</td><td style="text-align: left">Additional options to pass to <code>helm package</code>.</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_chart-push_opts"></a>push_opts</td><td style="text-align: left">Additional options to pass to <code>helm push</code>.</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_chart-upgrade_opts"></a>upgrade_opts</td><td style="text-align: left">Additional options to pass to <code>helm upgrade</code>.</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_chart-uninstall_opts"></a>uninstall_opts</td><td style="text-align: left">Additional options to pass to <code>helm uninstall</code>.</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_chart-data"></a>data</td><td style="text-align: left">Additional runtime data to pass to the helm install, upgrade, and uninstall targets.</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_chart-stamp"></a>stamp</td><td style="text-align: left">Whether to encode build information into the helm chart.</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_chart-kwargs"></a>kwargs</td><td style="text-align: left">Additional keyword arguments for <code>helm_package</code>.</td><td style="text-align: left">none</td></tr>
+</tbody></table>
+</div>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="rules.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="helm_command.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="rules.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="helm_command.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

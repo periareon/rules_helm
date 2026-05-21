@@ -175,442 +175,60 @@
     toolchains = ["@rules_helm//helm:current_toolchain"],
 )
 </code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="helm-rules"><a class="header" href="#helm-rules">Helm Rules</a></h1>
+<ul>
+<li><a href="./chart_file.html#chart_content">chart_content</a></li>
+<li><a href="./chart_file.html#chart_file">chart_file</a></li>
+<li><a href="./helm_chart.html#helm_chart">helm_chart</a></li>
+<li><a href="./helm_command.html#helm_command">helm_command</a></li>
+<li><a href="./helm_import.html#helm_import">helm_import</a></li>
+<li><a href="./helm_install.html#helm_install">helm_install</a></li>
+<li><a href="./helm_lint.html#helm_lint_aspect">helm_lint_aspect</a></li>
+<li><a href="./helm_lint.html#helm_lint_test">helm_lint_test</a></li>
+<li><a href="./helm_oci_digest.html#helm_oci_digest">helm_oci_digest</a></li>
+<li><a href="./helm_package.html#helm_package">helm_package</a></li>
+<li><a href="./helm_plugin.html#helm_plugin">helm_plugin</a></li>
+<li><a href="./helm_push.html#helm_push_images">helm_push_images</a></li>
+<li><a href="./helm_push.html#helm_push_registry">helm_push_registry</a></li>
+<li><a href="./helm_push.html#helm_push">helm_push</a></li>
+<li><a href="./helm_template.html#helm_template_test">helm_template_test</a></li>
+<li><a href="./helm_template.html#helm_template">helm_template</a></li>
+<li><a href="./helm_toolchain.html#helm_toolchain">helm_toolchain</a></li>
+<li><a href="./helm_install.html#helm_uninstall">helm_uninstall</a></li>
+<li><a href="./helm_install.html#helm_upgrade">helm_upgrade</a></li>
+<li><a href="./helm_package_info.html#HelmPackageInfo">HelmPackageInfo</a></li>
+</ul>
 <div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
-<h1 id="bazel-rules-for-helm"><a class="header" href="#bazel-rules-for-helm">Bazel rules for Helm.</a></h1>
-<h2 id="rules"><a class="header" href="#rules">Rules</a></h2>
-<ul>
-<li><a href="rules.html#chart_file">chart_file</a></li>
-<li><a href="rules.html#helm_command">helm_command</a></li>
-<li><a href="rules.html#helm_import">helm_import</a></li>
-<li><a href="rules.html#helm_install">helm_install</a></li>
-<li><a href="rules.html#helm_lint_test">helm_lint_test</a></li>
-<li><a href="rules.html#helm_oci_digest">helm_oci_digest</a></li>
-<li><a href="rules.html#helm_package">helm_package</a></li>
-<li><a href="rules.html#helm_plugin">helm_plugin</a></li>
-<li><a href="rules.html#helm_push">helm_push</a></li>
-<li><a href="rules.html#helm_push_images">helm_push_images</a></li>
-<li><a href="rules.html#helm_push_registry">helm_push_registry</a></li>
-<li><a href="rules.html#helm_template">helm_template</a></li>
-<li><a href="rules.html#helm_template_test">helm_template_test</a></li>
-<li><a href="rules.html#helm_toolchain">helm_toolchain</a></li>
-<li><a href="rules.html#helm_uninstall">helm_uninstall</a></li>
-<li><a href="rules.html#helm_upgrade">helm_upgrade</a></li>
-</ul>
-<h2 id="providers"><a class="header" href="#providers">Providers</a></h2>
-<ul>
-<li><a href="rules.html#HelmOCIDigestInfo">HelmOCIDigestInfo</a></li>
-<li><a href="rules.html#HelmPackageInfo">HelmPackageInfo</a></li>
-</ul>
+<h1 id="helm_chart-rule"><a class="header" href="#helm_chart-rule">helm_chart rule.</a></h1>
 <h2 id="functions"><a class="header" href="#functions">Functions</a></h2>
 <ul>
-<li><a href="rules.html#chart_content">chart_content</a></li>
-<li><a href="rules.html#helm_chart">helm_chart</a></li>
+<li><a href="helm_chart.html#helm_chart">helm_chart</a></li>
 </ul>
-<h2 id="aspects"><a class="header" href="#aspects">Aspects</a></h2>
-<ul>
-<li><a href="rules.html#helm_lint_aspect">helm_lint_aspect</a></li>
-</ul>
-<h2 id="repository-rules"><a class="header" href="#repository-rules">Repository Rules</a></h2>
-<ul>
-<li><a href="rules.html#helm_import_repository">helm_import_repository</a></li>
-</ul>
-<p><a id="chart_file"></a></p>
-<h2 id="chart_file"><a class="header" href="#chart_file">chart_file</a></h2>
-<pre>
-load("@rules_helm//helm:defs.bzl", "chart_file")
-
-chart_file(<a href="rules.html#chart_file-name">name</a>, <a href="rules.html#chart_file-api_version">api_version</a>, <a href="rules.html#chart_file-app_version">app_version</a>, <a href="rules.html#chart_file-app_version_file">app_version_file</a>, <a href="rules.html#chart_file-chart_name">chart_name</a>, <a href="rules.html#chart_file-description">description</a>, <a href="rules.html#chart_file-icon">icon</a>, <a href="rules.html#chart_file-type">type</a>,
-           <a href="rules.html#chart_file-version">version</a>, <a href="rules.html#chart_file-version_file">version_file</a>)
-</pre>
-<p>Create a Helm chart file.</p>
-<p><strong>ATTRIBUTES</strong></p>
-<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
-<tr><td style="text-align: left"><a id="chart_file-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
-<tr><td style="text-align: left"><a id="chart_file-api_version"></a>api_version</td><td style="text-align: left">The Helm API version</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>"v2"</code></td></tr>
-<tr><td style="text-align: left"><a id="chart_file-app_version"></a>app_version</td><td style="text-align: left">The version number of the application being deployed.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>"1.16.0"</code></td></tr>
-<tr><td style="text-align: left"><a id="chart_file-app_version_file"></a>app_version_file</td><td style="text-align: left">A file containing the version number of the application being deployed.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
-<tr><td style="text-align: left"><a id="chart_file-chart_name"></a>chart_name</td><td style="text-align: left">The name of the chart</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
-<tr><td style="text-align: left"><a id="chart_file-description"></a>description</td><td style="text-align: left">A descritpion of the chart.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>"A Helm chart for Kubernetes by Bazel."</code></td></tr>
-<tr><td style="text-align: left"><a id="chart_file-icon"></a>icon</td><td style="text-align: left">A URL to an SVG or PNG image to be used as an icon.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
-<tr><td style="text-align: left"><a id="chart_file-type"></a>type</td><td style="text-align: left">The chart type.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>"application"</code></td></tr>
-<tr><td style="text-align: left"><a id="chart_file-version"></a>version</td><td style="text-align: left">The chart version.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>"0.1.0"</code></td></tr>
-<tr><td style="text-align: left"><a id="chart_file-version_file"></a>version_file</td><td style="text-align: left">A file containing the chart version.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
-</tbody></table>
-</div>
-<p><a id="helm_command"></a></p>
-<h2 id="helm_command"><a class="header" href="#helm_command">helm_command</a></h2>
-<pre>
-load("@rules_helm//helm:defs.bzl", "helm_command")
-
-helm_command(<a href="rules.html#helm_command-name">name</a>, <a href="rules.html#helm_command-data">data</a>, <a href="rules.html#helm_command-command">command</a>, <a href="rules.html#helm_command-helm_opts">helm_opts</a>, <a href="rules.html#helm_command-install_name">install_name</a>, <a href="rules.html#helm_command-opts">opts</a>, <a href="rules.html#helm_command-package">package</a>, <a href="rules.html#helm_command-values">values</a>)
-</pre>
-<p>Produce an executable that invokes <code>helm</code> with an arbitrary subcommand. Useful for wrapping helm plugins (e.g. <a href="https://github.com/databus23/helm-diff">helm-diff</a>) without requiring a dedicated rule for each plugin.</p>
-<p>Example:</p>
-<pre><code class="language-python">load("@rules_helm//helm:defs.bzl", "helm_command")
-
-helm_command(
-    name = "my_chart.diff",
-    command = ["diff", "upgrade"],
-    install_name = "my-chart",
-    package = ":my_chart",
-)
-</code></pre>
-<p>Any helm plugin referenced by <code>command</code> must be registered in the active helm toolchain (see <a href="rules.html#helm_plugin">helm_plugin</a> / <a href="rules.html#helm_toolchain">helm_toolchain</a>).</p>
-<p><strong>ATTRIBUTES</strong></p>
-<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
-<tr><td style="text-align: left"><a id="helm_command-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
-<tr><td style="text-align: left"><a id="helm_command-data"></a>data</td><td style="text-align: left">Additional data to pass to the helm invocation.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_command-command"></a>command</td><td style="text-align: left">Subcommand tokens placed between <code>helm_opts</code> and <code>opts</code> (e.g. <code>["diff", "upgrade"]</code>).</td><td style="text-align: left">List of strings</td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
-<tr><td style="text-align: left"><a id="helm_command-helm_opts"></a>helm_opts</td><td style="text-align: left">Additional arguments to pass to <code>helm</code> before the subcommand.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_command-install_name"></a>install_name</td><td style="text-align: left">Release name appended as a positional after <code>opts</code>. Omitted when unset.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_command-opts"></a>opts</td><td style="text-align: left">Additional arguments to pass after the subcommand.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_command-package"></a>package</td><td style="text-align: left">Optional helm package. When set, its chart path is appended as the final positional argument.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_command-values"></a>values</td><td style="text-align: left">Values files to pass to the subcommand via <code>--values</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
-</tbody></table>
-</div>
-<p><a id="helm_import"></a></p>
-<h2 id="helm_import"><a class="header" href="#helm_import">helm_import</a></h2>
-<pre>
-load("@rules_helm//helm:defs.bzl", "helm_import")
-
-helm_import(<a href="rules.html#helm_import-name">name</a>, <a href="rules.html#helm_import-chart">chart</a>, <a href="rules.html#helm_import-version">version</a>)
-</pre>
-<p>A rule that allows pre-packaged Helm charts to be used within Bazel.</p>
-<p><strong>ATTRIBUTES</strong></p>
-<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
-<tr><td style="text-align: left"><a id="helm_import-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
-<tr><td style="text-align: left"><a id="helm_import-chart"></a>chart</td><td style="text-align: left">A Helm chart's <code>.tgz</code> file.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_import-version"></a>version</td><td style="text-align: left">The version fo the helm chart</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
-</tbody></table>
-</div>
-<p><a id="helm_install"></a></p>
-<h2 id="helm_install"><a class="header" href="#helm_install">helm_install</a></h2>
-<pre>
-load("@rules_helm//helm:defs.bzl", "helm_install")
-
-helm_install(<a href="rules.html#helm_install-name">name</a>, <a href="rules.html#helm_install-data">data</a>, <a href="rules.html#helm_install-helm_opts">helm_opts</a>, <a href="rules.html#helm_install-install_name">install_name</a>, <a href="rules.html#helm_install-opts">opts</a>, <a href="rules.html#helm_install-package">package</a>, <a href="rules.html#helm_install-values">values</a>)
-</pre>
-<p>Produce an executable for performing a <code>helm install</code> operation.</p>
-<p><strong>ATTRIBUTES</strong></p>
-<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
-<tr><td style="text-align: left"><a id="helm_install-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
-<tr><td style="text-align: left"><a id="helm_install-data"></a>data</td><td style="text-align: left">Additional data to pass to <code>helm install</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_install-helm_opts"></a>helm_opts</td><td style="text-align: left">Additional arguments to pass to <code>helm</code> during install.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_install-install_name"></a>install_name</td><td style="text-align: left">The name to use for the <code>helm install</code> command. The target name will be used if unset.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_install-opts"></a>opts</td><td style="text-align: left">Additional arguments to pass to <code>helm install</code>.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_install-package"></a>package</td><td style="text-align: left">The helm package to install.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
-<tr><td style="text-align: left"><a id="helm_install-values"></a>values</td><td style="text-align: left">Values files to pass to <code>helm install --values</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
-</tbody></table>
-</div>
-<p><a id="helm_lint_test"></a></p>
-<h2 id="helm_lint_test"><a class="header" href="#helm_lint_test">helm_lint_test</a></h2>
-<pre>
-load("@rules_helm//helm:defs.bzl", "helm_lint_test")
-
-helm_lint_test(<a href="rules.html#helm_lint_test-name">name</a>, <a href="rules.html#helm_lint_test-chart">chart</a>, <a href="rules.html#helm_lint_test-opts">opts</a>, <a href="rules.html#helm_lint_test-substitutions">substitutions</a>, <a href="rules.html#helm_lint_test-values">values</a>)
-</pre>
-<p>A rule for performing <code>helm lint</code> on a helm package</p>
-<p><strong>ATTRIBUTES</strong></p>
-<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
-<tr><td style="text-align: left"><a id="helm_lint_test-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
-<tr><td style="text-align: left"><a id="helm_lint_test-chart"></a>chart</td><td style="text-align: left">The helm package to run linting on.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
-<tr><td style="text-align: left"><a id="helm_lint_test-opts"></a>opts</td><td style="text-align: left">Additional arguments to pass to <code>helm lint</code>.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_lint_test-substitutions"></a>substitutions</td><td style="text-align: left">A dictionary of substitutions passed to `helm lint --set flag.</td><td style="text-align: left"><a href="https://bazel.build/rules/lib/core/dict">Dictionary: String -&gt; String</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>{}</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_lint_test-values"></a>values</td><td style="text-align: left">A list of files passed to `helm lint --values flag.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
-</tbody></table>
-</div>
-<p><a id="helm_oci_digest"></a></p>
-<h2 id="helm_oci_digest"><a class="header" href="#helm_oci_digest">helm_oci_digest</a></h2>
-<pre>
-load("@rules_helm//helm:defs.bzl", "helm_oci_digest")
-
-helm_oci_digest(<a href="rules.html#helm_oci_digest-name">name</a>, <a href="rules.html#helm_oci_digest-chart">chart</a>)
-</pre>
-<p>Compute the OCI manifest digest for a Helm chart at build time.</p>
-<p>This rule constructs the OCI manifest that <code>helm push</code> (Helm v4) would
-create and computes its sha256 digest. The .tgz file's mtime is used for
-the creation annotation, formatted in UTC to match the push side.</p>
-<p>The digest file contains a single line: <code>sha256:&lt;hex&gt;</code>.</p>
-<p><strong>ATTRIBUTES</strong></p>
-<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
-<tr><td style="text-align: left"><a id="helm_oci_digest-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
-<tr><td style="text-align: left"><a id="helm_oci_digest-chart"></a>chart</td><td style="text-align: left">A helm_chart target providing HelmPackageInfo.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
-</tbody></table>
-</div>
-<p><a id="helm_package"></a></p>
-<h2 id="helm_package"><a class="header" href="#helm_package">helm_package</a></h2>
-<pre>
-load("@rules_helm//helm:defs.bzl", "helm_package")
-
-helm_package(<a href="rules.html#helm_package-name">name</a>, <a href="rules.html#helm_package-deps">deps</a>, <a href="rules.html#helm_package-chart">chart</a>, <a href="rules.html#helm_package-chart_json">chart_json</a>, <a href="rules.html#helm_package-crds">crds</a>, <a href="rules.html#helm_package-files">files</a>, <a href="rules.html#helm_package-images">images</a>, <a href="rules.html#helm_package-opts">opts</a>, <a href="rules.html#helm_package-schema">schema</a>, <a href="rules.html#helm_package-stamp">stamp</a>, <a href="rules.html#helm_package-substitutions">substitutions</a>,
-             <a href="rules.html#helm_package-templates">templates</a>, <a href="rules.html#helm_package-values">values</a>, <a href="rules.html#helm_package-values_json">values_json</a>)
-</pre>
-<p>Rules for creating Helm chart packages.</p>
-<p><strong>ATTRIBUTES</strong></p>
-<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
-<tr><td style="text-align: left"><a id="helm_package-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
-<tr><td style="text-align: left"><a id="helm_package-deps"></a>deps</td><td style="text-align: left">Other helm packages this package depends on.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_package-chart"></a>chart</td><td style="text-align: left">The <code>Chart.yaml</code> file of the helm chart</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_package-chart_json"></a>chart_json</td><td style="text-align: left">The <code>Chart.yaml</code> file of the helm chart as a json object</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_package-crds"></a>crds</td><td style="text-align: left">All <a href="https://helm.sh/docs/chart_best_practices/custom_resource_definitions/">Custom Resource Definitions</a> associated with the current helm chart. E.g., the <code>./crds</code> directory</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_package-files"></a>files</td><td style="text-align: left">Files accessed in templates via the <a href="https://helm.sh/docs/chart_template_guide/accessing_files/"><code>.Files</code> api</a></td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_package-images"></a>images</td><td style="text-align: left">A list of                 <a href="https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags">oci_push</a> or                 <a href="https://github.com/bazel-contrib/rules_img">image_push</a>                 targets.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_package-opts"></a>opts</td><td style="text-align: left">Additional arguments to pass to <code>helm package</code> commands.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_package-schema"></a>schema</td><td style="text-align: left">The <code>values.schema.json</code> file for the current package.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_package-stamp"></a>stamp</td><td style="text-align: left">Whether to encode build information into the helm actions. Possible values:<br><br>- <code>stamp = 1</code>: Always stamp the build information into the helm actions, even in                 <a href="https://docs.bazel.build/versions/main/user-manual.html#flag--stamp">--nostamp</a> builds.                 This setting should be avoided, since it potentially kills remote caching for the target and                 any downstream actions that depend on it.<br><br>- <code>stamp = 0</code>: Always replace build information by constant values. This gives good build result caching.<br><br>- <code>stamp = -1</code>: Embedding of build information is controlled by the                 <a href="https://docs.bazel.build/versions/main/user-manual.html#flag--stamp">--[no]stamp</a> flag.<br><br>Stamped targets are not rebuilt unless their dependencies change.</td><td style="text-align: left">Integer</td><td style="text-align: left">optional</td><td style="text-align: left"><code>-1</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_package-substitutions"></a>substitutions</td><td style="text-align: left">A dictionary of substitutions to apply to the <code>values.yaml</code> file.</td><td style="text-align: left"><a href="https://bazel.build/rules/lib/core/dict">Dictionary: String -&gt; String</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>{}</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_package-templates"></a>templates</td><td style="text-align: left">All templates associated with the current helm chart. E.g., the <code>./templates</code> directory</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_package-values"></a>values</td><td style="text-align: left">The <code>values.yaml</code> file for the current package.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_package-values_json"></a>values_json</td><td style="text-align: left">The <code>values.yaml</code> file for the current package as a json object.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
-</tbody></table>
-</div>
-<p><a id="helm_plugin"></a></p>
-<h2 id="helm_plugin"><a class="header" href="#helm_plugin">helm_plugin</a></h2>
-<pre>
-load("@rules_helm//helm:defs.bzl", "helm_plugin")
-
-helm_plugin(<a href="rules.html#helm_plugin-name">name</a>, <a href="rules.html#helm_plugin-data">data</a>, <a href="rules.html#helm_plugin-plugin_name">plugin_name</a>, <a href="rules.html#helm_plugin-yaml">yaml</a>)
-</pre>
-<p>Define a <a href="https://helm.sh/docs/topics/plugins/">helm plugin</a>.</p>
-<p><strong>ATTRIBUTES</strong></p>
-<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
-<tr><td style="text-align: left"><a id="helm_plugin-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
-<tr><td style="text-align: left"><a id="helm_plugin-data"></a>data</td><td style="text-align: left">Additional files associated with the plugin.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_plugin-plugin_name"></a>plugin_name</td><td style="text-align: left">An explicit name for the plugin. If unset, <code>name</code> will be used.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_plugin-yaml"></a>yaml</td><td style="text-align: left">The yaml file representing the plugin</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
-</tbody></table>
-</div>
-<p><a id="helm_push"></a></p>
-<h2 id="helm_push"><a class="header" href="#helm_push">helm_push</a></h2>
-<pre>
-load("@rules_helm//helm:defs.bzl", "helm_push")
-
-helm_push(<a href="rules.html#helm_push-name">name</a>, <a href="rules.html#helm_push-env">env</a>, <a href="rules.html#helm_push-include_images">include_images</a>, <a href="rules.html#helm_push-login_url">login_url</a>, <a href="rules.html#helm_push-opts">opts</a>, <a href="rules.html#helm_push-package">package</a>, <a href="rules.html#helm_push-push_cmd">push_cmd</a>, <a href="rules.html#helm_push-registry_url">registry_url</a>,
-          <a href="rules.html#helm_push-registry_url_file">registry_url_file</a>)
-</pre>
-<p>Produce an executable for performing a helm push to a registry.</p>
-<p>Before performing <code>helm push</code> the executable produced will conditionally perform <a href="https://helm.sh/docs/helm/helm_registry_login/"><code>helm registry login</code></a>
-if the following environment variables are defined:</p>
-<ul>
-<li><code>HELM_REGISTRY_USERNAME</code>: The value of <code>--username</code>.</li>
-<li><code>HELM_REGISTRY_PASSWORD</code>/<code>HELM_REGISTRY_PASSWORD_FILE</code>: The value of <code>--password</code> or a file containing the <code>--password</code> value.</li>
-</ul>
-<p><strong>ATTRIBUTES</strong></p>
-<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
-<tr><td style="text-align: left"><a id="helm_push-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
-<tr><td style="text-align: left"><a id="helm_push-env"></a>env</td><td style="text-align: left">Environment variables to set when running this target.</td><td style="text-align: left"><a href="https://bazel.build/rules/lib/core/dict">Dictionary: String -&gt; String</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>{}</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_push-include_images"></a>include_images</td><td style="text-align: left">If True, images depended on by <code>package</code> will be pushed as well.</td><td style="text-align: left">Boolean</td><td style="text-align: left">optional</td><td style="text-align: left"><code>False</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_push-login_url"></a>login_url</td><td style="text-align: left">The URL of the registry to use for <code>helm login</code>. E.g. <code>my.registry.io</code></td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_push-opts"></a>opts</td><td style="text-align: left">Additional arguments to pass to <code>helm</code> commands.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_push-package"></a>package</td><td style="text-align: left">The helm package to push to the registry.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
-<tr><td style="text-align: left"><a id="helm_push-push_cmd"></a>push_cmd</td><td style="text-align: left">An alternative command to <code>push</code> for publishing the helm chart. E.g. <code>cm-push</code></td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_push-registry_url"></a>registry_url</td><td style="text-align: left">The registry URL at which to push the helm chart to. E.g. <code>oci://my.registry.io/chart-name</code>. Mutually exclusive with <code>registry_url_file</code>.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_push-registry_url_file"></a>registry_url_file</td><td style="text-align: left">A file containing the registry URL at which to push the helm chart to. Mutually exclusive with <code>registry_url</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
-</tbody></table>
-</div>
-<p><a id="helm_push_images"></a></p>
-<h2 id="helm_push_images"><a class="header" href="#helm_push_images">helm_push_images</a></h2>
-<pre>
-load("@rules_helm//helm:defs.bzl", "helm_push_images")
-
-helm_push_images(<a href="rules.html#helm_push_images-name">name</a>, <a href="rules.html#helm_push_images-env">env</a>, <a href="rules.html#helm_push_images-package">package</a>)
-</pre>
-<p>Produce an executable for pushing all oci images used by a helm chart.</p>
-<p><strong>ATTRIBUTES</strong></p>
-<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
-<tr><td style="text-align: left"><a id="helm_push_images-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
-<tr><td style="text-align: left"><a id="helm_push_images-env"></a>env</td><td style="text-align: left">Environment variables to set when running this target.</td><td style="text-align: left"><a href="https://bazel.build/rules/lib/core/dict">Dictionary: String -&gt; String</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>{}</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_push_images-package"></a>package</td><td style="text-align: left">The helm package to upload images from.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
-</tbody></table>
-</div>
-<p><a id="helm_push_registry"></a></p>
-<h2 id="helm_push_registry"><a class="header" href="#helm_push_registry">helm_push_registry</a></h2>
-<pre>
-load("@rules_helm//helm:defs.bzl", "helm_push_registry")
-
-helm_push_registry(<a href="rules.html#helm_push_registry-name">name</a>, <a href="rules.html#helm_push_registry-env">env</a>, <a href="rules.html#helm_push_registry-include_images">include_images</a>, <a href="rules.html#helm_push_registry-login_url">login_url</a>, <a href="rules.html#helm_push_registry-opts">opts</a>, <a href="rules.html#helm_push_registry-package">package</a>, <a href="rules.html#helm_push_registry-push_cmd">push_cmd</a>, <a href="rules.html#helm_push_registry-registry_url">registry_url</a>,
-                   <a href="rules.html#helm_push_registry-registry_url_file">registry_url_file</a>)
-</pre>
-<p>Produce an executable for performing a helm push to a registry.</p>
-<p>Before performing <code>helm push</code> the executable produced will conditionally perform <a href="https://helm.sh/docs/helm/helm_registry_login/"><code>helm registry login</code></a>
-if the following environment variables are defined:</p>
-<ul>
-<li><code>HELM_REGISTRY_USERNAME</code>: The value of <code>--username</code>.</li>
-<li><code>HELM_REGISTRY_PASSWORD</code>/<code>HELM_REGISTRY_PASSWORD_FILE</code>: The value of <code>--password</code> or a file containing the <code>--password</code> value.</li>
-</ul>
-<p><strong>ATTRIBUTES</strong></p>
-<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
-<tr><td style="text-align: left"><a id="helm_push_registry-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
-<tr><td style="text-align: left"><a id="helm_push_registry-env"></a>env</td><td style="text-align: left">Environment variables to set when running this target.</td><td style="text-align: left"><a href="https://bazel.build/rules/lib/core/dict">Dictionary: String -&gt; String</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>{}</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_push_registry-include_images"></a>include_images</td><td style="text-align: left">If True, images depended on by <code>package</code> will be pushed as well.</td><td style="text-align: left">Boolean</td><td style="text-align: left">optional</td><td style="text-align: left"><code>False</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_push_registry-login_url"></a>login_url</td><td style="text-align: left">The URL of the registry to use for <code>helm login</code>. E.g. <code>my.registry.io</code></td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_push_registry-opts"></a>opts</td><td style="text-align: left">Additional arguments to pass to <code>helm</code> commands.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_push_registry-package"></a>package</td><td style="text-align: left">The helm package to push to the registry.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
-<tr><td style="text-align: left"><a id="helm_push_registry-push_cmd"></a>push_cmd</td><td style="text-align: left">An alternative command to <code>push</code> for publishing the helm chart. E.g. <code>cm-push</code></td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_push_registry-registry_url"></a>registry_url</td><td style="text-align: left">The registry URL at which to push the helm chart to. E.g. <code>oci://my.registry.io/chart-name</code>. Mutually exclusive with <code>registry_url_file</code>.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_push_registry-registry_url_file"></a>registry_url_file</td><td style="text-align: left">A file containing the registry URL at which to push the helm chart to. Mutually exclusive with <code>registry_url</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
-</tbody></table>
-</div>
-<p><a id="helm_template"></a></p>
-<h2 id="helm_template"><a class="header" href="#helm_template">helm_template</a></h2>
-<pre>
-load("@rules_helm//helm:defs.bzl", "helm_template")
-
-helm_template(<a href="rules.html#helm_template-name">name</a>, <a href="rules.html#helm_template-out">out</a>, <a href="rules.html#helm_template-chart">chart</a>, <a href="rules.html#helm_template-opts">opts</a>, <a href="rules.html#helm_template-values">values</a>)
-</pre>
-<p>A rule for rendering helm chart templates to a file.</p>
-<p><strong>ATTRIBUTES</strong></p>
-<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
-<tr><td style="text-align: left"><a id="helm_template-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
-<tr><td style="text-align: left"><a id="helm_template-out"></a>out</td><td style="text-align: left">The output file to write the output from <code>helm template</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a>; <a href="https://bazel.build/reference/be/common-definitions#configurable-attributes">nonconfigurable</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_template-chart"></a>chart</td><td style="text-align: left">The helm package to resolve charts for.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
-<tr><td style="text-align: left"><a id="helm_template-opts"></a>opts</td><td style="text-align: left">Additional arguments to pass to <code>helm template</code>.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_template-values"></a>values</td><td style="text-align: left">Values files to pass to <code>helm template --values</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
-</tbody></table>
-</div>
-<p><a id="helm_template_test"></a></p>
-<h2 id="helm_template_test"><a class="header" href="#helm_template_test">helm_template_test</a></h2>
-<pre>
-load("@rules_helm//helm:defs.bzl", "helm_template_test")
-
-helm_template_test(<a href="rules.html#helm_template_test-name">name</a>, <a href="rules.html#helm_template_test-chart">chart</a>, <a href="rules.html#helm_template_test-installer">installer</a>, <a href="rules.html#helm_template_test-opts">opts</a>, <a href="rules.html#helm_template_test-template_patterns">template_patterns</a>, <a href="rules.html#helm_template_test-values">values</a>)
-</pre>
-<p>A test rule for rendering helm chart templates.</p>
-<p><strong>ATTRIBUTES</strong></p>
-<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
-<tr><td style="text-align: left"><a id="helm_template_test-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
-<tr><td style="text-align: left"><a id="helm_template_test-chart"></a>chart</td><td style="text-align: left">The helm package to resolve templates for. Mutually exclusive with <code>installer</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
-<tr><td style="text-align: left"><a id="helm_template_test-installer"></a>installer</td><td style="text-align: left">The <code>helm_install</code>/<code>helm_upgrade</code> target to resolve templates for. Mutually exclusive with <code>chart</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_template_test-opts"></a>opts</td><td style="text-align: left">Additional arguments to pass to <code>helm template</code>.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_template_test-template_patterns"></a>template_patterns</td><td style="text-align: left">A mapping of template paths to regex patterns required to match.</td><td style="text-align: left"><a href="https://bazel.build/rules/lib/core/dict">Dictionary: String -&gt; List of strings</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>{}</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_template_test-values"></a>values</td><td style="text-align: left">Values files to pass to <code>helm template --values</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
-</tbody></table>
-</div>
-<p><a id="helm_toolchain"></a></p>
-<h2 id="helm_toolchain"><a class="header" href="#helm_toolchain">helm_toolchain</a></h2>
-<pre>
-load("@rules_helm//helm:defs.bzl", "helm_toolchain")
-
-helm_toolchain(<a href="rules.html#helm_toolchain-name">name</a>, <a href="rules.html#helm_toolchain-helm">helm</a>, <a href="rules.html#helm_toolchain-plugins">plugins</a>)
-</pre>
-<p>A helm toolchain.</p>
-<p><strong>ATTRIBUTES</strong></p>
-<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
-<tr><td style="text-align: left"><a id="helm_toolchain-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
-<tr><td style="text-align: left"><a id="helm_toolchain-helm"></a>helm</td><td style="text-align: left">A helm binary</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
-<tr><td style="text-align: left"><a id="helm_toolchain-plugins"></a>plugins</td><td style="text-align: left">Additional plugins to make available to helm.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
-</tbody></table>
-</div>
-<p><a id="helm_uninstall"></a></p>
-<h2 id="helm_uninstall"><a class="header" href="#helm_uninstall">helm_uninstall</a></h2>
-<pre>
-load("@rules_helm//helm:defs.bzl", "helm_uninstall")
-
-helm_uninstall(<a href="rules.html#helm_uninstall-name">name</a>, <a href="rules.html#helm_uninstall-data">data</a>, <a href="rules.html#helm_uninstall-helm_opts">helm_opts</a>, <a href="rules.html#helm_uninstall-install_name">install_name</a>, <a href="rules.html#helm_uninstall-opts">opts</a>)
-</pre>
-<p>Produce an executable for performing a <code>helm uninstall</code> operation.</p>
-<p><strong>ATTRIBUTES</strong></p>
-<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
-<tr><td style="text-align: left"><a id="helm_uninstall-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
-<tr><td style="text-align: left"><a id="helm_uninstall-data"></a>data</td><td style="text-align: left">Additional data to pass to <code>helm uninstall</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_uninstall-helm_opts"></a>helm_opts</td><td style="text-align: left">Additional arguments to pass to <code>helm</code> during install.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_uninstall-install_name"></a>install_name</td><td style="text-align: left">The name to use for the <code>helm install</code> command. The target name will be used if unset.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_uninstall-opts"></a>opts</td><td style="text-align: left">Additional arguments to pass to <code>helm uninstall</code>.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
-</tbody></table>
-</div>
-<p><a id="helm_upgrade"></a></p>
-<h2 id="helm_upgrade"><a class="header" href="#helm_upgrade">helm_upgrade</a></h2>
-<pre>
-load("@rules_helm//helm:defs.bzl", "helm_upgrade")
-
-helm_upgrade(<a href="rules.html#helm_upgrade-name">name</a>, <a href="rules.html#helm_upgrade-data">data</a>, <a href="rules.html#helm_upgrade-helm_opts">helm_opts</a>, <a href="rules.html#helm_upgrade-install_name">install_name</a>, <a href="rules.html#helm_upgrade-opts">opts</a>, <a href="rules.html#helm_upgrade-package">package</a>, <a href="rules.html#helm_upgrade-values">values</a>)
-</pre>
-<p>Produce an executable for performing a <code>helm upgrade</code> operation.</p>
-<p><strong>ATTRIBUTES</strong></p>
-<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
-<tr><td style="text-align: left"><a id="helm_upgrade-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
-<tr><td style="text-align: left"><a id="helm_upgrade-data"></a>data</td><td style="text-align: left">Additional data to pass to <code>helm upgrade</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_upgrade-helm_opts"></a>helm_opts</td><td style="text-align: left">Additional arguments to pass to <code>helm</code> during upgrade.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_upgrade-install_name"></a>install_name</td><td style="text-align: left">The name to use for the <code>helm upgrade</code> command. The target name will be used if unset.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_upgrade-opts"></a>opts</td><td style="text-align: left">Additional arguments to pass to <code>helm upgrade</code>.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_upgrade-package"></a>package</td><td style="text-align: left">The helm package to upgrade.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
-<tr><td style="text-align: left"><a id="helm_upgrade-values"></a>values</td><td style="text-align: left">Values files to pass to <code>helm upgrade --values</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
-</tbody></table>
-</div>
-<p><a id="HelmOCIDigestInfo"></a></p>
-<h2 id="helmocidigestinfo"><a class="header" href="#helmocidigestinfo">HelmOCIDigestInfo</a></h2>
-<pre>
-load("@rules_helm//helm:defs.bzl", "HelmOCIDigestInfo")
-
-HelmOCIDigestInfo(<a href="rules.html#HelmOCIDigestInfo-digest">digest</a>)
-</pre>
-<p>OCI manifest digest for a Helm chart, computed at build time.</p>
-<p><strong>FIELDS</strong></p>
-<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th></tr></thead><tbody>
-<tr><td style="text-align: left"><a id="HelmOCIDigestInfo-digest"></a>digest</td><td style="text-align: left">File: Text file containing the OCI manifest digest (sha256:...)</td></tr>
-</tbody></table>
-</div>
-<p><a id="HelmPackageInfo"></a></p>
-<h2 id="helmpackageinfo"><a class="header" href="#helmpackageinfo">HelmPackageInfo</a></h2>
-<pre>
-load("@rules_helm//helm:defs.bzl", "HelmPackageInfo")
-
-HelmPackageInfo(<a href="rules.html#HelmPackageInfo-chart">chart</a>, <a href="rules.html#HelmPackageInfo-images">images</a>, <a href="rules.html#HelmPackageInfo-metadata">metadata</a>)
-</pre>
-<p>A provider for helm packages</p>
-<p><strong>FIELDS</strong></p>
-<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th></tr></thead><tbody>
-<tr><td style="text-align: left"><a id="HelmPackageInfo-chart"></a>chart</td><td style="text-align: left">File: The result of <code>helm package</code></td></tr>
-<tr><td style="text-align: left"><a id="HelmPackageInfo-images"></a>images</td><td style="text-align: left">list[Target]: A list of <a href="https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags">@rules_oci//oci:defs.bzl%oci_push</a> or <a href="https://github.com/bazel-contrib/rules_img">@rules_img//img:push.bzl%image_push</a> targets</td></tr>
-<tr><td style="text-align: left"><a id="HelmPackageInfo-metadata"></a>metadata</td><td style="text-align: left">File: A json encoded file containing metadata about the helm chart</td></tr>
-</tbody></table>
-</div>
-<p><a id="chart_content"></a></p>
-<h2 id="chart_content"><a class="header" href="#chart_content">chart_content</a></h2>
-<pre>
-load("@rules_helm//helm:defs.bzl", "chart_content")
-
-chart_content(<a href="rules.html#chart_content-name">name</a>, <a href="rules.html#chart_content-api_version">api_version</a>, <a href="rules.html#chart_content-description">description</a>, <a href="rules.html#chart_content-type">type</a>, <a href="rules.html#chart_content-version">version</a>, <a href="rules.html#chart_content-app_version">app_version</a>, <a href="rules.html#chart_content-icon">icon</a>)
-</pre>
-<p>A convenience wrapper for defining Chart.yaml files with <a href="rules.html#helm_package-chart_json">helm_package.chart_json</a>.</p>
-<p><strong>PARAMETERS</strong></p>
-<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Default Value</th></tr></thead><tbody>
-<tr><td style="text-align: left"><a id="chart_content-name"></a>name</td><td style="text-align: left">The name of the chart</td><td style="text-align: left">none</td></tr>
-<tr><td style="text-align: left"><a id="chart_content-api_version"></a>api_version</td><td style="text-align: left">The Helm API version</td><td style="text-align: left"><code>"v2"</code></td></tr>
-<tr><td style="text-align: left"><a id="chart_content-description"></a>description</td><td style="text-align: left">A descritpion of the chart.</td><td style="text-align: left"><code>"A Helm chart for Kubernetes by Bazel."</code></td></tr>
-<tr><td style="text-align: left"><a id="chart_content-type"></a>type</td><td style="text-align: left">The chart type.</td><td style="text-align: left"><code>"application"</code></td></tr>
-<tr><td style="text-align: left"><a id="chart_content-version"></a>version</td><td style="text-align: left">The chart version.</td><td style="text-align: left"><code>"0.1.0"</code></td></tr>
-<tr><td style="text-align: left"><a id="chart_content-app_version"></a>app_version</td><td style="text-align: left">The version number of the application being deployed.</td><td style="text-align: left"><code>"1.16.0"</code></td></tr>
-<tr><td style="text-align: left"><a id="chart_content-icon"></a>icon</td><td style="text-align: left">A URL to an SVG or PNG image to be used as an icon.</td><td style="text-align: left"><code>None</code></td></tr>
-</tbody></table>
-</div>
-<p><strong>RETURNS</strong></p>
-<p>str: A json encoded string which represents <code>Chart.yaml</code> contents.</p>
 <p><a id="helm_chart"></a></p>
 <h2 id="helm_chart"><a class="header" href="#helm_chart">helm_chart</a></h2>
 <pre>
-load("@rules_helm//helm:defs.bzl", "helm_chart")
+load("@rules_helm//helm:helm_chart.bzl", "helm_chart")
 
-helm_chart(*, <a href="rules.html#helm_chart-name">name</a>, <a href="rules.html#helm_chart-chart">chart</a>, <a href="rules.html#helm_chart-chart_json">chart_json</a>, <a href="rules.html#helm_chart-crds">crds</a>, <a href="rules.html#helm_chart-values">values</a>, <a href="rules.html#helm_chart-values_json">values_json</a>, <a href="rules.html#helm_chart-substitutions">substitutions</a>, <a href="rules.html#helm_chart-templates">templates</a>, <a href="rules.html#helm_chart-schema">schema</a>,
-           <a href="rules.html#helm_chart-files">files</a>, <a href="rules.html#helm_chart-images">images</a>, <a href="rules.html#helm_chart-deps">deps</a>, <a href="rules.html#helm_chart-install_name">install_name</a>, <a href="rules.html#helm_chart-registry_url">registry_url</a>, <a href="rules.html#helm_chart-registry_url_file">registry_url_file</a>, <a href="rules.html#helm_chart-login_url">login_url</a>, <a href="rules.html#helm_chart-push_cmd">push_cmd</a>,
-           <a href="rules.html#helm_chart-helm_opts">helm_opts</a>, <a href="rules.html#helm_chart-install_opts">install_opts</a>, <a href="rules.html#helm_chart-package_opts">package_opts</a>, <a href="rules.html#helm_chart-push_opts">push_opts</a>, <a href="rules.html#helm_chart-upgrade_opts">upgrade_opts</a>, <a href="rules.html#helm_chart-uninstall_opts">uninstall_opts</a>, <a href="rules.html#helm_chart-data">data</a>,
-           <a href="rules.html#helm_chart-stamp">stamp</a>, <a href="rules.html#helm_chart-kwargs">**kwargs</a>)
+helm_chart(*, <a href="helm_chart.html#helm_chart-name">name</a>, <a href="helm_chart.html#helm_chart-chart">chart</a>, <a href="helm_chart.html#helm_chart-chart_json">chart_json</a>, <a href="helm_chart.html#helm_chart-crds">crds</a>, <a href="helm_chart.html#helm_chart-values">values</a>, <a href="helm_chart.html#helm_chart-values_json">values_json</a>, <a href="helm_chart.html#helm_chart-substitutions">substitutions</a>, <a href="helm_chart.html#helm_chart-templates">templates</a>, <a href="helm_chart.html#helm_chart-schema">schema</a>,
+           <a href="helm_chart.html#helm_chart-files">files</a>, <a href="helm_chart.html#helm_chart-images">images</a>, <a href="helm_chart.html#helm_chart-deps">deps</a>, <a href="helm_chart.html#helm_chart-install_name">install_name</a>, <a href="helm_chart.html#helm_chart-registry_url">registry_url</a>, <a href="helm_chart.html#helm_chart-registry_url_file">registry_url_file</a>, <a href="helm_chart.html#helm_chart-login_url">login_url</a>, <a href="helm_chart.html#helm_chart-push_cmd">push_cmd</a>,
+           <a href="helm_chart.html#helm_chart-helm_opts">helm_opts</a>, <a href="helm_chart.html#helm_chart-install_opts">install_opts</a>, <a href="helm_chart.html#helm_chart-package_opts">package_opts</a>, <a href="helm_chart.html#helm_chart-push_opts">push_opts</a>, <a href="helm_chart.html#helm_chart-upgrade_opts">upgrade_opts</a>, <a href="helm_chart.html#helm_chart-uninstall_opts">uninstall_opts</a>, <a href="helm_chart.html#helm_chart-data">data</a>,
+           <a href="helm_chart.html#helm_chart-stamp">stamp</a>, <a href="helm_chart.html#helm_chart-kwargs">**kwargs</a>)
 </pre>
 <p>Rules for producing a helm package and some convenience targets.</p>
 <div class="table-wrapper"><table><thead><tr><th>target</th><th>rule</th><th>condition</th></tr></thead><tbody>
-<tr><td><code>{name}</code></td><td><a href="rules.html#helm_package">helm_package</a></td><td><code>None</code></td></tr>
-<tr><td><code>{name}.push_images</code></td><td><a href="rules.html#helm_push_images">helm_push_images</a></td><td><code>None</code></td></tr>
-<tr><td><code>{name}.oci_digest</code></td><td><a href="rules.html#helm_oci_digest">helm_oci_digest</a></td><td><code>None</code></td></tr>
-<tr><td><code>{name}.push_registry</code></td><td><a href="rules.html#helm_push">helm_push</a> (<code>include_images = False</code>)</td><td><code>registry_url</code> or <code>registry_url_file</code> is defined.</td></tr>
-<tr><td><code>{name}.push</code></td><td><a href="rules.html#helm_push">helm_push</a> (<code>include_images = True</code>)</td><td><code>registry_url</code> or <code>registry_url_file</code> is defined.</td></tr>
-<tr><td><code>{name}.install</code></td><td><a href="rules.html#helm_install">helm_install</a></td><td><code>None</code></td></tr>
-<tr><td><code>{name}.uninstall</code></td><td><a href="rules.html#helm_uninstall">helm_uninstall</a></td><td><code>None</code></td></tr>
-<tr><td><code>{name}.upgrade</code></td><td><a href="rules.html#helm_upgrade">helm_upgrade</a></td><td><code>None</code></td></tr>
+<tr><td><code>{name}</code></td><td><a href="helm_chart.html#helm_package">helm_package</a></td><td><code>None</code></td></tr>
+<tr><td><code>{name}.push_images</code></td><td><a href="helm_chart.html#helm_push_images">helm_push_images</a></td><td><code>None</code></td></tr>
+<tr><td><code>{name}.oci_digest</code></td><td><a href="helm_chart.html#helm_oci_digest">helm_oci_digest</a></td><td><code>None</code></td></tr>
+<tr><td><code>{name}.push_registry</code></td><td><a href="helm_chart.html#helm_push">helm_push</a> (<code>include_images = False</code>)</td><td><code>registry_url</code> or <code>registry_url_file</code> is defined.</td></tr>
+<tr><td><code>{name}.push</code></td><td><a href="helm_chart.html#helm_push">helm_push</a> (<code>include_images = True</code>)</td><td><code>registry_url</code> or <code>registry_url_file</code> is defined.</td></tr>
+<tr><td><code>{name}.install</code></td><td><a href="helm_chart.html#helm_install">helm_install</a></td><td><code>None</code></td></tr>
+<tr><td><code>{name}.uninstall</code></td><td><a href="helm_chart.html#helm_uninstall">helm_uninstall</a></td><td><code>None</code></td></tr>
+<tr><td><code>{name}.upgrade</code></td><td><a href="helm_chart.html#helm_upgrade">helm_upgrade</a></td><td><code>None</code></td></tr>
 </tbody></table>
 </div>
 <p><strong>PARAMETERS</strong></p>
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Default Value</th></tr></thead><tbody>
-<tr><td style="text-align: left"><a id="helm_chart-name"></a>name</td><td style="text-align: left">The name of the <a href="rules.html#helm_package">helm_package</a> target.</td><td style="text-align: left">none</td></tr>
+<tr><td style="text-align: left"><a id="helm_chart-name"></a>name</td><td style="text-align: left">The name of the <a href="helm_chart.html#helm_package">helm_package</a> target.</td><td style="text-align: left">none</td></tr>
 <tr><td style="text-align: left"><a id="helm_chart-chart"></a>chart</td><td style="text-align: left">The path to the chart directory. Defaults to <code>Chart.yaml</code>.</td><td style="text-align: left"><code>None</code></td></tr>
 <tr><td style="text-align: left"><a id="helm_chart-chart_json"></a>chart_json</td><td style="text-align: left">The json encoded contents of <code>Chart.yaml</code>.</td><td style="text-align: left"><code>None</code></td></tr>
 <tr><td style="text-align: left"><a id="helm_chart-crds"></a>crds</td><td style="text-align: left">A list of crd files to include in the package.</td><td style="text-align: left"><code>None</code></td></tr>
@@ -637,23 +255,73 @@ helm_chart(*, <a href="rules.html#helm_chart-name">name</a>, <a href="rules.html
 <tr><td style="text-align: left"><a id="helm_chart-stamp"></a>stamp</td><td style="text-align: left">Whether to encode build information into the helm chart.</td><td style="text-align: left"><code>None</code></td></tr>
 <tr><td style="text-align: left"><a id="helm_chart-kwargs"></a>kwargs</td><td style="text-align: left">Additional keyword arguments for <code>helm_package</code>.</td><td style="text-align: left">none</td></tr>
 </tbody></table>
-</div>
-<p><a id="helm_lint_aspect"></a></p>
-<h2 id="helm_lint_aspect"><a class="header" href="#helm_lint_aspect">helm_lint_aspect</a></h2>
+</div><div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
+<h1 id="helm_command-rules"><a class="header" href="#helm_command-rules">helm_command rules.</a></h1>
+<h2 id="rules"><a class="header" href="#rules">Rules</a></h2>
+<ul>
+<li><a href="helm_command.html#helm_command">helm_command</a></li>
+</ul>
+<p><a id="helm_command"></a></p>
+<h2 id="helm_command"><a class="header" href="#helm_command">helm_command</a></h2>
 <pre>
-load("@rules_helm//helm:defs.bzl", "helm_lint_aspect")
+load("@rules_helm//helm:helm_command.bzl", "helm_command")
 
-helm_lint_aspect()
+helm_command(<a href="helm_command.html#helm_command-name">name</a>, <a href="helm_command.html#helm_command-data">data</a>, <a href="helm_command.html#helm_command-command">command</a>, <a href="helm_command.html#helm_command-helm_opts">helm_opts</a>, <a href="helm_command.html#helm_command-install_name">install_name</a>, <a href="helm_command.html#helm_command-opts">opts</a>, <a href="helm_command.html#helm_command-package">package</a>, <a href="helm_command.html#helm_command-values">values</a>)
 </pre>
-<p>An aspect for running <code>helm lint</code> on helm package targets</p>
-<p><strong>ASPECT ATTRIBUTES</strong></p>
+<p>Produce an executable that invokes <code>helm</code> with an arbitrary subcommand. Useful for wrapping helm plugins (e.g. <a href="https://github.com/databus23/helm-diff">helm-diff</a>) without requiring a dedicated rule for each plugin.</p>
+<p>Example:</p>
+<pre><code class="language-python">load("@rules_helm//helm:defs.bzl", "helm_command")
+
+helm_command(
+    name = "my_chart.diff",
+    command = ["diff", "upgrade"],
+    install_name = "my-chart",
+    package = ":my_chart",
+)
+</code></pre>
+<p>Any helm plugin referenced by <code>command</code> must be registered in the active helm toolchain (see <a href="helm_command.html#helm_plugin">helm_plugin</a> / <a href="helm_command.html#helm_toolchain">helm_toolchain</a>).</p>
 <p><strong>ATTRIBUTES</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="helm_command-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm_command-data"></a>data</td><td style="text-align: left">Additional data to pass to the helm invocation.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_command-command"></a>command</td><td style="text-align: left">Subcommand tokens placed between <code>helm_opts</code> and <code>opts</code> (e.g. <code>["diff", "upgrade"]</code>).</td><td style="text-align: left">List of strings</td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm_command-helm_opts"></a>helm_opts</td><td style="text-align: left">Additional arguments to pass to <code>helm</code> before the subcommand.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_command-install_name"></a>install_name</td><td style="text-align: left">Release name appended as a positional after <code>opts</code>. Omitted when unset.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_command-opts"></a>opts</td><td style="text-align: left">Additional arguments to pass after the subcommand.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_command-package"></a>package</td><td style="text-align: left">Optional helm package. When set, its chart path is appended as the final positional argument.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_command-values"></a>values</td><td style="text-align: left">Values files to pass to the subcommand via <code>--values</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
+<h1 id="helm_import-rules"><a class="header" href="#helm_import-rules">helm_import rules.</a></h1>
+<h2 id="rules-1"><a class="header" href="#rules-1">Rules</a></h2>
+<ul>
+<li><a href="helm_import.html#helm_import">helm_import</a></li>
+</ul>
+<h2 id="repository-rules"><a class="header" href="#repository-rules">Repository Rules</a></h2>
+<ul>
+<li><a href="helm_import.html#helm_import_repository">helm_import_repository</a></li>
+</ul>
+<p><a id="helm_import"></a></p>
+<h2 id="helm_import"><a class="header" href="#helm_import">helm_import</a></h2>
+<pre>
+load("@rules_helm//helm:helm_import.bzl", "helm_import")
+
+helm_import(<a href="helm_import.html#helm_import-name">name</a>, <a href="helm_import.html#helm_import-chart">chart</a>, <a href="helm_import.html#helm_import-version">version</a>)
+</pre>
+<p>A rule that allows pre-packaged Helm charts to be used within Bazel.</p>
+<p><strong>ATTRIBUTES</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="helm_import-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm_import-chart"></a>chart</td><td style="text-align: left">A Helm chart's <code>.tgz</code> file.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_import-version"></a>version</td><td style="text-align: left">The version fo the helm chart</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+</tbody></table>
+</div>
 <p><a id="helm_import_repository"></a></p>
 <h2 id="helm_import_repository"><a class="header" href="#helm_import_repository">helm_import_repository</a></h2>
 <pre>
-load("@rules_helm//helm:defs.bzl", "helm_import_repository")
+load("@rules_helm//helm:helm_import.bzl", "helm_import_repository")
 
-helm_import_repository(<a href="rules.html#helm_import_repository-name">name</a>, <a href="rules.html#helm_import_repository-chart_name">chart_name</a>, <a href="rules.html#helm_import_repository-repository">repository</a>, <a href="rules.html#helm_import_repository-sha256">sha256</a>, <a href="rules.html#helm_import_repository-url">url</a>, <a href="rules.html#helm_import_repository-version">version</a>)
+helm_import_repository(<a href="helm_import.html#helm_import_repository-name">name</a>, <a href="helm_import.html#helm_import_repository-chart_name">chart_name</a>, <a href="helm_import.html#helm_import_repository-repository">repository</a>, <a href="helm_import.html#helm_import_repository-sha256">sha256</a>, <a href="helm_import.html#helm_import_repository-url">url</a>, <a href="helm_import.html#helm_import_repository-version">version</a>)
 </pre>
 <p>A rule for fetching external Helm charts from an arbitrary URL or repository.</p>
 <p><strong>ATTRIBUTES</strong></p>
@@ -664,6 +332,444 @@ helm_import_repository(<a href="rules.html#helm_import_repository-name">name</a>
 <tr><td style="text-align: left"><a id="helm_import_repository-sha256"></a>sha256</td><td style="text-align: left">The expected SHA-256 hash of the chart imported.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
 <tr><td style="text-align: left"><a id="helm_import_repository-url"></a>url</td><td style="text-align: left">The url where a chart can be directly downloaded. Mutually exclusive with <code>chart_name</code>, <code>repository</code>, and <code>version</code></td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
 <tr><td style="text-align: left"><a id="helm_import_repository-version"></a>version</td><td style="text-align: left">Specify a version constraint for the chart version to use. Must be set if <code>repository</code> is specified.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
+<h1 id="helm_install-rules"><a class="header" href="#helm_install-rules">helm_install rules.</a></h1>
+<h2 id="rules-2"><a class="header" href="#rules-2">Rules</a></h2>
+<ul>
+<li><a href="helm_install.html#helm_install">helm_install</a></li>
+<li><a href="helm_install.html#helm_uninstall">helm_uninstall</a></li>
+<li><a href="helm_install.html#helm_upgrade">helm_upgrade</a></li>
+</ul>
+<p><a id="helm_install"></a></p>
+<h2 id="helm_install"><a class="header" href="#helm_install">helm_install</a></h2>
+<pre>
+load("@rules_helm//helm:helm_install.bzl", "helm_install")
+
+helm_install(<a href="helm_install.html#helm_install-name">name</a>, <a href="helm_install.html#helm_install-data">data</a>, <a href="helm_install.html#helm_install-helm_opts">helm_opts</a>, <a href="helm_install.html#helm_install-install_name">install_name</a>, <a href="helm_install.html#helm_install-opts">opts</a>, <a href="helm_install.html#helm_install-package">package</a>, <a href="helm_install.html#helm_install-values">values</a>)
+</pre>
+<p>Produce an executable for performing a <code>helm install</code> operation.</p>
+<p><strong>ATTRIBUTES</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="helm_install-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm_install-data"></a>data</td><td style="text-align: left">Additional data to pass to <code>helm install</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_install-helm_opts"></a>helm_opts</td><td style="text-align: left">Additional arguments to pass to <code>helm</code> during install.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_install-install_name"></a>install_name</td><td style="text-align: left">The name to use for the <code>helm install</code> command. The target name will be used if unset.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_install-opts"></a>opts</td><td style="text-align: left">Additional arguments to pass to <code>helm install</code>.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_install-package"></a>package</td><td style="text-align: left">The helm package to install.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm_install-values"></a>values</td><td style="text-align: left">Values files to pass to <code>helm install --values</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+</tbody></table>
+</div>
+<p><a id="helm_uninstall"></a></p>
+<h2 id="helm_uninstall"><a class="header" href="#helm_uninstall">helm_uninstall</a></h2>
+<pre>
+load("@rules_helm//helm:helm_install.bzl", "helm_uninstall")
+
+helm_uninstall(<a href="helm_install.html#helm_uninstall-name">name</a>, <a href="helm_install.html#helm_uninstall-data">data</a>, <a href="helm_install.html#helm_uninstall-helm_opts">helm_opts</a>, <a href="helm_install.html#helm_uninstall-install_name">install_name</a>, <a href="helm_install.html#helm_uninstall-opts">opts</a>)
+</pre>
+<p>Produce an executable for performing a <code>helm uninstall</code> operation.</p>
+<p><strong>ATTRIBUTES</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="helm_uninstall-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm_uninstall-data"></a>data</td><td style="text-align: left">Additional data to pass to <code>helm uninstall</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_uninstall-helm_opts"></a>helm_opts</td><td style="text-align: left">Additional arguments to pass to <code>helm</code> during install.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_uninstall-install_name"></a>install_name</td><td style="text-align: left">The name to use for the <code>helm install</code> command. The target name will be used if unset.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_uninstall-opts"></a>opts</td><td style="text-align: left">Additional arguments to pass to <code>helm uninstall</code>.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+</tbody></table>
+</div>
+<p><a id="helm_upgrade"></a></p>
+<h2 id="helm_upgrade"><a class="header" href="#helm_upgrade">helm_upgrade</a></h2>
+<pre>
+load("@rules_helm//helm:helm_install.bzl", "helm_upgrade")
+
+helm_upgrade(<a href="helm_install.html#helm_upgrade-name">name</a>, <a href="helm_install.html#helm_upgrade-data">data</a>, <a href="helm_install.html#helm_upgrade-helm_opts">helm_opts</a>, <a href="helm_install.html#helm_upgrade-install_name">install_name</a>, <a href="helm_install.html#helm_upgrade-opts">opts</a>, <a href="helm_install.html#helm_upgrade-package">package</a>, <a href="helm_install.html#helm_upgrade-values">values</a>)
+</pre>
+<p>Produce an executable for performing a <code>helm upgrade</code> operation.</p>
+<p><strong>ATTRIBUTES</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="helm_upgrade-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm_upgrade-data"></a>data</td><td style="text-align: left">Additional data to pass to <code>helm upgrade</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_upgrade-helm_opts"></a>helm_opts</td><td style="text-align: left">Additional arguments to pass to <code>helm</code> during upgrade.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_upgrade-install_name"></a>install_name</td><td style="text-align: left">The name to use for the <code>helm upgrade</code> command. The target name will be used if unset.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_upgrade-opts"></a>opts</td><td style="text-align: left">Additional arguments to pass to <code>helm upgrade</code>.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_upgrade-package"></a>package</td><td style="text-align: left">The helm package to upgrade.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm_upgrade-values"></a>values</td><td style="text-align: left">Values files to pass to <code>helm upgrade --values</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
+<h1 id="helm_lint-rules"><a class="header" href="#helm_lint-rules">helm_lint rules.</a></h1>
+<h2 id="rules-3"><a class="header" href="#rules-3">Rules</a></h2>
+<ul>
+<li><a href="helm_lint.html#helm_lint_test">helm_lint_test</a></li>
+</ul>
+<h2 id="aspects"><a class="header" href="#aspects">Aspects</a></h2>
+<ul>
+<li><a href="helm_lint.html#helm_lint_aspect">helm_lint_aspect</a></li>
+</ul>
+<p><a id="helm_lint_test"></a></p>
+<h2 id="helm_lint_test"><a class="header" href="#helm_lint_test">helm_lint_test</a></h2>
+<pre>
+load("@rules_helm//helm:helm_lint.bzl", "helm_lint_test")
+
+helm_lint_test(<a href="helm_lint.html#helm_lint_test-name">name</a>, <a href="helm_lint.html#helm_lint_test-chart">chart</a>, <a href="helm_lint.html#helm_lint_test-opts">opts</a>, <a href="helm_lint.html#helm_lint_test-substitutions">substitutions</a>, <a href="helm_lint.html#helm_lint_test-values">values</a>)
+</pre>
+<p>A rule for performing <code>helm lint</code> on a helm package</p>
+<p><strong>ATTRIBUTES</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="helm_lint_test-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm_lint_test-chart"></a>chart</td><td style="text-align: left">The helm package to run linting on.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm_lint_test-opts"></a>opts</td><td style="text-align: left">Additional arguments to pass to <code>helm lint</code>.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_lint_test-substitutions"></a>substitutions</td><td style="text-align: left">A dictionary of substitutions passed to `helm lint --set flag.</td><td style="text-align: left"><a href="https://bazel.build/rules/lib/core/dict">Dictionary: String -&gt; String</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>{}</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_lint_test-values"></a>values</td><td style="text-align: left">A list of files passed to `helm lint --values flag.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+</tbody></table>
+</div>
+<p><a id="helm_lint_aspect"></a></p>
+<h2 id="helm_lint_aspect"><a class="header" href="#helm_lint_aspect">helm_lint_aspect</a></h2>
+<pre>
+load("@rules_helm//helm:helm_lint.bzl", "helm_lint_aspect")
+
+helm_lint_aspect()
+</pre>
+<p>An aspect for running <code>helm lint</code> on helm package targets</p>
+<p><strong>ASPECT ATTRIBUTES</strong></p>
+<p><strong>ATTRIBUTES</strong></p>
+<div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
+<h1 id="helm_oci_digest-rules"><a class="header" href="#helm_oci_digest-rules">helm_oci_digest rules.</a></h1>
+<h2 id="rules-4"><a class="header" href="#rules-4">Rules</a></h2>
+<ul>
+<li><a href="helm_oci_digest.html#helm_oci_digest">helm_oci_digest</a></li>
+</ul>
+<h2 id="providers"><a class="header" href="#providers">Providers</a></h2>
+<ul>
+<li><a href="helm_oci_digest.html#HelmOCIDigestInfo">HelmOCIDigestInfo</a></li>
+</ul>
+<p><a id="helm_oci_digest"></a></p>
+<h2 id="helm_oci_digest"><a class="header" href="#helm_oci_digest">helm_oci_digest</a></h2>
+<pre>
+load("@rules_helm//helm:helm_oci_digest.bzl", "helm_oci_digest")
+
+helm_oci_digest(<a href="helm_oci_digest.html#helm_oci_digest-name">name</a>, <a href="helm_oci_digest.html#helm_oci_digest-chart">chart</a>)
+</pre>
+<p>Compute the OCI manifest digest for a Helm chart at build time.</p>
+<p>This rule constructs the OCI manifest that <code>helm push</code> (Helm v4) would
+create and computes its sha256 digest. The .tgz file's mtime is used for
+the creation annotation, formatted in UTC to match the push side.</p>
+<p>The digest file contains a single line: <code>sha256:&lt;hex&gt;</code>.</p>
+<p><strong>ATTRIBUTES</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="helm_oci_digest-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm_oci_digest-chart"></a>chart</td><td style="text-align: left">A helm_chart target providing HelmPackageInfo.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+</tbody></table>
+</div>
+<p><a id="HelmOCIDigestInfo"></a></p>
+<h2 id="helmocidigestinfo"><a class="header" href="#helmocidigestinfo">HelmOCIDigestInfo</a></h2>
+<pre>
+load("@rules_helm//helm:helm_oci_digest.bzl", "HelmOCIDigestInfo")
+
+HelmOCIDigestInfo(<a href="helm_oci_digest.html#HelmOCIDigestInfo-digest">digest</a>)
+</pre>
+<p>OCI manifest digest for a Helm chart, computed at build time.</p>
+<p><strong>FIELDS</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="HelmOCIDigestInfo-digest"></a>digest</td><td style="text-align: left">File: Text file containing the OCI manifest digest (sha256:...)</td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
+<h1 id="helm_package-rule"><a class="header" href="#helm_package-rule">helm_package rule.</a></h1>
+<h2 id="rules-5"><a class="header" href="#rules-5">Rules</a></h2>
+<ul>
+<li><a href="helm_package.html#helm_package">helm_package</a></li>
+</ul>
+<p><a id="helm_package"></a></p>
+<h2 id="helm_package"><a class="header" href="#helm_package">helm_package</a></h2>
+<pre>
+load("@rules_helm//helm:helm_package.bzl", "helm_package")
+
+helm_package(<a href="helm_package.html#helm_package-name">name</a>, <a href="helm_package.html#helm_package-deps">deps</a>, <a href="helm_package.html#helm_package-chart">chart</a>, <a href="helm_package.html#helm_package-chart_json">chart_json</a>, <a href="helm_package.html#helm_package-crds">crds</a>, <a href="helm_package.html#helm_package-files">files</a>, <a href="helm_package.html#helm_package-images">images</a>, <a href="helm_package.html#helm_package-opts">opts</a>, <a href="helm_package.html#helm_package-schema">schema</a>, <a href="helm_package.html#helm_package-stamp">stamp</a>, <a href="helm_package.html#helm_package-substitutions">substitutions</a>,
+             <a href="helm_package.html#helm_package-templates">templates</a>, <a href="helm_package.html#helm_package-values">values</a>, <a href="helm_package.html#helm_package-values_json">values_json</a>)
+</pre>
+<p>Rules for creating Helm chart packages.</p>
+<p><strong>ATTRIBUTES</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="helm_package-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm_package-deps"></a>deps</td><td style="text-align: left">Other helm packages this package depends on.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_package-chart"></a>chart</td><td style="text-align: left">The <code>Chart.yaml</code> file of the helm chart</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_package-chart_json"></a>chart_json</td><td style="text-align: left">The <code>Chart.yaml</code> file of the helm chart as a json object</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_package-crds"></a>crds</td><td style="text-align: left">All <a href="https://helm.sh/docs/chart_best_practices/custom_resource_definitions/">Custom Resource Definitions</a> associated with the current helm chart. E.g., the <code>./crds</code> directory</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_package-files"></a>files</td><td style="text-align: left">Files accessed in templates via the <a href="https://helm.sh/docs/chart_template_guide/accessing_files/"><code>.Files</code> api</a></td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_package-images"></a>images</td><td style="text-align: left">A list of                 <a href="https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags">oci_push</a> or                 <a href="https://github.com/bazel-contrib/rules_img">image_push</a>                 targets.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_package-opts"></a>opts</td><td style="text-align: left">Additional arguments to pass to <code>helm package</code> commands.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_package-schema"></a>schema</td><td style="text-align: left">The <code>values.schema.json</code> file for the current package.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_package-stamp"></a>stamp</td><td style="text-align: left">Whether to encode build information into the helm actions. Possible values:<br><br>- <code>stamp = 1</code>: Always stamp the build information into the helm actions, even in                 <a href="https://docs.bazel.build/versions/main/user-manual.html#flag--stamp">--nostamp</a> builds.                 This setting should be avoided, since it potentially kills remote caching for the target and                 any downstream actions that depend on it.<br><br>- <code>stamp = 0</code>: Always replace build information by constant values. This gives good build result caching.<br><br>- <code>stamp = -1</code>: Embedding of build information is controlled by the                 <a href="https://docs.bazel.build/versions/main/user-manual.html#flag--stamp">--[no]stamp</a> flag.<br><br>Stamped targets are not rebuilt unless their dependencies change.</td><td style="text-align: left">Integer</td><td style="text-align: left">optional</td><td style="text-align: left"><code>-1</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_package-substitutions"></a>substitutions</td><td style="text-align: left">A dictionary of substitutions to apply to the <code>values.yaml</code> file.</td><td style="text-align: left"><a href="https://bazel.build/rules/lib/core/dict">Dictionary: String -&gt; String</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>{}</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_package-templates"></a>templates</td><td style="text-align: left">All templates associated with the current helm chart. E.g., the <code>./templates</code> directory</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_package-values"></a>values</td><td style="text-align: left">The <code>values.yaml</code> file for the current package.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_package-values_json"></a>values_json</td><td style="text-align: left">The <code>values.yaml</code> file for the current package as a json object.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
+<h1 id="helmpackageinfo-provider"><a class="header" href="#helmpackageinfo-provider">HelmPackageInfo provider</a></h1>
+<h2 id="providers-1"><a class="header" href="#providers-1">Providers</a></h2>
+<ul>
+<li><a href="helm_package_info.html#HelmPackageInfo">HelmPackageInfo</a></li>
+</ul>
+<p><a id="HelmPackageInfo"></a></p>
+<h2 id="helmpackageinfo"><a class="header" href="#helmpackageinfo">HelmPackageInfo</a></h2>
+<pre>
+load("@rules_helm//helm:helm_package_info.bzl", "HelmPackageInfo")
+
+HelmPackageInfo(<a href="helm_package_info.html#HelmPackageInfo-chart">chart</a>, <a href="helm_package_info.html#HelmPackageInfo-images">images</a>, <a href="helm_package_info.html#HelmPackageInfo-metadata">metadata</a>)
+</pre>
+<p>A provider for helm packages</p>
+<p><strong>FIELDS</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="HelmPackageInfo-chart"></a>chart</td><td style="text-align: left">File: The result of <code>helm package</code></td></tr>
+<tr><td style="text-align: left"><a id="HelmPackageInfo-images"></a>images</td><td style="text-align: left">list[Target]: A list of <a href="https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags">@rules_oci//oci:defs.bzl%oci_push</a> or <a href="https://github.com/bazel-contrib/rules_img">@rules_img//img:push.bzl%image_push</a> targets</td></tr>
+<tr><td style="text-align: left"><a id="HelmPackageInfo-metadata"></a>metadata</td><td style="text-align: left">File: A json encoded file containing metadata about the helm chart</td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
+<h1 id="helm_plugin-rule"><a class="header" href="#helm_plugin-rule">helm_plugin rule.</a></h1>
+<h2 id="rules-6"><a class="header" href="#rules-6">Rules</a></h2>
+<ul>
+<li><a href="helm_plugin.html#helm_plugin">helm_plugin</a></li>
+</ul>
+<p><a id="helm_plugin"></a></p>
+<h2 id="helm_plugin"><a class="header" href="#helm_plugin">helm_plugin</a></h2>
+<pre>
+load("@rules_helm//helm:helm_plugin.bzl", "helm_plugin")
+
+helm_plugin(<a href="helm_plugin.html#helm_plugin-name">name</a>, <a href="helm_plugin.html#helm_plugin-data">data</a>, <a href="helm_plugin.html#helm_plugin-plugin_name">plugin_name</a>, <a href="helm_plugin.html#helm_plugin-yaml">yaml</a>)
+</pre>
+<p>Define a <a href="https://helm.sh/docs/topics/plugins/">helm plugin</a>.</p>
+<p><strong>ATTRIBUTES</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="helm_plugin-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm_plugin-data"></a>data</td><td style="text-align: left">Additional files associated with the plugin.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_plugin-plugin_name"></a>plugin_name</td><td style="text-align: left">An explicit name for the plugin. If unset, <code>name</code> will be used.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_plugin-yaml"></a>yaml</td><td style="text-align: left">The yaml file representing the plugin</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
+<h1 id="helm_push-rules"><a class="header" href="#helm_push-rules">helm_push rules.</a></h1>
+<h2 id="rules-7"><a class="header" href="#rules-7">Rules</a></h2>
+<ul>
+<li><a href="helm_push.html#helm_push">helm_push</a></li>
+<li><a href="helm_push.html#helm_push_images">helm_push_images</a></li>
+<li><a href="helm_push.html#helm_push_registry">helm_push_registry</a></li>
+</ul>
+<p><a id="helm_push"></a></p>
+<h2 id="helm_push"><a class="header" href="#helm_push">helm_push</a></h2>
+<pre>
+load("@rules_helm//helm:helm_push.bzl", "helm_push")
+
+helm_push(<a href="helm_push.html#helm_push-name">name</a>, <a href="helm_push.html#helm_push-env">env</a>, <a href="helm_push.html#helm_push-include_images">include_images</a>, <a href="helm_push.html#helm_push-login_url">login_url</a>, <a href="helm_push.html#helm_push-opts">opts</a>, <a href="helm_push.html#helm_push-package">package</a>, <a href="helm_push.html#helm_push-push_cmd">push_cmd</a>, <a href="helm_push.html#helm_push-registry_url">registry_url</a>,
+          <a href="helm_push.html#helm_push-registry_url_file">registry_url_file</a>)
+</pre>
+<p>Produce an executable for performing a helm push to a registry.</p>
+<p>Before performing <code>helm push</code> the executable produced will conditionally perform <a href="https://helm.sh/docs/helm/helm_registry_login/"><code>helm registry login</code></a>
+if the following environment variables are defined:</p>
+<ul>
+<li><code>HELM_REGISTRY_USERNAME</code>: The value of <code>--username</code>.</li>
+<li><code>HELM_REGISTRY_PASSWORD</code>/<code>HELM_REGISTRY_PASSWORD_FILE</code>: The value of <code>--password</code> or a file containing the <code>--password</code> value.</li>
+</ul>
+<p><strong>ATTRIBUTES</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="helm_push-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm_push-env"></a>env</td><td style="text-align: left">Environment variables to set when running this target.</td><td style="text-align: left"><a href="https://bazel.build/rules/lib/core/dict">Dictionary: String -&gt; String</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>{}</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_push-include_images"></a>include_images</td><td style="text-align: left">If True, images depended on by <code>package</code> will be pushed as well.</td><td style="text-align: left">Boolean</td><td style="text-align: left">optional</td><td style="text-align: left"><code>False</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_push-login_url"></a>login_url</td><td style="text-align: left">The URL of the registry to use for <code>helm login</code>. E.g. <code>my.registry.io</code></td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_push-opts"></a>opts</td><td style="text-align: left">Additional arguments to pass to <code>helm</code> commands.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_push-package"></a>package</td><td style="text-align: left">The helm package to push to the registry.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm_push-push_cmd"></a>push_cmd</td><td style="text-align: left">An alternative command to <code>push</code> for publishing the helm chart. E.g. <code>cm-push</code></td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_push-registry_url"></a>registry_url</td><td style="text-align: left">The registry URL at which to push the helm chart to. E.g. <code>oci://my.registry.io/chart-name</code>. Mutually exclusive with <code>registry_url_file</code>.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_push-registry_url_file"></a>registry_url_file</td><td style="text-align: left">A file containing the registry URL at which to push the helm chart to. Mutually exclusive with <code>registry_url</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
+</tbody></table>
+</div>
+<p><a id="helm_push_images"></a></p>
+<h2 id="helm_push_images"><a class="header" href="#helm_push_images">helm_push_images</a></h2>
+<pre>
+load("@rules_helm//helm:helm_push.bzl", "helm_push_images")
+
+helm_push_images(<a href="helm_push.html#helm_push_images-name">name</a>, <a href="helm_push.html#helm_push_images-env">env</a>, <a href="helm_push.html#helm_push_images-package">package</a>)
+</pre>
+<p>Produce an executable for pushing all oci images used by a helm chart.</p>
+<p><strong>ATTRIBUTES</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="helm_push_images-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm_push_images-env"></a>env</td><td style="text-align: left">Environment variables to set when running this target.</td><td style="text-align: left"><a href="https://bazel.build/rules/lib/core/dict">Dictionary: String -&gt; String</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>{}</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_push_images-package"></a>package</td><td style="text-align: left">The helm package to upload images from.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+</tbody></table>
+</div>
+<p><a id="helm_push_registry"></a></p>
+<h2 id="helm_push_registry"><a class="header" href="#helm_push_registry">helm_push_registry</a></h2>
+<pre>
+load("@rules_helm//helm:helm_push.bzl", "helm_push_registry")
+
+helm_push_registry(<a href="helm_push.html#helm_push_registry-name">name</a>, <a href="helm_push.html#helm_push_registry-env">env</a>, <a href="helm_push.html#helm_push_registry-include_images">include_images</a>, <a href="helm_push.html#helm_push_registry-login_url">login_url</a>, <a href="helm_push.html#helm_push_registry-opts">opts</a>, <a href="helm_push.html#helm_push_registry-package">package</a>, <a href="helm_push.html#helm_push_registry-push_cmd">push_cmd</a>, <a href="helm_push.html#helm_push_registry-registry_url">registry_url</a>,
+                   <a href="helm_push.html#helm_push_registry-registry_url_file">registry_url_file</a>)
+</pre>
+<p>Produce an executable for performing a helm push to a registry.</p>
+<p>Before performing <code>helm push</code> the executable produced will conditionally perform <a href="https://helm.sh/docs/helm/helm_registry_login/"><code>helm registry login</code></a>
+if the following environment variables are defined:</p>
+<ul>
+<li><code>HELM_REGISTRY_USERNAME</code>: The value of <code>--username</code>.</li>
+<li><code>HELM_REGISTRY_PASSWORD</code>/<code>HELM_REGISTRY_PASSWORD_FILE</code>: The value of <code>--password</code> or a file containing the <code>--password</code> value.</li>
+</ul>
+<p><strong>ATTRIBUTES</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="helm_push_registry-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm_push_registry-env"></a>env</td><td style="text-align: left">Environment variables to set when running this target.</td><td style="text-align: left"><a href="https://bazel.build/rules/lib/core/dict">Dictionary: String -&gt; String</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>{}</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_push_registry-include_images"></a>include_images</td><td style="text-align: left">If True, images depended on by <code>package</code> will be pushed as well.</td><td style="text-align: left">Boolean</td><td style="text-align: left">optional</td><td style="text-align: left"><code>False</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_push_registry-login_url"></a>login_url</td><td style="text-align: left">The URL of the registry to use for <code>helm login</code>. E.g. <code>my.registry.io</code></td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_push_registry-opts"></a>opts</td><td style="text-align: left">Additional arguments to pass to <code>helm</code> commands.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_push_registry-package"></a>package</td><td style="text-align: left">The helm package to push to the registry.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm_push_registry-push_cmd"></a>push_cmd</td><td style="text-align: left">An alternative command to <code>push</code> for publishing the helm chart. E.g. <code>cm-push</code></td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_push_registry-registry_url"></a>registry_url</td><td style="text-align: left">The registry URL at which to push the helm chart to. E.g. <code>oci://my.registry.io/chart-name</code>. Mutually exclusive with <code>registry_url_file</code>.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_push_registry-registry_url_file"></a>registry_url_file</td><td style="text-align: left">A file containing the registry URL at which to push the helm chart to. Mutually exclusive with <code>registry_url</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
+<h1 id="helm_template-rules"><a class="header" href="#helm_template-rules">helm_template rules.</a></h1>
+<h2 id="rules-8"><a class="header" href="#rules-8">Rules</a></h2>
+<ul>
+<li><a href="helm_template.html#helm_template">helm_template</a></li>
+<li><a href="helm_template.html#helm_template_test">helm_template_test</a></li>
+</ul>
+<p><a id="helm_template"></a></p>
+<h2 id="helm_template"><a class="header" href="#helm_template">helm_template</a></h2>
+<pre>
+load("@rules_helm//helm:helm_template.bzl", "helm_template")
+
+helm_template(<a href="helm_template.html#helm_template-name">name</a>, <a href="helm_template.html#helm_template-out">out</a>, <a href="helm_template.html#helm_template-chart">chart</a>, <a href="helm_template.html#helm_template-opts">opts</a>, <a href="helm_template.html#helm_template-values">values</a>)
+</pre>
+<p>A rule for rendering helm chart templates to a file.</p>
+<p><strong>ATTRIBUTES</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="helm_template-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm_template-out"></a>out</td><td style="text-align: left">The output file to write the output from <code>helm template</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a>; <a href="https://bazel.build/reference/be/common-definitions#configurable-attributes">nonconfigurable</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_template-chart"></a>chart</td><td style="text-align: left">The helm package to resolve charts for.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm_template-opts"></a>opts</td><td style="text-align: left">Additional arguments to pass to <code>helm template</code>.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_template-values"></a>values</td><td style="text-align: left">Values files to pass to <code>helm template --values</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+</tbody></table>
+</div>
+<p><a id="helm_template_test"></a></p>
+<h2 id="helm_template_test"><a class="header" href="#helm_template_test">helm_template_test</a></h2>
+<pre>
+load("@rules_helm//helm:helm_template.bzl", "helm_template_test")
+
+helm_template_test(<a href="helm_template.html#helm_template_test-name">name</a>, <a href="helm_template.html#helm_template_test-chart">chart</a>, <a href="helm_template.html#helm_template_test-installer">installer</a>, <a href="helm_template.html#helm_template_test-opts">opts</a>, <a href="helm_template.html#helm_template_test-template_patterns">template_patterns</a>, <a href="helm_template.html#helm_template_test-values">values</a>)
+</pre>
+<p>A test rule for rendering helm chart templates.</p>
+<p><strong>ATTRIBUTES</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="helm_template_test-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm_template_test-chart"></a>chart</td><td style="text-align: left">The helm package to resolve templates for. Mutually exclusive with <code>installer</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm_template_test-installer"></a>installer</td><td style="text-align: left">The <code>helm_install</code>/<code>helm_upgrade</code> target to resolve templates for. Mutually exclusive with <code>chart</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_template_test-opts"></a>opts</td><td style="text-align: left">Additional arguments to pass to <code>helm template</code>.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_template_test-template_patterns"></a>template_patterns</td><td style="text-align: left">A mapping of template paths to regex patterns required to match.</td><td style="text-align: left"><a href="https://bazel.build/rules/lib/core/dict">Dictionary: String -&gt; List of strings</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>{}</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_template_test-values"></a>values</td><td style="text-align: left">Values files to pass to <code>helm template --values</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
+<h1 id="helm_toolchain-rule"><a class="header" href="#helm_toolchain-rule">helm_toolchain rule.</a></h1>
+<h2 id="rules-9"><a class="header" href="#rules-9">Rules</a></h2>
+<ul>
+<li><a href="helm_toolchain.html#helm_toolchain">helm_toolchain</a></li>
+</ul>
+<p><a id="helm_toolchain"></a></p>
+<h2 id="helm_toolchain"><a class="header" href="#helm_toolchain">helm_toolchain</a></h2>
+<pre>
+load("@rules_helm//helm:helm_toolchain.bzl", "helm_toolchain")
+
+helm_toolchain(<a href="helm_toolchain.html#helm_toolchain-name">name</a>, <a href="helm_toolchain.html#helm_toolchain-helm">helm</a>, <a href="helm_toolchain.html#helm_toolchain-plugins">plugins</a>)
+</pre>
+<p>A helm toolchain.</p>
+<p><strong>ATTRIBUTES</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="helm_toolchain-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm_toolchain-helm"></a>helm</td><td style="text-align: left">A helm binary</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm_toolchain-plugins"></a>plugins</td><td style="text-align: left">Additional plugins to make available to helm.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
+<p>Bzlmod extensions</p>
+<h2 id="module-extensions"><a class="header" href="#module-extensions">Module Extensions</a></h2>
+<ul>
+<li><a href="extensions.html#helm">helm</a></li>
+</ul>
+<p><a id="helm"></a></p>
+<h2 id="helm"><a class="header" href="#helm">helm</a></h2>
+<pre>
+helm = use_extension("@rules_helm//helm:extensions.bzl", "helm")
+helm.host_tools(<a href="extensions.html#helm.host_tools-name">name</a>, <a href="extensions.html#helm.host_tools-version">version</a>)
+helm.plugin(<a href="extensions.html#helm.plugin-name">name</a>, <a href="extensions.html#helm.plugin-integrity">integrity</a>, <a href="extensions.html#helm.plugin-strip_prefix">strip_prefix</a>, <a href="extensions.html#helm.plugin-url_templates">url_templates</a>, <a href="extensions.html#helm.plugin-version">version</a>, <a href="extensions.html#helm.plugin-yaml">yaml</a>)
+helm.toolchain(<a href="extensions.html#helm.toolchain-name">name</a>, <a href="extensions.html#helm.toolchain-plugins">plugins</a>)
+</pre>
+<p><strong>TAG CLASSES</strong></p>
+<p><a id="helm.host_tools"></a></p>
+<h3 id="host_tools"><a class="header" href="#host_tools">host_tools</a></h3>
+<p>An extension for creating a host alias repository that provides a shorter name for the host platform's helm binary.</p>
+<p>An example of defining and using host tools:</p>
+<pre><code class="language-python">helm = use_extension("@rules_helm//helm:extensions.bzl", "helm")
+helm.host_tools(name = "helm")
+use_repo(helm, "helm")
+
+# Then you can use @helm//:helm in your BUILD files
+</code></pre>
+<p><strong>Attributes</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="helm.host_tools-name"></a>name</td><td style="text-align: left">The name of the host alias repository.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>"helm"</code></td></tr>
+<tr><td style="text-align: left"><a id="helm.host_tools-version"></a>version</td><td style="text-align: left">The version of helm to use for host tools.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>"4.0.4"</code></td></tr>
+</tbody></table>
+</div>
+<p><a id="helm.plugin"></a></p>
+<h3 id="plugin"><a class="header" href="#plugin">plugin</a></h3>
+<p>An extension tag for declaring Helm plugins.</p>
+<p>Plugins are downloaded per-platform and made available to <code>helm.toolchain()</code> tags that reference them by name. Only platforms listed in <code>integrity</code> (and <code>url_templates</code>) will receive the plugin.</p>
+<p>An example of declaring the helm-diff plugin and wiring it into a named toolchain:</p>
+<pre><code class="language-python">helm = use_extension("@rules_helm//helm:extensions.bzl", "helm")
+helm.host_tools()
+helm.plugin(
+    name = "diff",
+    version = "3.15.5",
+    strip_prefix = "diff",
+    url_templates = {
+        "darwin-arm64": ["https://github.com/databus23/helm-diff/releases/download/v{version}/helm-diff-macos-arm64.tgz"],
+        "linux-amd64": ["https://github.com/databus23/helm-diff/releases/download/v{version}/helm-diff-linux-amd64.tgz"],
+    },
+    integrity = {
+        "darwin-arm64": "sha256-KJmZ7wY3gAcWFzK5R9+TfQlaRfEXzJ7hDNRC8NgIDog=",
+        "linux-amd64": "sha256-ToJjCrKyMxfAOeezsWYF95qKwPPSKHPg1G6pzZgN2o4=",
+    },
+)
+helm.toolchain(
+    name = "with_diff",
+    plugins = ["diff"],
+)
+use_repo(helm, "helm", "helm_toolchains", "with_diff_toolchains")
+register_toolchains("@helm_toolchains//:all")
+</code></pre>
+<p><strong>Attributes</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="helm.plugin-name"></a>name</td><td style="text-align: left">The name of the plugin.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm.plugin-integrity"></a>integrity</td><td style="text-align: left">A mapping of helm platform name to integrity hash. Only platforms listed here will receive the plugin.</td><td style="text-align: left"><a href="https://bazel.build/rules/lib/core/dict">Dictionary: String -&gt; String</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm.plugin-strip_prefix"></a>strip_prefix</td><td style="text-align: left">A directory prefix to strip from the extracted plugin archive.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+<tr><td style="text-align: left"><a id="helm.plugin-url_templates"></a>url_templates</td><td style="text-align: left">Mapping of helm platform name to a list of URL templates for downloading the plugin on that platform. Only <code>{version}</code> is substituted; spell the platform name into the URL string directly. Every key in <code>integrity</code> must have a matching entry here.</td><td style="text-align: left"><a href="https://bazel.build/rules/lib/core/dict">Dictionary: String -&gt; List of strings</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm.plugin-version"></a>version</td><td style="text-align: left">The version of the plugin to download.</td><td style="text-align: left">String</td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm.plugin-yaml"></a>yaml</td><td style="text-align: left">Relative path to plugin.yaml within the extracted archive (after strip_prefix).</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>"plugin.yaml"</code></td></tr>
+</tbody></table>
+</div>
+<p><a id="helm.toolchain"></a></p>
+<h3 id="toolchain"><a class="header" href="#toolchain">toolchain</a></h3>
+<p>Define a named set of helm toolchains with specific plugins.</p>
+<p>Creates an independent hub repository <code>@{name}_toolchains</code> containing toolchains for the default helm version with the specified plugins baked in. Only platforms where all referenced plugins are available will have toolchains generated.</p>
+<p>The hub is <strong>not</strong> registered automatically — call <code>register_toolchains</code> explicitly, or use a Starlark transition to override toolchain resolution.</p>
+<pre><code class="language-python">helm = use_extension("@rules_helm//helm:extensions.bzl", "helm")
+helm.plugin(name = "diff", ...)
+helm.toolchain(
+    name = "with_diff",
+    plugins = ["diff"],
+)
+use_repo(helm, "with_diff_toolchains")
+register_toolchains("@with_diff_toolchains//:all")
+</code></pre>
+<p><strong>Attributes</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="helm.toolchain-name"></a>name</td><td style="text-align: left">Name prefix for the hub repository. Produces <code>@{name}_toolchains</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm.toolchain-plugins"></a>plugins</td><td style="text-align: left">Plugin names (from <code>helm.plugin()</code> tags) to include in these toolchains.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
 </tbody></table>
 </div>
                     </main>

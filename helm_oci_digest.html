@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Rules - rules_helm</title>
+        <title>helm_oci_digest - rules_helm</title>
 
 
         <!-- Custom HTML head -->
@@ -155,39 +155,56 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="helm-rules"><a class="header" href="#helm-rules">Helm Rules</a></h1>
+                        <!-- Generated with Stardoc: http://skydoc.bazel.build -->
+<h1 id="helm_oci_digest-rules"><a class="header" href="#helm_oci_digest-rules">helm_oci_digest rules.</a></h1>
+<h2 id="rules"><a class="header" href="#rules">Rules</a></h2>
 <ul>
-<li><a href="./chart_file.html#chart_content">chart_content</a></li>
-<li><a href="./chart_file.html#chart_file">chart_file</a></li>
-<li><a href="./helm_chart.html#helm_chart">helm_chart</a></li>
-<li><a href="./helm_command.html#helm_command">helm_command</a></li>
-<li><a href="./helm_import.html#helm_import">helm_import</a></li>
-<li><a href="./helm_install.html#helm_install">helm_install</a></li>
-<li><a href="./helm_lint.html#helm_lint_aspect">helm_lint_aspect</a></li>
-<li><a href="./helm_lint.html#helm_lint_test">helm_lint_test</a></li>
-<li><a href="./helm_oci_digest.html#helm_oci_digest">helm_oci_digest</a></li>
-<li><a href="./helm_package.html#helm_package">helm_package</a></li>
-<li><a href="./helm_plugin.html#helm_plugin">helm_plugin</a></li>
-<li><a href="./helm_push.html#helm_push_images">helm_push_images</a></li>
-<li><a href="./helm_push.html#helm_push_registry">helm_push_registry</a></li>
-<li><a href="./helm_push.html#helm_push">helm_push</a></li>
-<li><a href="./helm_template.html#helm_template_test">helm_template_test</a></li>
-<li><a href="./helm_template.html#helm_template">helm_template</a></li>
-<li><a href="./helm_toolchain.html#helm_toolchain">helm_toolchain</a></li>
-<li><a href="./helm_install.html#helm_uninstall">helm_uninstall</a></li>
-<li><a href="./helm_install.html#helm_upgrade">helm_upgrade</a></li>
-<li><a href="./helm_package_info.html#HelmPackageInfo">HelmPackageInfo</a></li>
+<li><a href="#helm_oci_digest">helm_oci_digest</a></li>
 </ul>
+<h2 id="providers"><a class="header" href="#providers">Providers</a></h2>
+<ul>
+<li><a href="#HelmOCIDigestInfo">HelmOCIDigestInfo</a></li>
+</ul>
+<p><a id="helm_oci_digest"></a></p>
+<h2 id="helm_oci_digest"><a class="header" href="#helm_oci_digest">helm_oci_digest</a></h2>
+<pre>
+load("@rules_helm//helm:helm_oci_digest.bzl", "helm_oci_digest")
 
+helm_oci_digest(<a href="#helm_oci_digest-name">name</a>, <a href="#helm_oci_digest-chart">chart</a>)
+</pre>
+<p>Compute the OCI manifest digest for a Helm chart at build time.</p>
+<p>This rule constructs the OCI manifest that <code>helm push</code> (Helm v4) would
+create and computes its sha256 digest. The .tgz file's mtime is used for
+the creation annotation, formatted in UTC to match the push side.</p>
+<p>The digest file contains a single line: <code>sha256:&lt;hex&gt;</code>.</p>
+<p><strong>ATTRIBUTES</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="helm_oci_digest-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm_oci_digest-chart"></a>chart</td><td style="text-align: left">A helm_chart target providing HelmPackageInfo.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+</tbody></table>
+</div>
+<p><a id="HelmOCIDigestInfo"></a></p>
+<h2 id="helmocidigestinfo"><a class="header" href="#helmocidigestinfo">HelmOCIDigestInfo</a></h2>
+<pre>
+load("@rules_helm//helm:helm_oci_digest.bzl", "HelmOCIDigestInfo")
+
+HelmOCIDigestInfo(<a href="#HelmOCIDigestInfo-digest">digest</a>)
+</pre>
+<p>OCI manifest digest for a Helm chart, computed at build time.</p>
+<p><strong>FIELDS</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="HelmOCIDigestInfo-digest"></a>digest</td><td style="text-align: left">File: Text file containing the OCI manifest digest (sha256:...)</td></tr>
+</tbody></table>
+</div>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="helm_lint.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="helm_chart.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="helm_package.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -197,11 +214,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="helm_lint.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="helm_chart.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="helm_package.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

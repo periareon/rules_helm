@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Rules - rules_helm</title>
+        <title>helm_package - rules_helm</title>
 
 
         <!-- Custom HTML head -->
@@ -155,39 +155,48 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="helm-rules"><a class="header" href="#helm-rules">Helm Rules</a></h1>
+                        <!-- Generated with Stardoc: http://skydoc.bazel.build -->
+<h1 id="helm_package-rule"><a class="header" href="#helm_package-rule">helm_package rule.</a></h1>
+<h2 id="rules"><a class="header" href="#rules">Rules</a></h2>
 <ul>
-<li><a href="./chart_file.html#chart_content">chart_content</a></li>
-<li><a href="./chart_file.html#chart_file">chart_file</a></li>
-<li><a href="./helm_chart.html#helm_chart">helm_chart</a></li>
-<li><a href="./helm_command.html#helm_command">helm_command</a></li>
-<li><a href="./helm_import.html#helm_import">helm_import</a></li>
-<li><a href="./helm_install.html#helm_install">helm_install</a></li>
-<li><a href="./helm_lint.html#helm_lint_aspect">helm_lint_aspect</a></li>
-<li><a href="./helm_lint.html#helm_lint_test">helm_lint_test</a></li>
-<li><a href="./helm_oci_digest.html#helm_oci_digest">helm_oci_digest</a></li>
-<li><a href="./helm_package.html#helm_package">helm_package</a></li>
-<li><a href="./helm_plugin.html#helm_plugin">helm_plugin</a></li>
-<li><a href="./helm_push.html#helm_push_images">helm_push_images</a></li>
-<li><a href="./helm_push.html#helm_push_registry">helm_push_registry</a></li>
-<li><a href="./helm_push.html#helm_push">helm_push</a></li>
-<li><a href="./helm_template.html#helm_template_test">helm_template_test</a></li>
-<li><a href="./helm_template.html#helm_template">helm_template</a></li>
-<li><a href="./helm_toolchain.html#helm_toolchain">helm_toolchain</a></li>
-<li><a href="./helm_install.html#helm_uninstall">helm_uninstall</a></li>
-<li><a href="./helm_install.html#helm_upgrade">helm_upgrade</a></li>
-<li><a href="./helm_package_info.html#HelmPackageInfo">HelmPackageInfo</a></li>
+<li><a href="#helm_package">helm_package</a></li>
 </ul>
+<p><a id="helm_package"></a></p>
+<h2 id="helm_package"><a class="header" href="#helm_package">helm_package</a></h2>
+<pre>
+load("@rules_helm//helm:helm_package.bzl", "helm_package")
 
+helm_package(<a href="#helm_package-name">name</a>, <a href="#helm_package-deps">deps</a>, <a href="#helm_package-chart">chart</a>, <a href="#helm_package-chart_json">chart_json</a>, <a href="#helm_package-crds">crds</a>, <a href="#helm_package-files">files</a>, <a href="#helm_package-images">images</a>, <a href="#helm_package-opts">opts</a>, <a href="#helm_package-schema">schema</a>, <a href="#helm_package-stamp">stamp</a>, <a href="#helm_package-substitutions">substitutions</a>,
+             <a href="#helm_package-templates">templates</a>, <a href="#helm_package-values">values</a>, <a href="#helm_package-values_json">values_json</a>)
+</pre>
+<p>Rules for creating Helm chart packages.</p>
+<p><strong>ATTRIBUTES</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="helm_package-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm_package-deps"></a>deps</td><td style="text-align: left">Other helm packages this package depends on.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_package-chart"></a>chart</td><td style="text-align: left">The <code>Chart.yaml</code> file of the helm chart</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_package-chart_json"></a>chart_json</td><td style="text-align: left">The <code>Chart.yaml</code> file of the helm chart as a json object</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_package-crds"></a>crds</td><td style="text-align: left">All <a href="https://helm.sh/docs/chart_best_practices/custom_resource_definitions/">Custom Resource Definitions</a> associated with the current helm chart. E.g., the <code>./crds</code> directory</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_package-files"></a>files</td><td style="text-align: left">Files accessed in templates via the <a href="https://helm.sh/docs/chart_template_guide/accessing_files/"><code>.Files</code> api</a></td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_package-images"></a>images</td><td style="text-align: left">A list of                 <a href="https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags">oci_push</a> or                 <a href="https://github.com/bazel-contrib/rules_img">image_push</a>                 targets.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_package-opts"></a>opts</td><td style="text-align: left">Additional arguments to pass to <code>helm package</code> commands.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_package-schema"></a>schema</td><td style="text-align: left">The <code>values.schema.json</code> file for the current package.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_package-stamp"></a>stamp</td><td style="text-align: left">Whether to encode build information into the helm actions. Possible values:<br><br>- <code>stamp = 1</code>: Always stamp the build information into the helm actions, even in                 <a href="https://docs.bazel.build/versions/main/user-manual.html#flag--stamp">--nostamp</a> builds.                 This setting should be avoided, since it potentially kills remote caching for the target and                 any downstream actions that depend on it.<br><br>- <code>stamp = 0</code>: Always replace build information by constant values. This gives good build result caching.<br><br>- <code>stamp = -1</code>: Embedding of build information is controlled by the                 <a href="https://docs.bazel.build/versions/main/user-manual.html#flag--stamp">--[no]stamp</a> flag.<br><br>Stamped targets are not rebuilt unless their dependencies change.</td><td style="text-align: left">Integer</td><td style="text-align: left">optional</td><td style="text-align: left"><code>-1</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_package-substitutions"></a>substitutions</td><td style="text-align: left">A dictionary of substitutions to apply to the <code>values.yaml</code> file.</td><td style="text-align: left"><a href="https://bazel.build/rules/lib/core/dict">Dictionary: String -&gt; String</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>{}</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_package-templates"></a>templates</td><td style="text-align: left">All templates associated with the current helm chart. E.g., the <code>./templates</code> directory</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_package-values"></a>values</td><td style="text-align: left">The <code>values.yaml</code> file for the current package.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_package-values_json"></a>values_json</td><td style="text-align: left">The <code>values.yaml</code> file for the current package as a json object.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+</tbody></table>
+</div>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="helm_oci_digest.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="helm_chart.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="helm_package_info.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -197,11 +206,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="helm_oci_digest.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="helm_chart.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="helm_package_info.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
