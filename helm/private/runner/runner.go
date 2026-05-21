@@ -115,8 +115,8 @@ func main() {
 	}
 
 	// Check required arguments
-	if *rawHelmPath == "" || *rawHelmPluginsPath == "" || (!is_uninstall && *rawChartPath == "") {
-		log.Fatalf("Missing required arguments: helm, helm_plugins or chart")
+	if *rawHelmPath == "" || *rawHelmPluginsPath == "" {
+		log.Fatalf("Missing required arguments: helm or helm_plugins")
 	}
 
 	helmPath := helm_utils.GetRunfile(*rawHelmPath)

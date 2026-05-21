@@ -53,9 +53,6 @@ register_toolchains(
     "@helm_toolchains//:all",
 )
 
-# Test-only: exercise the `helm.plugin` extension by wiring helm-cm-push into all
-# generated toolchains. Consumed by `//tests/bzlmod_plugin`. dev_dependency keeps
-# this out of downstream builds.
 helm_dev = use_extension(
     "@rules_helm//helm:extensions.bzl",
     "helm",
@@ -78,6 +75,14 @@ helm_dev.plugin(
         "windows-amd64": ["https://github.com/chartmuseum/helm-push/releases/download/v{version}/helm-push_{version}_windows_amd64.tar.gz"],
     },
     version = "0.10.4",
+)
+helm_dev.toolchain(
+    name = "with_cm_push",
+    plugins = ["cm-push"],
+)
+use_repo(
+    helm_dev,
+    "with_cm_push_toolchains",
 )
 
 helm_test = use_extension("@rules_helm//tests:test_extensions.bzl", "helm_test", dev_dependency = True)
