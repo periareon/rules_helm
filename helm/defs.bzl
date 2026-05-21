@@ -16,6 +16,7 @@ load(
 )
 load(
     ":helm_install.bzl",
+    _helm_command = "helm_command",
     _helm_install = "helm_install",
     _helm_uninstall = "helm_uninstall",
     _helm_upgrade = "helm_upgrade",
@@ -61,6 +62,7 @@ load(
 chart_content = _chart_content
 chart_file = _chart_file
 helm_chart = _helm_chart
+helm_command = _helm_command
 helm_import = _helm_import
 helm_import_repository = _helm_import_repository
 helm_install = _helm_install
