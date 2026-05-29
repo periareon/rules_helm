@@ -4,11 +4,11 @@
 load("//helm/private:install.bzl", "HelmInstallInfo")
 
 _PLUGIN_TOOLCHAIN_LABELS = [
-    "@with_cm_push_toolchains//:with_cm_push__4.0.4_darwin_amd64_helm_bin",
-    "@with_cm_push_toolchains//:with_cm_push__4.0.4_darwin_arm64_helm_bin",
-    "@with_cm_push_toolchains//:with_cm_push__4.0.4_linux_amd64_helm_bin",
-    "@with_cm_push_toolchains//:with_cm_push__4.0.4_linux_arm64_helm_bin",
-    "@with_cm_push_toolchains//:with_cm_push__4.0.4_windows_amd64_helm_bin",
+    "@with_cm_push_toolchains//:with_cm_push__4.2.0_darwin_amd64_helm_bin",
+    "@with_cm_push_toolchains//:with_cm_push__4.2.0_darwin_arm64_helm_bin",
+    "@with_cm_push_toolchains//:with_cm_push__4.2.0_linux_amd64_helm_bin",
+    "@with_cm_push_toolchains//:with_cm_push__4.2.0_linux_arm64_helm_bin",
+    "@with_cm_push_toolchains//:with_cm_push__4.2.0_windows_amd64_helm_bin",
 ]
 
 def _rlocationpath(file, workspace_name):
