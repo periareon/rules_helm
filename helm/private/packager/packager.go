@@ -329,6 +329,7 @@ func loadImageStamps(imageManifestPath string) ([]ReplacementGroup, error) {
 		workspaceLabel := strings.Replace(imageInfo.Label, "@@", "@", 1)
 		bzmodLabel := fmt.Sprintf("@%s", imageInfo.Label)
 		imageUrl := fmt.Sprintf("%s@%s", repository, digest)
+		repoSegments := strings.Split(repository, "/")
 
 		replacements := map[string]string{
 			workspaceLabel:                 imageUrl,
@@ -337,6 +338,14 @@ func loadImageStamps(imageManifestPath string) ([]ReplacementGroup, error) {
 			bzmodLabel:                     imageUrl,
 			bzmodLabel + ".repository":     repository,
 			bzmodLabel + ".digest":         digest,
+		}
+		if len(repoSegments) > 0 {
+			replacements[workspaceLabel+".registry"] = repoSegments[0]
+			replacements[bzmodLabel+".registry"] = repoSegments[0]
+		}
+		if len(repoSegments) > 1 {
+			replacements[workspaceLabel+".project"] = strings.Join(repoSegments[1:], "/")
+			replacements[bzmodLabel+".project"] = strings.Join(repoSegments[1:], "/")
 		}
 		if tag != "" {
 			replacements[workspaceLabel+".tag"] = tag
