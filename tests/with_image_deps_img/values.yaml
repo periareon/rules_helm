@@ -21,6 +21,8 @@ bazel_produced_images:
     url: "{@//tests/with_image_deps_img:image_d.push.repository}:{@//tests/with_image_deps_img:image_d.push.tag}"
   image_e:
     url: "{@//tests/with_image_deps_img:image_e.push.repository}:{@//tests/with_image_deps_img:image_e.push.tag}"
+  image_f:
+    url: "{@//tests/with_image_deps_img:image_f.push.registry}/{@//tests/with_image_deps_img:image_f.push.project}@{@//tests/with_image_deps_img:image_e.push.digest}"
 
 imagePullSecrets: []
 nameOverride: ""
