@@ -21,6 +21,7 @@ helm_chart(
         ":image_c.push",
         ":image_d.push",
         ":image_e.push",
+        ":image_f.push",
     ],
     target_compatible_with = EXCLUDE_WINDOWS,
 )
@@ -47,6 +48,7 @@ helm_package_regex_test(
         r"image_c:\s+url:\s+\"docker.io/rules_helm/test_img/image_c:1.2.3\"",
         r"image_d:\s+url:\s+\"docker.io/rules_helm/test_img/image_d:4.5.6\"",
         r"image_e:\s+url:\s+\"docker.io/rules_helm/test_img/image_e:7.8.9\"",
+        r"image_f:\s+url:\s+\"docker.io/rules_helm/test_img/image_f@sha256:[a-z0-9]{64}\"",
     ],
 )
 
@@ -56,6 +58,7 @@ _IMAGES = [
     "image_c",
     "image_d",
     "image_e",
+    "image_f",
 ]
 
 # Create simple image layers and manifests for each test image
@@ -150,5 +153,14 @@ image_push(
     registry = "{{ .registry }}",
     repository = "{{ .repository }}",
     tag = "{{ .tag }}",
+    target_compatible_with = EXCLUDE_WINDOWS,
+)
+
+image_push(
+    name = "image_f.push",
+    image = ":image_f",
+    registry = "docker.io",
+    repository = "rules_helm/test_img/image_f",
+    tag_list = ["latest"],
     target_compatible_with = EXCLUDE_WINDOWS,
 )
