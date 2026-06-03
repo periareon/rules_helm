@@ -191,12 +191,18 @@ def _helm_import_repository_impl(repository_ctx):
         repository_name = repository_ctx.name,
     ))
 
+    if repository_ctx.attr.url:
+        return {
+            "name": repository_ctx.name,
+            "sha256": result.sha256,
+            "url": chart_url,
+        }
+
     return {
         "chart_name": chart_name,
         "name": repository_ctx.name,
         "repository": repository_ctx.attr.repository,
         "sha256": result.sha256,
-        "url": chart_url,
         "version": chart_version,
     }
 
