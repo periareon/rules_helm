@@ -192,19 +192,29 @@ def _helm_import_repository_impl(repository_ctx):
     ))
 
     if repository_ctx.attr.url:
-        return {
+        attrs_for_reproducibility = {
             "name": repository_ctx.name,
             "sha256": result.sha256,
             "url": chart_url,
         }
+    else:
+        attrs_for_reproducibility = {
+            "chart_name": chart_name,
+            "name": repository_ctx.name,
+            "repository": repository_ctx.attr.repository,
+            "sha256": result.sha256,
+            "version": chart_version,
+        }
 
-    return {
-        "chart_name": chart_name,
-        "name": repository_ctx.name,
-        "repository": repository_ctx.attr.repository,
-        "sha256": result.sha256,
-        "version": chart_version,
-    }
+    # Bazel <8.3.0 lacks repository_ctx.repo_metadata
+    if not hasattr(repository_ctx, "repo_metadata"):
+        return attrs_for_reproducibility
+
+    reproducible = repository_ctx.attr.sha256 != ""
+    return repository_ctx.repo_metadata(
+        reproducible = reproducible,
+        attrs_for_reproducibility = {} if reproducible else attrs_for_reproducibility,
+    )
 
 helm_import_repository = repository_rule(
     implementation = _helm_import_repository_impl,
