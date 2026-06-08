@@ -193,6 +193,7 @@ def _helm_impl(module_ctx):
         helm_host_alias_repository(
             name = host_tools_attrs.name,
             toolchain_repo_prefix = "helm_toolchains__{}".format(host_tools_attrs.version),
+            version = host_tools_attrs.version,
         )
 
     return module_ctx.extension_metadata(
