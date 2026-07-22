@@ -14,6 +14,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -459,6 +460,71 @@ func sanitizeChartContent(content string) (string, error) {
 	}
 
 	return content, nil
+}
+
+// OCI image-spec pre-defined annotation key.
+const ociCreatedAnnotation = "org.opencontainers.image.created"
+
+// parseCreated accepts either epoch seconds (all digits) or RFC3339.
+func parseCreated(s string) (time.Time, error) {
+	if n, err := strconv.ParseInt(s, 10, 64); err == nil {
+		return time.Unix(n, 0).UTC(), nil
+	}
+	t, err := time.Parse(time.RFC3339, s)
+	if err != nil {
+		return time.Time{}, err
+	}
+	return t.UTC(), nil
+}
+
+// A brace survives only when a {KEY} stamp token went unresolved; no valid
+// created value (RFC3339 or epoch seconds) contains one.
+func hasUnresolvedToken(s string) bool { return strings.Contains(s, "{") }
+
+// A yaml.Node round-trip preserves Chart.yaml fields the HelmChart struct does
+// not model; re-marshalling through HelmChart would drop them.
+func normalizeCreatedAnnotation(content, canonical string) (string, error) {
+	var doc yaml.Node
+	if err := yaml.Unmarshal([]byte(content), &doc); err != nil {
+		return "", fmt.Errorf("unmarshal chart: %w", err)
+	}
+	if len(doc.Content) == 0 {
+		return content, nil
+	}
+
+	// A document node wraps the top mapping in Content[0].
+	top := doc.Content[0]
+	if top.Kind != yaml.MappingNode {
+		return content, nil
+	}
+
+	// Mapping node `.Content` is alternating key,value pairs.
+	var annotations *yaml.Node
+	for i := 0; i+1 < len(top.Content); i += 2 {
+		if top.Content[i].Value == "annotations" {
+			annotations = top.Content[i+1]
+			break
+		}
+	}
+	if annotations == nil || annotations.Kind != yaml.MappingNode {
+		return content, nil
+	}
+
+	for i := 0; i+1 < len(annotations.Content); i += 2 {
+		if annotations.Content[i].Value == ociCreatedAnnotation {
+			value := annotations.Content[i+1]
+			value.Value = canonical
+			value.Tag = "!!str"
+			value.Style = yaml.DoubleQuotedStyle
+			break
+		}
+	}
+
+	out, err := yaml.Marshal(&doc)
+	if err != nil {
+		return "", fmt.Errorf("marshal chart: %w", err)
+	}
+	return string(out), nil
 }
 
 func copyFile(source string, dest string) error {
@@ -958,12 +1024,6 @@ func main() {
 
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	// Stamped builds embed wall-clock time into the OCI `created` annotation
-	// so the published manifest reflects build time.
-	if args.VolatileStatusFile != "" {
-		chartTime = time.Now().UTC()
-	}
-
 	cwd, err := os.Getwd()
 	if err != nil {
 		log.Fatal(err)
@@ -1045,6 +1105,26 @@ func main() {
 	stampedChartContent, err = sanitizeChartContent(stampedChartContent)
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	// oci_digest merges this annotation over its mtime-derived value into the OCI
+	// manifest, so the resolved value also fixes the published digest. Canonicalize
+	// it to RFC3339 to keep the tgz mtimes, metadata.json, and manifest in
+	// agreement. chartTime otherwise stays at the reproducible epoch-0 default.
+	stampedChart, err := loadChart(stampedChartContent)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if raw := stampedChart.Annotations[ociCreatedAnnotation]; raw != "" {
+		if !hasUnresolvedToken(raw) {
+			if chartTime, err = parseCreated(raw); err != nil {
+				log.Fatalf("%s=%q is not epoch seconds or RFC3339: %v", ociCreatedAnnotation, raw, err)
+			}
+		}
+		stampedChartContent, err = normalizeCreatedAnnotation(stampedChartContent, chartTime.Format(time.RFC3339))
+		if err != nil {
+			log.Fatalf("normalize %s: %v", ociCreatedAnnotation, err)
+		}
 	}
 
 	// Create a directory in which to run helm package

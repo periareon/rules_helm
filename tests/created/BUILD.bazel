@@ -1,0 +1,5 @@
+load(":created_test.bzl", "created_test_suite")
+
+created_test_suite(
+    name = "created_test_suite",
+)
