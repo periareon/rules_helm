@@ -28,7 +28,12 @@ jobs:
   publish:
     uses: bazel-contrib/publish-to-bcr/.github/workflows/publish.yaml@v1.1.0
     with:
-      attest: false
+      # Carry the SLSA build-provenance attestation produced by
+      # `release.yaml`'s `actions/attest-build-provenance` step into
+      # the BCR submission. The reusable workflow downloads the
+      # attestation from the GitHub Attestation Store and attaches it
+      # to the registry PR.
+      attest: true
       tag_name: ${{ inputs.release_version }}
       author_name: periareon-bot
       author_email: 260522848+periareon-bot@users.noreply.github.com
@@ -40,5 +45,10 @@ jobs:
       draft: false
     permissions:
       contents: write
+      # `id-token: write` + `attestations: write` together let the
+      # reusable workflow read and re-attest the release-archive
+      # provenance during the BCR submission.
+      id-token: write
+      attestations: write
     secrets:
       publish_token: ${{ secrets.BCR_PUBLISH_TOKEN }}

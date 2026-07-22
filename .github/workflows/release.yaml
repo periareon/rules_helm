@@ -2,12 +2,21 @@
 name: Release
 on:
   workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+    paths:
+      # Run the release workflow on PRs that touch its scaffolding so
+      # changes get a dry-run before they land on `main`.
+      - version.bzl
+      - .github/workflows/release.yaml
+      - .github/workflows/release_prep.sh
   push:
     branches:
       - main
     paths:
-      # Only trigger for new releases
-      - "version.bzl"
+      # Only fire a real release when version.bzl is bumped.
+      - version.bzl
 
 defaults:
   run:
@@ -17,61 +26,94 @@ env:
   BAZEL_STARTUP_FLAGS: --bazelrc=${{ github.workspace }}/.github/github.bazelrc
 
 jobs:
-  release:
+  # Reject the release up front if the target tag already exists on the
+  # remote. Same guard as rules_rust uses — saves a partially-published
+  # release if version.bzl wasn't bumped before merge.
+  validation:
     if: ${{ github.repository_owner == 'periareon' }}
-    permissions:
-      contents: write
-      actions: write
-      attestations: write
-    outputs:
-      release_version: ${{ steps.version.outputs.release_version }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: main
-      - name: Detect the current version
-        id: version
+      - name: Ensure release does not already exist
+        if: startsWith(github.ref, 'refs/heads/main')
         run: |
-          version="$(grep 'VERSION =' ./version.bzl | sed 's/VERSION = "//' | sed 's/"//')"
-          echo "RELEASE_VERSION=${version}" >> $GITHUB_ENV
-          echo "release_version=${version}" >> $GITHUB_OUTPUT
-      # Ensure this does not exclude the module used for the .bcr presubmit job.
-      - name: Create release artifact
-        run: |
-          tar -czf ${{ github.workspace }}/.github/rules_helm.tar.gz --exclude=".git" --exclude=".github" --exclude="examples" -C ${{ github.workspace }} .
-          sha256_base64="$(shasum --algorithm 256 ${{ github.workspace }}/.github/rules_helm.tar.gz | awk '{ print $1 }' | xxd -r -p | base64)"
-          echo "ARCHIVE_SHA256_BASE64=${sha256_base64}" >> "${GITHUB_ENV}"
-      - name: Generate release notes
-        run: |
-          # Generate the release notes
-          sed 's/{version}/${{env.RELEASE_VERSION}}/g' ${{ github.workspace }}/.github/release_notes.template \
-          | sed 's#{sha256_base64}#${{ env.ARCHIVE_SHA256_BASE64 }}#g' \
-          > ${{ github.workspace }}/.github/release_notes.txt
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        id: rules_release
-        with:
-          generate_release_notes: true
-          tag_name: ${{ env.RELEASE_VERSION }}
-          body_path: ${{ github.workspace }}/.github/release_notes.txt
-          target_commitish: ${{ github.base_ref }}
-      - name: "Upload the rules archive"
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.rules_release.outputs.upload_url }}
-          asset_name: rules_helm-v${{ env.RELEASE_VERSION }}.tar.gz
-          asset_path: ${{ github.workspace }}/.github/rules_helm.tar.gz
-          asset_content_type: application/gzip
+          git fetch origin &> /dev/null
+          version="$(grep 'VERSION =' ${{ github.workspace }}/version.bzl | sed 's/VERSION = "//' | sed 's/"//')"
+          if [[ -n "$(git tag -l ${version})" ]]; then
+            echo "A release '${version}' already exists." >&2
+            exit 1
+          else
+            echo "Tag '${version}' will be created"
+          fi
 
-  bcr-publish:
-    needs: [release]
+  # Create and push the version tag at the resolved commit before the
+  # release_ruleset workflow runs — that workflow checks out the
+  # repository at `tag_name`, so the tag must exist first.
+  tag:
+    if: ${{ github.repository_owner == 'periareon' && (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/main'))) }}
+    needs: validation
+    runs-on: ubuntu-latest
     permissions:
       contents: write
+    outputs:
+      tag: ${{ steps.create_tag.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Create and push tag
+        id: create_tag
+        run: |
+          set -euo pipefail
+          version="$(grep 'VERSION =' ${{ github.workspace }}/version.bzl | sed 's/VERSION = "//' | sed 's/"//')"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # Pin the tag to the resolved SHA so a concurrent merge to
+          # main can't shift the release contents out from under us.
+          git tag -a "${version}" -m "rules_helm ${version}" "${{ github.sha }}"
+          git push origin "${version}"
+          echo "tag=${version}" >> $GITHUB_OUTPUT
+
+  # Delegate the source archive build + attestation + GitHub release
+  # creation to the bazel-contrib reusable workflow. BCR's verifier
+  # specifically trusts attestations whose builder ID points at this
+  # reusable workflow path; rolling our own `actions/attest-build-provenance`
+  # would produce a valid SLSA attestation that BCR would still reject.
+  #
+  # `release_prep.sh` at `.github/workflows/release_prep.sh` is the
+  # hardcoded build hook — it gets `${tag_name}` as `$1`, must write
+  # release notes to stdout, and must produce files matching the
+  # `release_files` glob in cwd.
+  release:
+    needs: tag
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    uses: bazel-contrib/.github/.github/workflows/release_ruleset.yaml@v7.6.0
+    with:
+      # CI already ran the full test matrix on the PR that bumped
+      # version.bzl, and this reusable workflow runs on a single
+      # ubuntu-latest. Skip the default `bazel test //...` here.
+      bazel_test_command: "bazel info release"
+      release_files: rules_helm-*.tar.gz
+      prerelease: false
+      tag_name: ${{ needs.tag.outputs.tag }}
+
+  # Re-publish to the Bazel Central Registry, carrying the
+  # build-provenance attestation produced upstream.
+  bcr-publish:
+    needs: [tag, release]
+    permissions:
+      contents: write
+      # `id-token: write` + `attestations: write` propagate down so the
+      # reusable `publish-to-bcr` workflow can read the attestation
+      # from the GitHub Attestation Store and attach it to the
+      # registry PR.
+      id-token: write
+      attestations: write
     uses: ./.github/workflows/bcr-publish.yaml
     with:
-      release_version: ${{ needs.release.outputs.release_version }}
+      release_version: ${{ needs.tag.outputs.tag }}
     secrets:
       BCR_PUBLISH_TOKEN: ${{ secrets.BCR_PUBLISH_TOKEN }}
