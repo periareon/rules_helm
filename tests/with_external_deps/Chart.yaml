@@ -43,3 +43,6 @@ dependencies:
   - name: postgresql
     repository: https://charts.bitnami.com/bitnami
     version: 14.0.5
+  - name: trust-manager
+    repository: https://charts.jetstack.io
+    version: v0.24.0

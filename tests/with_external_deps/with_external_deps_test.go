@@ -131,8 +131,8 @@ func TestWithChartDepsTest(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to load main Chart.yaml: %v", err)
 	}
-	if len(chart.Dependencies) != 6 {
-		t.Fatalf("Expected 6 dependencies in main Chart.yaml, but found %d", len(chart.Dependencies))
+	if len(chart.Dependencies) != 7 {
+		t.Fatalf("Expected 7 dependencies in main Chart.yaml, but found %d", len(chart.Dependencies))
 	}
 
 	expectedDeps := map[string]HelmChartDependency{
@@ -144,6 +144,7 @@ func TestWithChartDepsTest(t *testing.T) {
 		"cert-manager":   {Name: "cert-manager", Repository: "oci://quay.io/jetstack/charts", Version: "v1.19.4"},
 		"redis":          {Name: "redis", Repository: "https://charts.bitnami.com/bitnami", Version: "21.2.5"},
 		"postgresql":     {Name: "postgresql", Repository: "https://charts.bitnami.com/bitnami", Version: "14.0.5"},
+		"trust-manager":  {Name: "trust-manager", Repository: "https://charts.jetstack.io", Version: "v0.24.0"},
 	}
 
 	for _, dep := range chart.Dependencies {

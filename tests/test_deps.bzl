@@ -30,6 +30,16 @@ def helm_test_deps():
         sha256 = "4f70fc4c8caac66b21450581e29e3437cad401895d5ac0191e9e91f74ed8dc10",
     )
 
+    # Test downloading from a chart repository that uses relative URLs with paths in its index.yaml:
+    maybe(
+        helm_import_repository,
+        name = "helm_test_deps__with_external_deps_trust_manager",
+        repository = "https://charts.jetstack.io",
+        chart_name = "trust-manager",
+        version = "v0.24.0",
+        sha256 = "0de4bbef2d1a013bd4a91c6f59a9cb0273dda9a785e018a9a16e8f2b096af823",
+    )
+
     # Directly download this chart from a HTTP URL:
     maybe(
         helm_import_repository,

@@ -97,6 +97,7 @@ use_repo(
     "helm_test_deps__with_external_deps_karpenter",
     "helm_test_deps__with_external_deps_postgresql",
     "helm_test_deps__with_external_deps_redis",
+    "helm_test_deps__with_external_deps_trust_manager",
     "rules_helm_test_img_container_base",
     "rules_helm_test_oci_container_base",
 )

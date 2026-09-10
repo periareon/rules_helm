@@ -52,12 +52,12 @@ def _find_chart_url(repository_ctx, repo_file, chart_name, chart_version):
         line = line.lstrip(" ")
         if line.startswith("-") and line.endswith(chart_file) or line.endswith(oci_identifier):
             url = line.lstrip("-").lstrip(" ")
-            if url == chart_file:
-                return "{}/{}".format(repository_ctx.attr.repository, url)
             if url.startswith("http") and url.endswith("/{}".format(chart_file)):
                 return url
             if url.startswith("oci") and url.endswith("/{}".format(oci_identifier)):
                 return url
+            if not url.startswith("http") and not url.startswith("oci"):
+                return "{}/{}".format(repository_ctx.attr.repository, url)
     fail("cannot find {} (version {}) in {}".format(chart_name, chart_version, repository_ctx.attr.repository))
 
 def _get_chart_file_name(chart_url):
