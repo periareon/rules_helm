@@ -18,9 +18,13 @@ import (
 	"strings"
 	"time"
 
+	helm "helm.sh/helm/v4/pkg/chart/v2"
 	"github.com/periareon/rules_helm/helm/private/helm_utils"
-	"gopkg.in/yaml.v3"
+	yaml "sigs.k8s.io/yaml"
+	yamlv3 "gopkg.in/yaml.v3"
 )
+
+type HelmChart = helm.Metadata
 
 type ImageInfo struct {
 	Label      string
@@ -71,40 +75,6 @@ type DepsManfiest []string
 type HelmResultMetadata struct {
 	Name    string
 	Version string
-}
-
-type HelmMaintainer struct {
-	Name  string `yaml:"name"`
-	Email string `yaml:"email,omitempty"`
-	Url   string `yaml:"url,omitempty"`
-}
-
-type HelmDependency struct {
-	Name         string   `yaml:"name"`
-	Version      string   `yaml:"version"`
-	Repository   string   `yaml:"repository,omitempty"`
-	Condition    string   `yaml:"condition,omitempty"`
-	Tags         []string `yaml:"tags,omitempty"`
-	ImportValues []string `yaml:"import-values,omitempty"`
-	Alias        string   `yaml:"alias,omitempty"`
-}
-
-type HelmChart struct {
-	ApiVersion   string            `yaml:"apiVersion"`
-	Name         string            `yaml:"name"`
-	Version      string            `yaml:"version"`
-	KubeVersion  string            `yaml:"kubeVersion,omitempty"`
-	Description  string            `yaml:"description,omitempty"`
-	Type         string            `yaml:"type,omitempty"`
-	Keywords     []string          `yaml:"keywords,omitempty"`
-	Home         string            `yaml:"home,omitempty"`
-	Sources      []string          `yaml:"sources,omitempty"`
-	Dependencies []HelmDependency  `yaml:"dependencies,omitempty"`
-	Maintainers  []HelmMaintainer  `yaml:"maintainers,omitempty"`
-	Icon         string            `yaml:"icon,omitempty"`
-	AppVersion   string            `yaml:"appVersion,omitempty"`
-	Deprecated   bool              `yaml:"deprecated,omitempty"`
-	Annotations  map[string]string `yaml:"annotations,omitempty"`
 }
 
 type Arguments struct {
@@ -200,7 +170,7 @@ func loadImageInfos(imageManifestPath string) ([]ImageInfo, error) {
 	}
 
 	var paths []string
-	err = json.Unmarshal(content, &paths)
+	err = yaml.Unmarshal(content, &paths)
 	if err != nil {
 		return nil, fmt.Errorf("Error unmarshalling file %s: %w", imageManifestPath, err)
 	}
@@ -228,7 +198,7 @@ func loadImageManifest(imageManifestPath string) (ImageManifest, error) {
 	if err != nil {
 		return manifest, fmt.Errorf("Error reading file %s: %w", imageManifestPath, err)
 	}
-	err = json.Unmarshal(content, &manifest)
+	err = yaml.Unmarshal(content, &manifest)
 	if err != nil {
 		return manifest, fmt.Errorf("Error unmarshalling file %s: %w", imageManifestPath, err)
 	}
@@ -266,7 +236,7 @@ func imageManifestToImageInfo(imageManifest ImageManifest) (ImageInfo, error) {
 		}
 
 		var imageIndex ImageIndex
-		err = json.Unmarshal(imageIndexContent, &imageIndex)
+		err = yaml.Unmarshal(imageIndexContent, &imageIndex)
 		if err != nil {
 			return imageInfo, fmt.Errorf("Error unmarshalling file %s: %w", imageIndexPath, err)
 		}
@@ -280,7 +250,7 @@ func imageManifestToImageInfo(imageManifest ImageManifest) (ImageInfo, error) {
 		}
 
 		var ociManifest OCIManifest
-		err = json.Unmarshal(manifestContent, &ociManifest)
+		err = yaml.Unmarshal(manifestContent, &ociManifest)
 		if err != nil {
 			return imageInfo, fmt.Errorf("Error unmarshalling manifest file %s: %w", imageManifest.ManifestFile, err)
 		}
@@ -403,7 +373,7 @@ func applySubstitutions(content string, substitutions_file string) (string, erro
 	}
 
 	var substitutions map[string]string
-	err = json.Unmarshal(contentBytes, &substitutions)
+	err = yaml.Unmarshal(contentBytes, &substitutions)
 	if err != nil {
 		return content, fmt.Errorf("Error unmarshalling substitutions file %s: %w", substitutions_file, err)
 	}
@@ -484,7 +454,7 @@ func hasUnresolvedToken(s string) bool { return strings.Contains(s, "{") }
 // A yaml.Node round-trip preserves Chart.yaml fields the HelmChart struct does
 // not model; re-marshalling through HelmChart would drop them.
 func normalizeCreatedAnnotation(content, canonical string) (string, error) {
-	var doc yaml.Node
+	var doc yamlv3.Node
 	if err := yaml.Unmarshal([]byte(content), &doc); err != nil {
 		return "", fmt.Errorf("unmarshal chart: %w", err)
 	}
@@ -494,19 +464,19 @@ func normalizeCreatedAnnotation(content, canonical string) (string, error) {
 
 	// A document node wraps the top mapping in Content[0].
 	top := doc.Content[0]
-	if top.Kind != yaml.MappingNode {
+	if top.Kind != yamlv3.MappingNode {
 		return content, nil
 	}
 
 	// Mapping node `.Content` is alternating key,value pairs.
-	var annotations *yaml.Node
+	var annotations *yamlv3.Node
 	for i := 0; i+1 < len(top.Content); i += 2 {
 		if top.Content[i].Value == "annotations" {
 			annotations = top.Content[i+1]
 			break
 		}
 	}
-	if annotations == nil || annotations.Kind != yaml.MappingNode {
+	if annotations == nil || annotations.Kind != yamlv3.MappingNode {
 		return content, nil
 	}
 
@@ -515,7 +485,7 @@ func normalizeCreatedAnnotation(content, canonical string) (string, error) {
 			value := annotations.Content[i+1]
 			value.Value = canonical
 			value.Tag = "!!str"
-			value.Style = yaml.DoubleQuotedStyle
+			value.Style = yamlv3.DoubleQuotedStyle
 			break
 		}
 	}
@@ -649,7 +619,7 @@ func addDependencyToChart(workingDir, chartContent string, dep string) (string, 
 	}
 
 	if !alreadyExists {
-		parentChart.Dependencies = append(parentChart.Dependencies, HelmDependency{
+		parentChart.Dependencies = append(parentChart.Dependencies, &helm.Dependency{
 			Name:    depChart.Name,
 			Version: depChart.Version,
 		})
@@ -683,7 +653,7 @@ func installHelmContent(workingDir string, packagePath string, stampedChartConte
 	}
 
 	var templates TemplatesManfiest
-	err = json.Unmarshal(templatesManifestContent, &templates)
+	err = yaml.Unmarshal(templatesManifestContent, &templates)
 	if err != nil {
 		return "", fmt.Errorf("Error unmarshalling templates manifest %s: %w", templatesManifest, err)
 	}
@@ -808,7 +778,7 @@ func installHelmContent(workingDir string, packagePath string, stampedChartConte
 	}
 
 	var crds CrdsManfiest
-	err = json.Unmarshal(crdsManifestContent, &crds)
+	err = yaml.Unmarshal(crdsManifestContent, &crds)
 	if err != nil {
 		return "", fmt.Errorf("Error unmarshalling crds manifest %s: %w", crdsManifest, err)
 	}
@@ -914,7 +884,7 @@ func installHelmContent(workingDir string, packagePath string, stampedChartConte
 		}
 
 		var deps DepsManfiest
-		err = json.Unmarshal(manifestContent, &deps)
+		err = yaml.Unmarshal(manifestContent, &deps)
 		if err != nil {
 			return "", fmt.Errorf("Error unmarshalling deps manifest %s: %w", depsManifest, err)
 		}
@@ -934,7 +904,7 @@ func installHelmContent(workingDir string, packagePath string, stampedChartConte
 	}
 
 	var files FilesManfiest
-	err = json.Unmarshal(filesManifestContent, &files)
+	err = yaml.Unmarshal(filesManifestContent, &files)
 	if err != nil {
 		return "", fmt.Errorf("Error unmarshalling files manifest %s: %w", filesManifest, err)
 	}
