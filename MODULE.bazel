@@ -3,13 +3,12 @@
 module(
     name = "rules_helm",
     version = "0.32.0",
-    compatibility_level = 1,
 )
 
-bazel_dep(name = "platforms", version = "1.0.0")
+bazel_dep(name = "platforms", version = "1.1.0")
 bazel_dep(name = "bazel_skylib", version = "1.8.2")
-bazel_dep(name = "rules_go", version = "0.59.0")
-bazel_dep(name = "gazelle", version = "0.47.0")
+bazel_dep(name = "rules_go", version = "0.63.0")
+bazel_dep(name = "gazelle", version = "0.53.0")
 bazel_dep(name = "bazel_lib", version = "3.0.0")
 
 bazel_dep(name = "rules_oci", version = "2.3.0", dev_dependency = True)
@@ -29,7 +28,7 @@ single_version_override(
 )
 
 go_sdk = use_extension("@rules_go//go:extensions.bzl", "go_sdk")
-go_sdk.download(version = "1.25.4")
+go_sdk.from_file(go_mod = "//:go.mod")
 
 go_deps = use_extension("@gazelle//:extensions.bzl", "go_deps")
 go_deps.from_file(go_mod = "//:go.mod")
@@ -39,6 +38,7 @@ use_repo(
     "com_github_opencontainers_image_spec",
     "in_gopkg_yaml_v3",
     "io_k8s_sigs_yaml",
+    "sh_helm_helm_v4",
 )
 
 helm = use_extension("@rules_helm//helm:extensions.bzl", "helm")
