@@ -18,11 +18,13 @@ import (
 	"strings"
 	"time"
 
-	helm "helm.sh/helm/v4/pkg/chart/v2"
 	"github.com/periareon/rules_helm/helm/private/helm_utils"
+	helm "helm.sh/helm/v4/pkg/chart/v2"
 	yaml "sigs.k8s.io/yaml"
-	yamlv3 "gopkg.in/yaml.v3"
 )
+
+// overwritten in normalize
+var chartTime = time.Unix(0, 0).UTC()
 
 type HelmChart = helm.Metadata
 
@@ -447,54 +449,24 @@ func parseCreated(s string) (time.Time, error) {
 	return t.UTC(), nil
 }
 
-// A brace survives only when a {KEY} stamp token went unresolved; no valid
-// created value (RFC3339 or epoch seconds) contains one.
-func hasUnresolvedToken(s string) bool { return strings.Contains(s, "{") }
-
-// A yaml.Node round-trip preserves Chart.yaml fields the HelmChart struct does
-// not model; re-marshalling through HelmChart would drop them.
-func normalizeCreatedAnnotation(content, canonical string) (string, error) {
-	var doc yamlv3.Node
-	if err := yaml.Unmarshal([]byte(content), &doc); err != nil {
-		return "", fmt.Errorf("unmarshal chart: %w", err)
+// Normalizes the `org.opencontainers.image.created` annotation
+// in the provided chart to RFC-3339
+func normalizeCreatedAnnotation(chart *HelmChart) error {
+	if chart.Annotations == nil {
+		chart.Annotations = make(map[string]string)
 	}
-	if len(doc.Content) == 0 {
-		return content, nil
-	}
-
-	// A document node wraps the top mapping in Content[0].
-	top := doc.Content[0]
-	if top.Kind != yamlv3.MappingNode {
-		return content, nil
-	}
-
-	// Mapping node `.Content` is alternating key,value pairs.
-	var annotations *yamlv3.Node
-	for i := 0; i+1 < len(top.Content); i += 2 {
-		if top.Content[i].Value == "annotations" {
-			annotations = top.Content[i+1]
-			break
+	// if they specified a create stamp, normalize it
+	if t := chart.Annotations[ociCreatedAnnotation]; t != "" {
+		parsed, err := parseCreated(t)
+		if err == nil {
+			chartTime = parsed
+		} else {
+			log.Printf("WARN: Using defult created timestamp: %s", err)
 		}
+		var canonical = chartTime.Format(time.RFC3339)
+		chart.Annotations[ociCreatedAnnotation] = canonical
 	}
-	if annotations == nil || annotations.Kind != yamlv3.MappingNode {
-		return content, nil
-	}
-
-	for i := 0; i+1 < len(annotations.Content); i += 2 {
-		if annotations.Content[i].Value == ociCreatedAnnotation {
-			value := annotations.Content[i+1]
-			value.Value = canonical
-			value.Tag = "!!str"
-			value.Style = yamlv3.DoubleQuotedStyle
-			break
-		}
-	}
-
-	out, err := yaml.Marshal(&doc)
-	if err != nil {
-		return "", fmt.Errorf("marshal chart: %w", err)
-	}
-	return string(out), nil
+	return nil
 }
 
 func copyFile(source string, dest string) error {
@@ -593,15 +565,10 @@ func readChartYamlFromTarball(tarballPath string) (HelmChart, error) {
 	return chart, nil
 }
 
-func addDependencyToChart(workingDir, chartContent string, dep string) (string, error) {
-	parentChart, err := loadChart(chartContent)
-	if err != nil {
-		return chartContent, fmt.Errorf("Error loading chart content: %w", err)
-	}
-
+func addDependencyToChart(workingDir string, dep string, parentChart *HelmChart) error {
 	depChart, err := readChartYamlFromTarball(dep)
 	if err != nil {
-		return chartContent, fmt.Errorf("Error reading dependency %s: %w", dep, err)
+		return fmt.Errorf("Error reading dependency %s: %w", dep, err)
 	}
 
 	// Only add the dependency if the chart.yaml does not already have it
@@ -610,7 +577,7 @@ func addDependencyToChart(workingDir, chartContent string, dep string) (string, 
 	for _, existingDep := range parentChart.Dependencies {
 		if existingDep.Name == depChart.Name {
 			if existingDep.Version != depChart.Version {
-				return chartContent, fmt.Errorf("Dependency %s already exists in Chart.yaml with different version (%s != %s)", depChart.Name, existingDep.Version, depChart.Version)
+				return fmt.Errorf("Dependency %s already exists in Chart.yaml with different version (%s != %s)", depChart.Name, existingDep.Version, depChart.Version)
 			}
 
 			alreadyExists = true
@@ -627,19 +594,13 @@ func addDependencyToChart(workingDir, chartContent string, dep string) (string, 
 
 	err = copyFile(dep, filepath.Join(workingDir, "charts", fmt.Sprintf("%s-%s.tgz", depChart.Name, depChart.Version)))
 	if err != nil {
-		return chartContent, fmt.Errorf("Error copying dependency %s: %w", dep, err)
+		return fmt.Errorf("Error copying dependency %s: %w", dep, err)
 	}
 
-	chartContentBytes, err := yaml.Marshal(parentChart)
-	if err != nil {
-		return chartContent, fmt.Errorf("Error marshalling chart content: %w", err)
-	}
-	chartContent = string(chartContentBytes)
-
-	return chartContent, nil
+	return nil
 }
 
-func installHelmContent(workingDir string, packagePath string, stampedChartContent string, stampedValuesContent string, stampedSchemaContent string, templatesManifest string, filesManifest string, crdsManifest string, depsManifest string) (string, error) {
+func installHelmContent(workingDir string, packagePath string, stampedChart *HelmChart, stampedValuesContent string, stampedSchemaContent string, templatesManifest string, filesManifest string, crdsManifest string, depsManifest string) (string, error) {
 	templatesParent := filepath.Join(workingDir, packagePath)
 
 	err := os.MkdirAll(templatesParent, 0700)
@@ -890,7 +851,7 @@ func installHelmContent(workingDir string, packagePath string, stampedChartConte
 		}
 
 		for _, dep := range deps {
-			stampedChartContent, err = addDependencyToChart(templatesParent, stampedChartContent, dep)
+			err := addDependencyToChart(templatesParent, dep, stampedChart)
 			if err != nil {
 				return "", fmt.Errorf("Error copying dep %s: %w", dep, err)
 			}
@@ -919,7 +880,11 @@ func installHelmContent(workingDir string, packagePath string, stampedChartConte
 
 	// Write the Chart.yaml last because it may have been modified by the above steps
 	chartYaml := filepath.Join(templatesParent, "Chart.yaml")
-	err = writeFile(chartYaml, []byte(stampedChartContent), 0644)
+	data, err := yaml.Marshal(stampedChart)
+	if err != nil {
+		return "", fmt.Errorf("YAML marshalling error: %w", err)
+	}
+	err = writeFile(chartYaml, []byte(data), 0644)
 	if err != nil {
 		return "", fmt.Errorf("Error writing chart file %s: %w", chartYaml, err)
 	}
@@ -1085,20 +1050,13 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if raw := stampedChart.Annotations[ociCreatedAnnotation]; raw != "" {
-		if !hasUnresolvedToken(raw) {
-			if chartTime, err = parseCreated(raw); err != nil {
-				log.Fatalf("%s=%q is not epoch seconds or RFC3339: %v", ociCreatedAnnotation, raw, err)
-			}
-		}
-		stampedChartContent, err = normalizeCreatedAnnotation(stampedChartContent, chartTime.Format(time.RFC3339))
-		if err != nil {
-			log.Fatalf("normalize %s: %v", ociCreatedAnnotation, err)
-		}
+
+	if err := normalizeCreatedAnnotation(&stampedChart); err != nil {
+		log.Fatal(err)
 	}
 
 	// Create a directory in which to run helm package
-	helmDir, err := installHelmContent(dir, args.Package, stampedChartContent, stampedValuesContent, stampedSchemaContent, args.TemplatesManifest, args.FilesManifest, args.CrdsManifest, args.DepsManifest)
+	helmDir, err := installHelmContent(dir, args.Package, &stampedChart, stampedValuesContent, stampedSchemaContent, args.TemplatesManifest, args.FilesManifest, args.CrdsManifest, args.DepsManifest)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -1136,8 +1094,6 @@ func main() {
 		log.Fatal(err)
 	}
 }
-
-var chartTime = time.Unix(0, 0).UTC()
 
 func writeFile(path string, content []byte, mode os.FileMode) error {
 	if err := os.WriteFile(path, content, mode); err != nil {
