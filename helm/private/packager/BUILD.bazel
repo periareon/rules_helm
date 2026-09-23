@@ -7,5 +7,7 @@ go_binary(
     deps = [
         "//helm/private/helm_utils",
         "@in_gopkg_yaml_v3//:yaml_v3",
+        "@io_k8s_sigs_yaml//:yaml",
+        "@sh_helm_helm_v4//pkg/chart/v2:chart",
     ],
 )
