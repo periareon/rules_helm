@@ -1,0 +1,58 @@
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+load("//k8s/private:current_kubectl_toolchain.bzl", "current_kubectl_toolchain")
+
+exports_files(
+    [
+        "defs.bzl",
+        "extensions.bzl",
+        "kubectl_toolchain.bzl",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+toolchain_type(
+    name = "kubectl_toolchain_type",
+    visibility = ["//visibility:public"],
+)
+
+current_kubectl_toolchain(
+    name = "current_kubectl_toolchain",
+    # Marked manual so that `bazel test //...` passes
+    # even if no toolchain is registered.
+    tags = ["manual"],
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "bzl_srcs",
+    srcs = glob(["**/*.bzl"]) + [
+        "//k8s/private:bzl_srcs",
+    ],
+    visibility = ["//:__subpackages__"],
+)
+
+bzl_library(
+    name = "defs_bzl",
+    srcs = ["defs.bzl"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":kubectl_toolchain_bzl",
+    ],
+)
+
+bzl_library(
+    name = "extensions_bzl",
+    srcs = ["extensions.bzl"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//helm/private:bzl_lib",
+        "//k8s/private:bzl_lib",
+    ],
+)
+
+bzl_library(
+    name = "kubectl_toolchain_bzl",
+    srcs = ["kubectl_toolchain.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["//k8s/private:bzl_lib"],
+)

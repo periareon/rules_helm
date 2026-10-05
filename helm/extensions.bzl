@@ -1,5 +1,6 @@
 """Bzlmod extensions"""
 
+load("//helm/private:extension_utils.bzl", "find_modules")
 load(
     "//helm/private:repositories.bzl",
     "helm_host_alias_repository",
@@ -14,21 +15,6 @@ load(
     "DEFAULT_HELM_VERSION",
     "HELM_VERSIONS",
 )
-
-def _find_modules(module_ctx):
-    root = None
-    rules_module = None
-    for mod in module_ctx.modules:
-        if mod.is_root:
-            root = mod
-        if mod.name == "rules_helm":
-            rules_module = mod
-    if root == None:
-        root = rules_module
-    if rules_module == None:
-        fail("Unable to find rules_helm module")
-
-    return root, rules_module
 
 def _helm_url(version, platform):
     """Return the URL and compression for a helm binary."""
@@ -49,7 +35,7 @@ def _helm_url(version, platform):
     return urls, url_platform
 
 def _helm_impl(module_ctx):
-    root_mod, rules_mod = _find_modules(module_ctx)
+    root_mod, rules_mod = find_modules(module_ctx)
 
     host_tools = root_mod.tags.host_tools
     if not host_tools:

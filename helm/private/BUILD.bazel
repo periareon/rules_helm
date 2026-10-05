@@ -12,7 +12,10 @@ filegroup(
 bzl_library(
     name = "bzl_lib",
     srcs = ["bzl_srcs"],
-    visibility = ["//helm:__subpackages__"],
+    visibility = [
+        "//helm:__subpackages__",
+        "//k8s:__subpackages__",
+    ],
     deps = [
         "@bazel_lib//lib:base64",
         "@bazel_lib//lib:repo_utils",

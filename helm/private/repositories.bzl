@@ -174,7 +174,7 @@ helm_plugin_repository = repository_rule(
     },
 )
 
-def _platform(rctx):
+def host_platform(rctx):
     """Returns a normalized name of the host os and CPU architecture.
 
     Alias archictures names are normalized:
@@ -239,7 +239,7 @@ copy_file(
 )
 """.format(
         prefix = repository_ctx.attr.toolchain_repo_prefix,
-        platform = _platform(repository_ctx),
+        platform = host_platform(repository_ctx),
         ext = ext,
         version = repository_ctx.attr.version,
     ))
@@ -268,7 +268,7 @@ toolchain(
     target_compatible_with = {target_constraint_sets_serialized},
     target_settings = {target_settings_serialized},
     toolchain = "{toolchain}",
-    toolchain_type = "@rules_helm//helm:toolchain_type",
+    toolchain_type = "{toolchain_type}",
     visibility = ["//visibility:public"],
 )
 """
@@ -278,13 +278,15 @@ def _BUILD_for_toolchain_hub(
         toolchain_labels,
         target_compatible_with,
         exec_compatible_with,
-        target_settings):
+        target_settings,
+        toolchain_type):
     return "\n".join([_BUILD_FILE_FOR_TOOLCHAIN_HUB_TEMPLATE.format(
         name = toolchain_name,
         exec_constraint_sets_serialized = json.encode(exec_compatible_with.get(toolchain_name, [])),
         target_constraint_sets_serialized = json.encode(target_compatible_with.get(toolchain_name, [])),
         toolchain = toolchain_labels[toolchain_name],
         target_settings_serialized = repr(target_settings.get(toolchain_name, None)),
+        toolchain_type = toolchain_type,
     ) for toolchain_name in toolchain_names])
 
 def _helm_toolchain_repository_hub_impl(repository_ctx):
@@ -298,6 +300,7 @@ def _helm_toolchain_repository_hub_impl(repository_ctx):
         target_compatible_with = repository_ctx.attr.target_compatible_with,
         exec_compatible_with = repository_ctx.attr.exec_compatible_with,
         target_settings = repository_ctx.attr.target_settings,
+        toolchain_type = str(repository_ctx.attr.toolchain_type),
     ))
 
 helm_toolchain_repository_hub = repository_rule(
@@ -325,6 +328,10 @@ helm_toolchain_repository_hub = repository_rule(
         ),
         "toolchain_names": attr.string_list(
             mandatory = True,
+        ),
+        "toolchain_type": attr.label(
+            doc = "The `toolchain_type` every generated `toolchain` target is registered for.",
+            default = Label("//helm:toolchain_type"),
         ),
     },
 )

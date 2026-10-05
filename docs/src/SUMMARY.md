@@ -19,3 +19,7 @@
   - [helm_toolchain](./helm_toolchain.md)
 
 - [Extensions](./extensions.md)
+
+- [Kubernetes tools](./k8s.md)
+  - [kubectl_toolchain](./k8s_defs.md)
+  - [k8s extension](./k8s_extensions.md)
