@@ -54,6 +54,18 @@ register_toolchains(
     "@helm_toolchains//:all",
 )
 
+k8s = use_extension("@rules_helm//k8s:extensions.bzl", "k8s")
+k8s.kubectl()
+use_repo(
+    k8s,
+    "kubectl",
+    "kubectl_toolchains",
+)
+
+register_toolchains(
+    "@kubectl_toolchains//:all",
+)
+
 helm_dev = use_extension(
     "@rules_helm//helm:extensions.bzl",
     "helm",
@@ -84,6 +96,20 @@ helm_dev.toolchain(
 use_repo(
     helm_dev,
     "with_cm_push_toolchains",
+)
+
+k8s_dev = use_extension(
+    "@rules_helm//k8s:extensions.bzl",
+    "k8s",
+    dev_dependency = True,
+)
+k8s_dev.kubectl(
+    name = "kubectl_pinned",
+    version = "1.36.5",
+)
+use_repo(
+    k8s_dev,
+    "kubectl_pinned",
 )
 
 helm_test = use_extension("@rules_helm//tests:test_extensions.bzl", "helm_test", dev_dependency = True)

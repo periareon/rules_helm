@@ -19,6 +19,13 @@ bazel_dep(name = "rules_helm", version = "{version}")
 bazel run @helm//:helm -- ...
 ```
 
+A matching `kubectl` is available for inspecting the cluster after a deploy. See
+[Kubernetes tools](./k8s.md) for setup.
+
+```bash
+bazel run @kubectl//:kubectl -- ...
+```
+
 ## Use in a genrule
 
 ```python
