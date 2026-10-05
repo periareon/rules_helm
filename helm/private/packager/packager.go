@@ -238,7 +238,7 @@ func imageManifestToImageInfo(imageManifest ImageManifest) (ImageInfo, error) {
 		}
 
 		var imageIndex ImageIndex
-		err = yaml.Unmarshal(imageIndexContent, &imageIndex)
+		err = json.Unmarshal(imageIndexContent, &imageIndex)
 		if err != nil {
 			return imageInfo, fmt.Errorf("Error unmarshalling file %s: %w", imageIndexPath, err)
 		}
@@ -251,8 +251,10 @@ func imageManifestToImageInfo(imageManifest ImageManifest) (ImageInfo, error) {
 			return imageInfo, fmt.Errorf("Error reading manifest file %s: %w", imageManifest.ManifestFile, err)
 		}
 
+		// Manifests are JSON documents. Parse them as such since registries
+		// may emit JSON escapes (e.g. `\/`) that a YAML parser rejects.
 		var ociManifest OCIManifest
-		err = yaml.Unmarshal(manifestContent, &ociManifest)
+		err = json.Unmarshal(manifestContent, &ociManifest)
 		if err != nil {
 			return imageInfo, fmt.Errorf("Error unmarshalling manifest file %s: %w", imageManifest.ManifestFile, err)
 		}
