@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Introduction - rules_helm</title>
+        <title>k8s extension - rules_helm</title>
 
 
         <!-- Custom HTML head -->
@@ -155,52 +155,52 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="rules_helm"><a class="header" href="#rules_helm">rules_helm</a></h1>
-<p>Bazel rules for producing <a href="https://helm.sh/">helm charts</a></p>
-<h2 id="setup-modulebazel"><a class="header" href="#setup-modulebazel">Setup MODULE.bazel</a></h2>
-<p><code>rules_helm</code> is published to the
-<a href="https://registry.bazel.build/modules/rules_helm">Bazel Central Registry</a>:</p>
-<pre><code class="language-python">bazel_dep(name = "rules_helm", version = "{version}")
+                        <!-- Generated with Stardoc: http://skydoc.bazel.build -->
+<p>Bzlmod extensions for Kubernetes tooling</p>
+<h2 id="module-extensions"><a class="header" href="#module-extensions">Module Extensions</a></h2>
+<ul>
+<li><a href="#k8s">k8s</a></li>
+</ul>
+<p><a id="k8s"></a></p>
+<h2 id="k8s"><a class="header" href="#k8s">k8s</a></h2>
+<pre>
+k8s = use_extension("@rules_helm//k8s:extensions.bzl", "k8s")
+k8s.kubectl(<a href="#k8s.kubectl-name">name</a>, <a href="#k8s.kubectl-version">version</a>)
+</pre>
+<p>Module extension for fetching Kubernetes tooling such as <code>kubectl</code>.</p>
+<p><strong>TAG CLASSES</strong></p>
+<p><a id="k8s.kubectl"></a></p>
+<h3 id="kubectl"><a class="header" href="#kubectl">kubectl</a></h3>
+<p>Fetch a <code>kubectl</code> binary for the host platform and register toolchains for it.</p>
+<p>Each tag creates a host alias repository (default <code>@kubectl</code>) that exposes the binary as <code>@{name}//:kubectl</code>, which is the quickest way to inspect a cluster after a <code>helm_install</code> / <code>helm_upgrade</code>:</p>
+<pre><code class="language-python">k8s = use_extension("@rules_helm//k8s:extensions.bzl", "k8s")
+k8s.kubectl()
+use_repo(k8s, "kubectl", "kubectl_toolchains")
+register_toolchains("@kubectl_toolchains//:all")
 </code></pre>
-<h2 id="run-as-a-tool"><a class="header" href="#run-as-a-tool">Run as a tool</a></h2>
-<pre><code class="language-bash">bazel run @helm//:helm -- ...
+<pre><code class="language-bash">bazel run @kubectl//:kubectl -- get pods --namespace my-release
+bazel run @kubectl//:kubectl -- describe deployment my-release
+bazel run @kubectl//:kubectl -- logs deployment/my-release --tail 100
 </code></pre>
-<p>A matching <code>kubectl</code> is available for inspecting the cluster after a deploy. See
-<a href="./k8s.html">Kubernetes tools</a> for setup.</p>
-<pre><code class="language-bash">bazel run @kubectl//:kubectl -- ...
+<p>The toolchains in <code>@kubectl_toolchains</code> serve the version requested by the root module's first <code>kubectl</code> tag (or the default when the root module has none).</p>
+<h3 id="versions"><a class="header" href="#versions">Versions</a></h3>
+<p><code>rules_helm</code> ships checksums for a single default version. Requesting any other version makes the extension download the upstream <code>.sha256</code> files for that release while it is evaluated. On Bazel 8.5 and newer the digests are then stored as facts in <code>MODULE.bazel.lock</code>, so the lookup only happens once per version and airgapped builds work from the lockfile. Older Bazel versions repeat the lookup whenever the extension is re-evaluated.</p>
+<pre><code class="language-python">k8s.kubectl(version = "1.36.5")
 </code></pre>
-<h2 id="use-in-a-genrule"><a class="header" href="#use-in-a-genrule">Use in a genrule</a></h2>
-<pre><code class="language-python">genrule(
-    name = "genrule",
-    srcs = [":chart"],
-    outs = ["template.yaml"],
-    cmd = "$(HELM_BIN) template my-chart $(execpath :chart) &gt; $@",
-    toolchains = ["@rules_helm//helm:current_toolchain"],
-)
-</code></pre>
-<h2 id="environment-variables"><a class="header" href="#environment-variables">Environment variables</a></h2>
-<h3 id="rules_helm_image_push_concurrency"><a class="header" href="#rules_helm_image_push_concurrency"><code>RULES_HELM_IMAGE_PUSH_CONCURRENCY</code></a></h3>
-<p>How many of a chart's bundled image pushers run at once. Defaults to <code>4</code>, and applies to
-<a href="https://periareon.github.io/rules_helm/defs.html#helm_push">helm_push</a>,
-<a href="https://periareon.github.io/rules_helm/defs.html#helm_push_images">helm_push_images</a>,
-<a href="https://periareon.github.io/rules_helm/defs.html#helm_install">helm_install</a> and
-<a href="https://periareon.github.io/rules_helm/defs.html#helm_upgrade">helm_upgrade</a>.</p>
-<p>Each image is pushed by its own process, which authenticates with the registry before it looks at
-anything, so a chart with many images spends most of the push waiting rather than transferring.
-Running the pushers concurrently keeps that cost from scaling with the image count.</p>
-<p>Set it to <code>1</code> to push one image at a time. A serial run also streams each pusher's output live on
-its own streams, instead of capturing it and replaying it as a block once the pusher exits, which
-makes a single failing push easier to follow.</p>
-<p>Values that are not a positive integer are ignored with a warning.</p>
-
+<p><strong>Attributes</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="k8s.kubectl-name"></a>name</td><td style="text-align: left">The name of the host alias repository.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>"kubectl"</code></td></tr>
+<tr><td style="text-align: left"><a id="k8s.kubectl-version"></a>version</td><td style="text-align: left">The version of kubectl to fetch, without a leading <code>v</code>.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>"1.37.1"</code></td></tr>
+</tbody></table>
+</div>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-
-                            <a rel="next prefetch" href="rules.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
+                            <a rel="prev" href="k8s_defs.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
                             </a>
+
 
                         <div style="clear: both"></div>
                     </nav>
@@ -208,10 +208,10 @@ makes a single failing push easier to follow.</p>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-
-                    <a rel="next prefetch" href="rules.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
+                    <a rel="prev" href="k8s_defs.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
                     </a>
+
             </nav>
 
         </div>

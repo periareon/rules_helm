@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Introduction - rules_helm</title>
+        <title>Kubernetes tools - rules_helm</title>
 
 
         <!-- Custom HTML head -->
@@ -155,50 +155,82 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="rules_helm"><a class="header" href="#rules_helm">rules_helm</a></h1>
-<p>Bazel rules for producing <a href="https://helm.sh/">helm charts</a></p>
-<h2 id="setup-modulebazel"><a class="header" href="#setup-modulebazel">Setup MODULE.bazel</a></h2>
-<p><code>rules_helm</code> is published to the
-<a href="https://registry.bazel.build/modules/rules_helm">Bazel Central Registry</a>:</p>
-<pre><code class="language-python">bazel_dep(name = "rules_helm", version = "{version}")
+                        <h1 id="kubernetes-tools"><a class="header" href="#kubernetes-tools">Kubernetes tools</a></h1>
+<p><code>rules_helm</code> can fetch <code>kubectl</code> the same way it fetches <code>helm</code>, so a release
+driven by <a href="./helm_install.html#helm_install">helm_install</a> or
+<a href="./helm_install.html#helm_upgrade">helm_upgrade</a> can be inspected from the same
+workspace without installing anything on the host. Everyone on a project gets
+the same <code>kubectl</code> version, on every platform Bazel runs on.</p>
+<h2 id="setup"><a class="header" href="#setup">Setup</a></h2>
+<p><code>rules_helm</code> registers the <code>kubectl</code> toolchains itself. To get the <code>@kubectl</code>
+repository for <code>bazel run</code>, add the extension to your <code>MODULE.bazel</code>:</p>
+<pre><code class="language-python">k8s = use_extension("@rules_helm//k8s:extensions.bzl", "k8s")
+k8s.kubectl()
+use_repo(k8s, "kubectl")
 </code></pre>
-<h2 id="run-as-a-tool"><a class="header" href="#run-as-a-tool">Run as a tool</a></h2>
-<pre><code class="language-bash">bazel run @helm//:helm -- ...
-</code></pre>
-<p>A matching <code>kubectl</code> is available for inspecting the cluster after a deploy. See
-<a href="./k8s.html">Kubernetes tools</a> for setup.</p>
-<pre><code class="language-bash">bazel run @kubectl//:kubectl -- ...
+<h2 id="debugging-a-helm-deploy"><a class="header" href="#debugging-a-helm-deploy">Debugging a helm deploy</a></h2>
+<p><code>bazel run</code> passes your environment through, so <code>KUBECONFIG</code>, <code>~/.kube/config</code>
+and the usual <code>--context</code> / <code>--namespace</code> flags behave exactly as they do for a
+locally installed <code>kubectl</code>.</p>
+<pre><code class="language-bash"># Roll out the release
+bazel run //deploy:my_chart.install
+
+# What did helm do?
+bazel run @helm//:helm -- status my-release
+bazel run @helm//:helm -- history my-release
+bazel run @helm//:helm -- get manifest my-release
+
+# What is the cluster doing with it?
+bazel run @kubectl//:kubectl -- get pods --namespace my-namespace
+bazel run @kubectl//:kubectl -- describe deployment my-release
+bazel run @kubectl//:kubectl -- logs deployment/my-release --tail 100
+bazel run @kubectl//:kubectl -- get events --sort-by=.lastTimestamp
 </code></pre>
 <h2 id="use-in-a-genrule"><a class="header" href="#use-in-a-genrule">Use in a genrule</a></h2>
+<p>The resolved toolchain exposes the binary as the <code>KUBECTL_BIN</code> make variable:</p>
 <pre><code class="language-python">genrule(
-    name = "genrule",
-    srcs = [":chart"],
-    outs = ["template.yaml"],
-    cmd = "$(HELM_BIN) template my-chart $(execpath :chart) &gt; $@",
-    toolchains = ["@rules_helm//helm:current_toolchain"],
+    name = "kubectl_version",
+    outs = ["kubectl_version.json"],
+    cmd = "$(KUBECTL_BIN) version --client --output json &gt; $@",
+    toolchains = ["@rules_helm//k8s:current_kubectl_toolchain"],
 )
 </code></pre>
-<h2 id="environment-variables"><a class="header" href="#environment-variables">Environment variables</a></h2>
-<h3 id="rules_helm_image_push_concurrency"><a class="header" href="#rules_helm_image_push_concurrency"><code>RULES_HELM_IMAGE_PUSH_CONCURRENCY</code></a></h3>
-<p>How many of a chart's bundled image pushers run at once. Defaults to <code>4</code>, and applies to
-<a href="https://periareon.github.io/rules_helm/defs.html#helm_push">helm_push</a>,
-<a href="https://periareon.github.io/rules_helm/defs.html#helm_push_images">helm_push_images</a>,
-<a href="https://periareon.github.io/rules_helm/defs.html#helm_install">helm_install</a> and
-<a href="https://periareon.github.io/rules_helm/defs.html#helm_upgrade">helm_upgrade</a>.</p>
-<p>Each image is pushed by its own process, which authenticates with the registry before it looks at
-anything, so a chart with many images spends most of the push waiting rather than transferring.
-Running the pushers concurrently keeps that cost from scaling with the image count.</p>
-<p>Set it to <code>1</code> to push one image at a time. A serial run also streams each pusher's output live on
-its own streams, instead of capturing it and replaying it as a block once the pusher exits, which
-makes a single failing push easier to follow.</p>
-<p>Values that are not a positive integer are ignored with a warning.</p>
+<h2 id="pinning-a-version"><a class="header" href="#pinning-a-version">Pinning a version</a></h2>
+<p><code>rules_helm</code> ships checksums for a single default <code>kubectl</code> version. Clusters
+that are more than one minor version away from it should pin a matching
+release, which the root module can do with the <code>version</code> attribute:</p>
+<pre><code class="language-python">k8s.kubectl(version = "1.36.5")
+</code></pre>
+<p>Checksums for versions <code>rules_helm</code> does not know about are looked up from the
+upstream <code>.sha256</code> files while the extension is evaluated. On Bazel 8.5 and newer
+the digests are then stored as facts in <code>MODULE.bazel.lock</code>, so the lookup
+happens once per version and airgapped builds keep working from the lockfile.
+Older Bazel versions repeat the lookup whenever the extension is re-evaluated.</p>
+<p>Several versions can live side by side by giving each tag its own repository
+name. Only the first <code>kubectl</code> tag in the root module decides which version the
+registered toolchains serve:</p>
+<pre><code class="language-python">k8s.kubectl()
+k8s.kubectl(name = "kubectl_legacy", version = "1.35.6")
+use_repo(k8s, "kubectl", "kubectl_legacy")
+</code></pre>
+<pre><code class="language-bash">bazel run @kubectl_legacy//:kubectl -- get nodes
+</code></pre>
+<h2 id="for-rule-authors"><a class="header" href="#for-rule-authors">For rule authors</a></h2>
+<p>Rules that need <code>kubectl</code> in an action depend on the
+<code>@rules_helm//k8s:kubectl_toolchain_type</code> toolchain type and read the binary
+from <code>ctx.toolchains[...].kubectl</code>. See <a href="./k8s_defs.html#kubectl_toolchain">kubectl_toolchain</a>
+for the provider fields and the <a href="./k8s_extensions.html">k8s extension</a> for the
+<code>MODULE.bazel</code> API.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="extensions.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
 
-                            <a rel="next prefetch" href="rules.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="k8s_defs.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -208,8 +240,11 @@ makes a single failing push easier to follow.</p>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="extensions.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
 
-                    <a rel="next prefetch" href="rules.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="k8s_defs.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
