@@ -27,6 +27,7 @@ filegroup(
     name = "bzl_srcs",
     srcs = glob(["*.bzl"]) + [
         "//helm:bzl_srcs",
+        "//k8s:bzl_srcs",
     ],
     visibility = ["//visibility:public"],
 )

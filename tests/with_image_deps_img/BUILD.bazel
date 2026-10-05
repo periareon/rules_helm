@@ -22,7 +22,16 @@ helm_chart(
         ":image_d.push",
         ":image_e.push",
         ":image_f.push",
+        # An image pulled with `img_pull` (an `image_import` target).
+        "@rules_helm_test_img_container_base",
     ],
+    substitutions = {
+        # The canonical repository name of the pulled image differs between
+        # Bazel versions (`~` vs `+` separators). Substitutions are applied
+        # before image stamping, so resolve the label here instead of
+        # hardcoding it in `values.yaml`.
+        "base_container_label": str(package_relative_label("@rules_helm_test_img_container_base//:image")),
+    },
     target_compatible_with = EXCLUDE_WINDOWS,
 )
 
@@ -49,6 +58,8 @@ helm_package_regex_test(
         r"image_d:\s+url:\s+\"docker.io/rules_helm/test_img/image_d:4.5.6\"",
         r"image_e:\s+url:\s+\"docker.io/rules_helm/test_img/image_e:7.8.9\"",
         r"image_f:\s+url:\s+\"docker.io/rules_helm/test_img/image_f@sha256:[a-z0-9]{64}\"",
+        r"image_pull:\s+url:\s+\"index.docker.io/library/alpine@sha256:25109184c71bdad752c8312a8623239686a9a2071e8825f20acb8f2198c3f659\"",
+        r"image_pull_tag:\s+url:\s+\"index.docker.io/library/alpine:3.23.3\"",
     ],
 )
 

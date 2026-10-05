@@ -145,6 +145,24 @@ stardoc(
     deps = ["//helm:helm_toolchain_bzl"],
 )
 
+stardoc(
+    name = "k8s_defs",
+    out = "src/k8s_defs.md",
+    input = "//k8s:defs.bzl",
+    table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
+    tags = ["manual"],
+    deps = ["//k8s:defs_bzl"],
+)
+
+stardoc(
+    name = "k8s_extensions",
+    out = "src/k8s_extensions.md",
+    input = "//k8s:extensions.bzl",
+    table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
+    tags = ["manual"],
+    deps = ["//k8s:extensions_bzl"],
+)
+
 mdbook(
     name = "book",
     srcs = glob(["src/**/*.md"]) + [
@@ -163,6 +181,8 @@ mdbook(
         ":helm_push",
         ":helm_template",
         ":helm_toolchain",
+        ":k8s_defs",
+        ":k8s_extensions",
         ":settings",
     ],
     book = "book.toml",

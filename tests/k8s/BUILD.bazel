@@ -1,0 +1,54 @@
+load("@rules_go//go:def.bzl", "go_test")
+
+# buildifier: disable=bzl-visibility
+load("//k8s/private:kubectl_versions.bzl", "DEFAULT_KUBECTL_VERSION")
+
+# Must match the `k8s_dev.kubectl(name = "kubectl_pinned", ...)` tag in MODULE.bazel.
+PINNED_KUBECTL_VERSION = "1.36.5"
+
+# The host alias repo created by the default `k8s.kubectl()` tag.
+go_test(
+    name = "kubectl_host_alias_test",
+    size = "small",
+    srcs = ["kubectl_version_test.go"],
+    data = ["@kubectl"],
+    env = {
+        "EXPECTED_VERSION": "v" + DEFAULT_KUBECTL_VERSION,
+        "KUBECTL": "$(rlocationpath @kubectl//:kubectl)",
+    },
+    deps = ["@rules_go//go/runfiles"],
+)
+
+# Toolchain resolution and the `KUBECTL_BIN` make variable.
+genrule(
+    name = "kubectl_genrule_version",
+    outs = ["kubectl_genrule_version.json"],
+    cmd = "$(KUBECTL_BIN) version --client --output json > $@",
+    toolchains = ["//k8s:current_kubectl_toolchain"],
+)
+
+go_test(
+    name = "kubectl_genrule_test",
+    size = "small",
+    srcs = ["kubectl_version_test.go"],
+    data = [":kubectl_genrule_version"],
+    env = {
+        "EXPECTED_VERSION": "v" + DEFAULT_KUBECTL_VERSION,
+        "KUBECTL_VERSION_JSON": "$(rlocationpath :kubectl_genrule_version)",
+    },
+    deps = ["@rules_go//go/runfiles"],
+)
+
+# A version without checksums in `kubectl_versions.bzl`, resolved by the
+# extension at fetch time (and persisted as lockfile facts on Bazel 8.5+).
+go_test(
+    name = "kubectl_pinned_version_test",
+    size = "small",
+    srcs = ["kubectl_version_test.go"],
+    data = ["@kubectl_pinned//:kubectl"],
+    env = {
+        "EXPECTED_VERSION": "v" + PINNED_KUBECTL_VERSION,
+        "KUBECTL": "$(rlocationpath @kubectl_pinned//:kubectl)",
+    },
+    deps = ["@rules_go//go/runfiles"],
+)
