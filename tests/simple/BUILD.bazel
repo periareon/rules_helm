@@ -54,3 +54,29 @@ diff_test(
     file1 = "simple.oci_digest.golden",
     file2 = ":simple.oci_digest",
 )
+
+filegroup(
+    name = "simple_oci_manifest",
+    srcs = [":simple.oci_digest"],
+    output_group = "manifest",
+)
+
+filegroup(
+    name = "simple_oci_config",
+    srcs = [":simple.oci_digest"],
+    output_group = "config",
+)
+
+# The digest above is the sha256 of this manifest, so locking both keeps them
+# honest: changing one without the other fails here.
+diff_test(
+    name = "simple_oci_manifest_test",
+    file1 = "simple.oci_manifest.golden",
+    file2 = ":simple_oci_manifest",
+)
+
+diff_test(
+    name = "simple_oci_config_test",
+    file1 = "simple.oci_config.golden",
+    file2 = ":simple_oci_config",
+)

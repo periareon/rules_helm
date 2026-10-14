@@ -127,6 +127,8 @@ func main() {
 	chartTgz := flag.String("chart", "", "Path to the Helm chart .tgz file")
 	metadataJSON := flag.String("metadata", "", "Path to the chart metadata JSON file")
 	digestOutput := flag.String("digest_output", "", "Path to write the manifest digest (sha256:...)")
+	manifestOutput := flag.String("manifest_output", "", "Optional path to write the OCI manifest bytes")
+	configOutput := flag.String("config_output", "", "Optional path to write the OCI config blob bytes")
 
 	flag.Parse()
 
@@ -213,5 +215,22 @@ func main() {
 	// Write digest (no trailing newline)
 	if err := os.WriteFile(*digestOutput, []byte(digest.String()), 0644); err != nil {
 		log.Fatalf("Error writing digest file: %v", err)
+	}
+
+	// The manifest and config blobs are written verbatim, never re-marshalled by
+	// a consumer: re-serializing this JSON can reorder keys or change whitespace,
+	// which changes the digest above and invalidates every descriptor that
+	// references it. A pusher that uploads the blobs itself needs these exact
+	// bytes to PUT.
+	if *manifestOutput != "" {
+		if err := os.WriteFile(*manifestOutput, manifestBytes, 0644); err != nil {
+			log.Fatalf("Error writing manifest file: %v", err)
+		}
+	}
+
+	if *configOutput != "" {
+		if err := os.WriteFile(*configOutput, configBlob, 0644); err != nil {
+			log.Fatalf("Error writing config file: %v", err)
+		}
 	}
 }
