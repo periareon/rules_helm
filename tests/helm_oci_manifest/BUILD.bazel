@@ -1,0 +1,158 @@
+load("@bazel_skylib//rules:write_file.bzl", "write_file")
+load("@rules_go//go:def.bzl", "go_test")
+load("@rules_img//img:multi_deploy.bzl", "multi_deploy")
+load("//helm:defs.bzl", "helm_chart")
+load("//helm:rules_img.bzl", "helm_oci_manifest")
+
+EXCLUDE_WINDOWS = select({
+    # As in //tests/with_image_deps_img.
+    "@platforms//os:windows": ["@platforms//:incompatible"],
+    "//conditions:default": [],
+})
+
+# These charts have no templates, which Helm 4 lint rejects, so linting is
+# disabled for them as in //tests/no_templates.
+helm_chart(
+    name = "simple",
+    chart_json = json.encode({
+        "apiVersion": "v2",
+        "appVersion": "1.16.0",
+        "description": "A Helm chart for Kubernetes",
+        "icon": "https://helm.sh/img/helm.svg",
+        "name": "simple",
+        "type": "application",
+        "version": "0.1.0",
+    }),
+    tags = ["no-helm-lint"],
+    values_json = json.encode({}),
+)
+
+# A description that `rules_img` would otherwise expand as a Go template.
+helm_chart(
+    name = "template",
+    chart_json = json.encode({
+        "apiVersion": "v2",
+        "description": "Renders {{ .Values.name }} and a lone {{",
+        "name": "template",
+        "version": "0.1.0",
+    }),
+    tags = ["no-helm-lint"],
+    values_json = json.encode({}),
+)
+
+# A version with build metadata, whose `+` is not valid in a tag.
+helm_chart(
+    name = "plus",
+    chart_json = json.encode({
+        "apiVersion": "v2",
+        "name": "plus",
+        "version": "0.1.0+build.1",
+    }),
+    tags = ["no-helm-lint"],
+    values_json = json.encode({}),
+)
+
+helm_oci_manifest(
+    name = "simple.oci_manifest",
+    chart = ":simple",
+    registry_url = "oci://localhost:5051/charts",
+    target_compatible_with = EXCLUDE_WINDOWS,
+)
+
+helm_oci_manifest(
+    name = "template.oci_manifest",
+    chart = ":template",
+    registry_url = "oci://localhost:5051/charts",
+    target_compatible_with = EXCLUDE_WINDOWS,
+)
+
+helm_oci_manifest(
+    name = "plus.oci_manifest",
+    chart = ":plus",
+    registry_url = "oci://localhost:5051/charts",
+    target_compatible_with = EXCLUDE_WINDOWS,
+)
+
+multi_deploy(
+    name = "deploy",
+    operations = [
+        ":plus.oci_manifest",
+        ":simple.oci_manifest",
+        ":template.oci_manifest",
+    ],
+    target_compatible_with = EXCLUDE_WINDOWS,
+)
+
+helm_oci_manifest(
+    name = "simple.oci_manifest_trailing_slash",
+    chart = ":simple",
+    registry_url = "oci://localhost:5051/charts/",
+    target_compatible_with = EXCLUDE_WINDOWS,
+)
+
+multi_deploy(
+    name = "deploy_trailing_slash",
+    operations = [":simple.oci_manifest_trailing_slash"],
+    target_compatible_with = EXCLUDE_WINDOWS,
+)
+
+write_file(
+    name = "registry_url_file",
+    out = "registry_url.txt",
+    content = [
+        "oci://localhost:5051/charts",
+        "",
+    ],
+)
+
+helm_oci_manifest(
+    name = "simple.oci_manifest_url_file",
+    chart = ":simple",
+    registry_url_file = ":registry_url_file",
+    target_compatible_with = EXCLUDE_WINDOWS,
+)
+
+multi_deploy(
+    name = "deploy_url_file",
+    operations = [":simple.oci_manifest_url_file"],
+    target_compatible_with = EXCLUDE_WINDOWS,
+)
+
+# The `simple.helm_push_*.golden` files are what a real `helm push` of
+# `:simple` sends. To regenerate them after `:simple`'s .tgz changes, run
+# `crane registry serve --address localhost:5051`, set the .tgz mtime to the
+# epoch, run `TZ=UTC helm push simple-0.1.0.tgz oci://localhost:5051/golden
+# --plain-http`, and save `crane manifest localhost:5051/golden/simple:0.1.0`
+# and `crane blob` of its config digest, both without a trailing newline.
+go_test(
+    name = "helm_oci_manifest_test",
+    srcs = ["helm_oci_manifest_test.go"],
+    data = [
+        "simple.helm_push_config.golden",
+        "simple.helm_push_manifest.golden",
+        ":deploy",
+        ":deploy_trailing_slash",
+        ":deploy_url_file",
+        ":plus",
+        ":plus.oci_digest",
+        ":simple",
+        ":simple.oci_digest",
+        ":template",
+        ":template.oci_digest",
+    ],
+    env = {
+        "DEPLOY": "$(rlocationpath :deploy)",
+        "DEPLOY_TRAILING_SLASH": "$(rlocationpath :deploy_trailing_slash)",
+        "DEPLOY_URL_FILE": "$(rlocationpath :deploy_url_file)",
+        "HELM_PUSH_CONFIG": "$(rlocationpath simple.helm_push_config.golden)",
+        "HELM_PUSH_MANIFEST": "$(rlocationpath simple.helm_push_manifest.golden)",
+        "PLUS_CHART": "$(rlocationpath :plus)",
+        "PLUS_DIGEST": "$(rlocationpath :plus.oci_digest)",
+        "SIMPLE_CHART": "$(rlocationpath :simple)",
+        "SIMPLE_DIGEST": "$(rlocationpath :simple.oci_digest)",
+        "TEMPLATE_CHART": "$(rlocationpath :template)",
+        "TEMPLATE_DIGEST": "$(rlocationpath :template.oci_digest)",
+    },
+    target_compatible_with = EXCLUDE_WINDOWS,
+    deps = ["@rules_go//go/runfiles"],
+)

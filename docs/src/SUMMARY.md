@@ -17,6 +17,7 @@
   - [helm_push](./helm_push.md)
   - [helm_template](./helm_template.md)
   - [helm_toolchain](./helm_toolchain.md)
+  - [rules_img](./rules_img.md)
 
 - [Extensions](./extensions.md)
 
