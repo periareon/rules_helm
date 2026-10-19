@@ -146,6 +146,15 @@ stardoc(
 )
 
 stardoc(
+    name = "rules_img",
+    out = "src/rules_img.md",
+    input = "//helm:rules_img.bzl",
+    table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
+    tags = ["manual"],
+    deps = ["//helm:rules_img_bzl"],
+)
+
+stardoc(
     name = "k8s_defs",
     out = "src/k8s_defs.md",
     input = "//k8s:defs.bzl",
@@ -183,6 +192,7 @@ mdbook(
         ":helm_toolchain",
         ":k8s_defs",
         ":k8s_extensions",
+        ":rules_img",
         ":settings",
     ],
     book = "book.toml",

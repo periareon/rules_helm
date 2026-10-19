@@ -1,0 +1,21 @@
+load("@rules_go//go:def.bzl", "go_binary", "go_library", "go_test")
+
+go_library(
+    name = "oci_parts_lib",
+    srcs = ["oci_parts.go"],
+    importpath = "github.com/periareon/rules_helm/helm/private/oci_parts",
+    visibility = ["//visibility:private"],
+    deps = ["//helm/private/oci_digest/ociartifact"],
+)
+
+go_binary(
+    name = "oci_parts",
+    embed = [":oci_parts_lib"],
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "oci_parts_test",
+    srcs = ["oci_parts_test.go"],
+    embed = [":oci_parts_lib"],
+)
