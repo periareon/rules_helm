@@ -1,13 +1,26 @@
-load("@rules_go//go:def.bzl", "go_binary")
+load("@rules_go//go:def.bzl", "go_binary", "go_library", "go_test")
 
-go_binary(
-    name = "packager",
+go_library(
+    name = "packager_lib",
     srcs = ["packager.go"],
-    visibility = ["//visibility:public"],
+    importpath = "github.com/periareon/rules_helm/helm/private/packager",
+    visibility = ["//visibility:private"],
     deps = [
         "//helm/private/helm_utils",
         "@in_gopkg_yaml_v3//:yaml_v3",
         "@io_k8s_sigs_yaml//:yaml",
         "@sh_helm_helm_v4//pkg/chart/v2:chart",
     ],
+)
+
+go_binary(
+    name = "packager",
+    embed = [":packager_lib"],
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "packager_test",
+    srcs = ["packager_test.go"],
+    embed = [":packager_lib"],
 )

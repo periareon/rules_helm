@@ -30,17 +30,19 @@ type HelmChart = helm.Metadata
 
 type ImageInfo struct {
 	Label      string
+	Aliases    []string
 	Repository string
 	Digest     string
 	RemoteTag  string
 }
 
 type ImageManifest struct {
-	Label          string `json:"label"`
-	RepositoryPath string `json:"repository_path"`
-	OciLayoutDir   string `json:"oci_layout_dir"`
-	ManifestFile   string `json:"manifest_file"`
-	RemoteTagsPath string `json:"remote_tags_path"`
+	Label          string   `json:"label"`
+	Aliases        []string `json:"aliases"`
+	RepositoryPath string   `json:"repository_path"`
+	OciLayoutDir   string   `json:"oci_layout_dir"`
+	ManifestFile   string   `json:"manifest_file"`
+	RemoteTagsPath string   `json:"remote_tags_path"`
 }
 
 type ImageIndexManifest struct {
@@ -211,6 +213,7 @@ func loadImageManifest(imageManifestPath string) (ImageManifest, error) {
 func imageManifestToImageInfo(imageManifest ImageManifest) (ImageInfo, error) {
 	var imageInfo ImageInfo
 	imageInfo.Label = imageManifest.Label
+	imageInfo.Aliases = imageManifest.Aliases
 
 	repository, err := os.ReadFile(imageManifest.RepositoryPath)
 	if err != nil {
@@ -297,23 +300,32 @@ func loadImageStamps(imageManifestPath string) ([]ReplacementGroup, error) {
 	isSingleImage := len(imageInfos) == 1
 
 	for _, imageInfo := range imageInfos {
-		repository := imageInfo.Repository
-		digest := imageInfo.Digest
-		tag := imageInfo.RemoteTag
+		replacementGroups = append(replacementGroups, imageStamps(imageInfo, isSingleImage))
+	}
 
-		workspaceLabel := strings.Replace(imageInfo.Label, "@@", "@", 1)
-		bzmodLabel := fmt.Sprintf("@%s", imageInfo.Label)
-		imageUrl := fmt.Sprintf("%s@%s", repository, digest)
-		repoSegments := strings.Split(repository, "/")
+	return replacementGroups, nil
+}
 
-		replacements := map[string]string{
-			workspaceLabel:                 imageUrl,
-			workspaceLabel + ".repository": repository,
-			workspaceLabel + ".digest":     digest,
-			bzmodLabel:                     imageUrl,
-			bzmodLabel + ".repository":     repository,
-			bzmodLabel + ".digest":         digest,
-		}
+func imageStamps(imageInfo ImageInfo, isSingleImage bool) ReplacementGroup {
+	repository := imageInfo.Repository
+	digest := imageInfo.Digest
+	tag := imageInfo.RemoteTag
+
+	imageUrl := fmt.Sprintf("%s@%s", repository, digest)
+	repoSegments := strings.Split(repository, "/")
+
+	labels := append([]string{imageInfo.Label}, imageInfo.Aliases...)
+	replacements := map[string]string{}
+	for _, label := range labels {
+		workspaceLabel := strings.Replace(label, "@@", "@", 1)
+		bzmodLabel := fmt.Sprintf("@%s", label)
+
+		replacements[workspaceLabel] = imageUrl
+		replacements[workspaceLabel+".repository"] = repository
+		replacements[workspaceLabel+".digest"] = digest
+		replacements[bzmodLabel] = imageUrl
+		replacements[bzmodLabel+".repository"] = repository
+		replacements[bzmodLabel+".digest"] = digest
 		if len(repoSegments) > 0 {
 			replacements[workspaceLabel+".registry"] = repoSegments[0]
 			replacements[bzmodLabel+".registry"] = repoSegments[0]
@@ -326,24 +338,22 @@ func loadImageStamps(imageManifestPath string) ([]ReplacementGroup, error) {
 			replacements[workspaceLabel+".tag"] = tag
 			replacements[bzmodLabel+".tag"] = tag
 		}
-
-		// in case of single image add well-known replacements for image details
-		if isSingleImage {
-			replacements["bazel.image.url"] = imageUrl
-			replacements["bazel.image.repository"] = repository
-			replacements["bazel.image.digest"] = digest
-			if tag != "" {
-				replacements["bazel.image.tag"] = tag
-			}
-		}
-
-		replacementGroups = append(replacementGroups, ReplacementGroup{
-			Name:         imageInfo.Label,
-			Replacements: replacements,
-		})
 	}
 
-	return replacementGroups, nil
+	// in case of single image add well-known replacements for image details
+	if isSingleImage {
+		replacements["bazel.image.url"] = imageUrl
+		replacements["bazel.image.repository"] = repository
+		replacements["bazel.image.digest"] = digest
+		if tag != "" {
+			replacements["bazel.image.tag"] = tag
+		}
+	}
+
+	return ReplacementGroup{
+		Name:         strings.Join(labels, " or "),
+		Replacements: replacements,
+	}
 }
 
 func replaceKeyValues(content string, replacementGroups []ReplacementGroup, mustReplace bool) (string, error) {

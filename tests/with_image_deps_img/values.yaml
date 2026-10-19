@@ -27,6 +27,12 @@ bazel_produced_images:
     url: "{@{base_container_label}}"
   image_pull_tag:
     url: "{@{base_container_label}.repository}:{@{base_container_label}.tag}"
+  image_pull_import:
+    url: "{@{base_container_import_label}}"
+  image_pull_final:
+    url: "{@{base_container_final_label}}"
+  image_pull_repo:
+    url: "{@{base_container_repo_label}}"
 
 imagePullSecrets: []
 nameOverride: ""
