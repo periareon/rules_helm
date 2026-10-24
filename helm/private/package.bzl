@@ -138,6 +138,7 @@ def _helm_package_impl(ctx):
             content = json.encode_indent(
                 struct(
                     label = str(image.label),
+                    aliases = [str(alias) for alias in image[ImageRepositoryInfo].aliases],
                     repository_path = image[ImageRepositoryInfo].repository_file.path,
                     oci_layout_dir = oci_layout_dir,
                     manifest_file = manifest_file,
