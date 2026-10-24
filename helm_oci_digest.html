@@ -174,9 +174,13 @@ helm_oci_digest(<a href="#helm_oci_digest-name">name</a>, <a href="#helm_oci_dig
 </pre>
 <p>Compute the OCI manifest digest for a Helm chart at build time.</p>
 <p>This rule constructs the OCI manifest that <code>helm push</code> (Helm v4) would
-create and computes its sha256 digest. The .tgz file's mtime is used for
-the creation annotation, formatted in UTC to match the push side.</p>
+create and computes its sha256 digest. The creation annotation comes from
+the chart's own <code>org.opencontainers.image.created</code> annotation, resolved by
+the stamping pass, and is formatted in UTC to match the push side.</p>
 <p>The digest file contains a single line: <code>sha256:&lt;hex&gt;</code>.</p>
+<p>The manifest and config blobs are also emitted, so a pusher that uploads
+them itself can PUT the exact bytes this digest was computed over. They are
+not in the default outputs; read them off <code>HelmOCIDigestInfo</code>.</p>
 <p><strong>ATTRIBUTES</strong></p>
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
 <tr><td style="text-align: left"><a id="helm_oci_digest-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
@@ -188,12 +192,14 @@ the creation annotation, formatted in UTC to match the push side.</p>
 <pre>
 load("@rules_helm//helm:helm_oci_digest.bzl", "HelmOCIDigestInfo")
 
-HelmOCIDigestInfo(<a href="#HelmOCIDigestInfo-digest">digest</a>)
+HelmOCIDigestInfo(<a href="#HelmOCIDigestInfo-config">config</a>, <a href="#HelmOCIDigestInfo-digest">digest</a>, <a href="#HelmOCIDigestInfo-manifest">manifest</a>)
 </pre>
 <p>OCI manifest digest for a Helm chart, computed at build time.</p>
 <p><strong>FIELDS</strong></p>
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="HelmOCIDigestInfo-config"></a>config</td><td style="text-align: left">File: The raw OCI config blob (application/vnd.cncf.helm.config.v1+json)</td></tr>
 <tr><td style="text-align: left"><a id="HelmOCIDigestInfo-digest"></a>digest</td><td style="text-align: left">File: Text file containing the OCI manifest digest (sha256:...)</td></tr>
+<tr><td style="text-align: left"><a id="HelmOCIDigestInfo-manifest"></a>manifest</td><td style="text-align: left">File: The raw OCI manifest bytes whose digest is in <code>digest</code></td></tr>
 </tbody></table>
 </div>
                     </main>
