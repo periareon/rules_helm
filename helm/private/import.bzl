@@ -130,55 +130,71 @@ def _helm_import_repository_impl(repository_ctx):
         url, _, chart_version = chart_url.rpartition(":")
         hostname, _, chart_path = url.removeprefix("oci://").partition("/")
 
-        au = authn.new(repository_ctx)
-        token = au.get_token(hostname, chart_path)
+        # A Helm chart's OCI layer is the chart .tgz, so `sha256` names its
+        # blob, and a cached blob needs neither a token nor the manifest.
+        result = None
+        if repository_ctx.attr.sha256:
+            result = repository_ctx.download(
+                output = repository_ctx.path(chart_file),
+                url = "https://{}/v2/{}/blobs/sha256:{}".format(
+                    hostname,
+                    chart_path,
+                    repository_ctx.attr.sha256,
+                ),
+                sha256 = repository_ctx.attr.sha256,
+                allow_fail = True,
+            )
 
-        # Find the digest for the layer with the chart package in the image manifest:
-        manifest_json = "manifest.json"
-        manifest_url = "https://{}/v2/{}/manifests/{}".format(
-            hostname,
-            chart_path,
-            chart_version,
-        )
-        repository_ctx.download(
-            output = manifest_json,
-            url = manifest_url,
-            auth = {
-                manifest_url: token,
-            },
-            # Copied from `helm pull --debug`
-            headers = {
-                "Accept": [
-                    "application/vnd.docker.distribution.manifest.v2+json",
-                    "application/vnd.docker.distribution.manifest.list.v2+json",
-                    "application/vnd.oci.image.manifest.v1+json",
-                    "application/vnd.oci.image.index.v1+json",
-                    "*/*",
-                ],
-            },
-        )
-        manifest = json.decode(repository_ctx.read(manifest_json))
+        if not result or not result.success:
+            au = authn.new(repository_ctx)
+            token = au.get_token(hostname, chart_path)
 
-        # https://helm.sh/docs/topics/registries/#helm-chart-manifest
-        if manifest["config"]["mediaType"] != "application/vnd.cncf.helm.config.v1+json":
-            fail("{} is not a Helm chart package".format(chart_url))
+            # Find the digest for the layer with the chart package in the image manifest:
+            manifest_json = "manifest.json"
+            manifest_url = "https://{}/v2/{}/manifests/{}".format(
+                hostname,
+                chart_path,
+                chart_version,
+            )
+            repository_ctx.download(
+                output = manifest_json,
+                url = manifest_url,
+                auth = {
+                    manifest_url: token,
+                },
+                # Copied from `helm pull --debug`
+                headers = {
+                    "Accept": [
+                        "application/vnd.docker.distribution.manifest.v2+json",
+                        "application/vnd.docker.distribution.manifest.list.v2+json",
+                        "application/vnd.oci.image.manifest.v1+json",
+                        "application/vnd.oci.image.index.v1+json",
+                        "*/*",
+                    ],
+                },
+            )
+            manifest = json.decode(repository_ctx.read(manifest_json))
 
-        chart_digest = _find_chart_digest(manifest)
-        chart_blob_url = "https://{}/v2/{}/blobs/{}".format(
-            hostname,
-            chart_path,
-            chart_digest,
-        )
+            # https://helm.sh/docs/topics/registries/#helm-chart-manifest
+            if manifest.get("config", {}).get("mediaType") != "application/vnd.cncf.helm.config.v1+json":
+                fail("{} is not a Helm chart package".format(chart_url))
 
-        # Download the chart package:
-        result = repository_ctx.download(
-            output = repository_ctx.path(chart_file),
-            url = chart_blob_url,
-            sha256 = repository_ctx.attr.sha256,
-            auth = {
-                chart_blob_url: token,
-            },
-        )
+            chart_digest = _find_chart_digest(manifest)
+            chart_blob_url = "https://{}/v2/{}/blobs/{}".format(
+                hostname,
+                chart_path,
+                chart_digest,
+            )
+
+            # Download the chart package:
+            result = repository_ctx.download(
+                output = repository_ctx.path(chart_file),
+                url = chart_blob_url,
+                sha256 = repository_ctx.attr.sha256,
+                auth = {
+                    chart_blob_url: token,
+                },
+            )
 
     else:
         fail("cannot download {} from {}, unsupported scheme".format(repository_ctx.attr.chart_name, chart_url))
@@ -227,7 +243,7 @@ helm_import_repository = repository_rule(
             doc = "Chart repository url where to locate the requested chart. Mutually exclusive with `url`.",
         ),
         "sha256": attr.string(
-            doc = "The expected SHA-256 hash of the chart imported.",
+            doc = "The expected SHA-256 hash of the chart imported. For an `oci://` url, a chart already in the repository cache is then fetched without any request to the registry.",
         ),
         "url": attr.string(
             doc = "The url where a chart can be directly downloaded. Mutually exclusive with `chart_name`, `repository`, and `version`",
