@@ -61,7 +61,7 @@ def _helm_toolchain_repository_impl(repository_ctx):
         repository_ctx.name,
     ))
 
-    return {
+    attrs_for_reproducibility = {
         "integrity": results.integrity,
         "name": repository_ctx.name,
         "platform": repository_ctx.attr.platform,
@@ -69,6 +69,16 @@ def _helm_toolchain_repository_impl(repository_ctx):
         "strip_prefix": repository_ctx.attr.strip_prefix,
         "urls": repository_ctx.attr.urls,
     }
+
+    # Bazel <8.3.0 lacks repository_ctx.repo_metadata
+    if not hasattr(repository_ctx, "repo_metadata"):
+        return attrs_for_reproducibility
+
+    reproducible = repository_ctx.attr.integrity != ""
+    return repository_ctx.repo_metadata(
+        reproducible = reproducible,
+        attrs_for_reproducibility = {} if reproducible else attrs_for_reproducibility,
+    )
 
 helm_toolchain_repository = repository_rule(
     implementation = _helm_toolchain_repository_impl,
@@ -147,6 +157,12 @@ def _helm_plugin_repository_impl(repository_ctx):
     repository_ctx.file("WORKSPACE.bazel", _HELM_WORKSPACE_CONTENT.format(
         repository_ctx.name,
     ))
+
+    # Bazel <8.3.0 lacks repository_ctx.repo_metadata
+    if not hasattr(repository_ctx, "repo_metadata"):
+        return None
+
+    return repository_ctx.repo_metadata(reproducible = repository_ctx.attr.integrity != "")
 
 helm_plugin_repository = repository_rule(
     implementation = _helm_plugin_repository_impl,
@@ -302,6 +318,12 @@ def _helm_toolchain_repository_hub_impl(repository_ctx):
         target_settings = repository_ctx.attr.target_settings,
         toolchain_type = str(repository_ctx.attr.toolchain_type),
     ))
+
+    # Bazel <8.3.0 lacks repository_ctx.repo_metadata
+    if not hasattr(repository_ctx, "repo_metadata"):
+        return None
+
+    return repository_ctx.repo_metadata(reproducible = True)
 
 helm_toolchain_repository_hub = repository_rule(
     doc = (
