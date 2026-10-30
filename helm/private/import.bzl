@@ -1,6 +1,8 @@
 """Helm rules for managing external dependencies"""
 
+load(":chart_utils.bzl", "chart_utils")
 load(":import_authn.bzl", "authn")
+load(":oci_chart.bzl", "oci_chart")
 load(":providers.bzl", "HelmPackageInfo")
 
 def _helm_import_impl(ctx):
@@ -60,6 +62,13 @@ def _find_chart_url(repository_ctx, repo_file, chart_name, chart_version):
                 return "{}/{}".format(repository_ctx.attr.repository, url)
     fail("cannot find {} (version {}) in {}".format(chart_name, chart_version, repository_ctx.attr.repository))
 
+def _get_chart_name_and_version(chart_url, chart_file):
+    if chart_url.startswith("oci"):
+        # The url names the chart and the version exactly.
+        chart_name, chart_version = chart_url.split("/")[-1].split(":")
+        return chart_name, chart_version
+    return chart_utils.split_chart_file(chart_file)
+
 def _get_chart_file_name(chart_url):
     if chart_url.startswith("http") and chart_url.endswith(".tgz"):
         return chart_url.split("/")[-1]
@@ -67,13 +76,6 @@ def _get_chart_file_name(chart_url):
         chart_name, chart_version = chart_url.split("/")[-1].split(":")
         return "{}-{}.tgz".format(chart_name, chart_version)
     fail("cannot determine chart file name from {}".format(chart_url))
-
-def _find_chart_digest(manifest):
-    for layer in manifest["layers"]:
-        # https://helm.sh/docs/topics/registries/#helm-chart-manifest
-        if layer["mediaType"] == "application/vnd.cncf.helm.chart.content.v1.tar+gzip":
-            return layer["digest"]
-    fail("could not find chart content layer")
 
 _HELM_DEP_BUILD_FILE = """\
 load("@rules_helm//helm:defs.bzl", "helm_import")
@@ -127,8 +129,7 @@ def _helm_import_repository_impl(repository_ctx):
             sha256 = repository_ctx.attr.sha256,
         )
     elif chart_url.startswith("oci"):
-        url, _, chart_version = chart_url.rpartition(":")
-        hostname, _, chart_path = url.removeprefix("oci://").partition("/")
+        chart = oci_chart.parse_url(chart_url)
 
         # A Helm chart's OCI layer is the chart .tgz, so `sha256` names its
         # blob, and a cached blob needs neither a token nor the manifest.
@@ -136,55 +137,15 @@ def _helm_import_repository_impl(repository_ctx):
         if repository_ctx.attr.sha256:
             result = repository_ctx.download(
                 output = repository_ctx.path(chart_file),
-                url = "https://{}/v2/{}/blobs/sha256:{}".format(
-                    hostname,
-                    chart_path,
-                    repository_ctx.attr.sha256,
-                ),
+                url = oci_chart.blob_url(chart, "sha256:" + repository_ctx.attr.sha256),
                 sha256 = repository_ctx.attr.sha256,
                 allow_fail = True,
             )
 
         if not result or not result.success:
             au = authn.new(repository_ctx)
-            token = au.get_token(hostname, chart_path)
-
-            # Find the digest for the layer with the chart package in the image manifest:
-            manifest_json = "manifest.json"
-            manifest_url = "https://{}/v2/{}/manifests/{}".format(
-                hostname,
-                chart_path,
-                chart_version,
-            )
-            repository_ctx.download(
-                output = manifest_json,
-                url = manifest_url,
-                auth = {
-                    manifest_url: token,
-                },
-                # Copied from `helm pull --debug`
-                headers = {
-                    "Accept": [
-                        "application/vnd.docker.distribution.manifest.v2+json",
-                        "application/vnd.docker.distribution.manifest.list.v2+json",
-                        "application/vnd.oci.image.manifest.v1+json",
-                        "application/vnd.oci.image.index.v1+json",
-                        "*/*",
-                    ],
-                },
-            )
-            manifest = json.decode(repository_ctx.read(manifest_json))
-
-            # https://helm.sh/docs/topics/registries/#helm-chart-manifest
-            if manifest.get("config", {}).get("mediaType") != "application/vnd.cncf.helm.config.v1+json":
-                fail("{} is not a Helm chart package".format(chart_url))
-
-            chart_digest = _find_chart_digest(manifest)
-            chart_blob_url = "https://{}/v2/{}/blobs/{}".format(
-                hostname,
-                chart_path,
-                chart_digest,
-            )
+            layer = oci_chart.find_chart_layer(repository_ctx, au, chart_url)
+            chart_blob_url = oci_chart.blob_url(chart, layer.digest)
 
             # Download the chart package:
             result = repository_ctx.download(
@@ -192,14 +153,14 @@ def _helm_import_repository_impl(repository_ctx):
                 url = chart_blob_url,
                 sha256 = repository_ctx.attr.sha256,
                 auth = {
-                    chart_blob_url: token,
+                    chart_blob_url: layer.token,
                 },
             )
 
     else:
         fail("cannot download {} from {}, unsupported scheme".format(repository_ctx.attr.chart_name, chart_url))
 
-    chart_name, _, chart_version = chart_file.removesuffix(".tgz").rpartition("-")
+    chart_name, chart_version = _get_chart_name_and_version(chart_url, chart_file)
 
     repository_ctx.file("BUILD.bazel", content = _HELM_DEP_BUILD_FILE.format(
         chart_name = chart_name,
@@ -234,7 +195,7 @@ def _helm_import_repository_impl(repository_ctx):
 
 helm_import_repository = repository_rule(
     implementation = _helm_import_repository_impl,
-    doc = "A rule for fetching external Helm charts from an arbitrary URL or repository.",
+    doc = "A rule for fetching external Helm charts from an arbitrary URL or repository. With bzlmod, the `helm_charts` extension in `@rules_helm//helm:extensions.bzl` fetches `oci://` charts with this rule and stores the digest it looks up in `MODULE.bazel.lock`.",
     attrs = {
         "chart_name": attr.string(
             doc = "Chart name to import. Must be set if `repository` is specified",
