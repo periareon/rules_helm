@@ -1,0 +1,21 @@
+load("@rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "ociartifact",
+    srcs = ["ociartifact.go"],
+    importpath = "github.com/periareon/rules_helm/helm/private/oci_digest/ociartifact",
+    visibility = ["//helm/private:__subpackages__"],
+    deps = [
+        "//helm/private/oci_digest/chartmeta",
+        "@com_github_opencontainers_go_digest//:go-digest",
+        "@com_github_opencontainers_image_spec//specs-go",
+        "@com_github_opencontainers_image_spec//specs-go/v1:specs-go",
+        "@io_k8s_sigs_yaml//:yaml",
+    ],
+)
+
+go_test(
+    name = "ociartifact_test",
+    srcs = ["ociartifact_test.go"],
+    embed = [":ociartifact"],
+)

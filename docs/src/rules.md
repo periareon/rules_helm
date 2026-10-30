@@ -9,6 +9,7 @@
 - [helm_lint_aspect](./helm_lint.md#helm_lint_aspect)
 - [helm_lint_test](./helm_lint.md#helm_lint_test)
 - [helm_oci_digest](./helm_oci_digest.md#helm_oci_digest)
+- [helm_oci_manifest](./rules_img.md#helm_oci_manifest)
 - [helm_package](./helm_package.md#helm_package)
 - [helm_plugin](./helm_plugin.md#helm_plugin)
 - [helm_push_images](./helm_push.md#helm_push_images)

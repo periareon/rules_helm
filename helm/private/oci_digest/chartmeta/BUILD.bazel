@@ -4,5 +4,5 @@ go_library(
     name = "chartmeta",
     srcs = ["chartmeta.go"],
     importpath = "github.com/periareon/rules_helm/helm/private/oci_digest/chartmeta",
-    visibility = ["//helm/private/oci_digest:__pkg__"],
+    visibility = ["//helm/private/oci_digest/ociartifact:__pkg__"],
 )
