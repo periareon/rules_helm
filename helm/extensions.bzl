@@ -1,6 +1,10 @@
 """Bzlmod extensions"""
 
+load("//helm/private:chart_utils.bzl", "chart_utils")
 load("//helm/private:extension_utils.bzl", "find_modules")
+load("//helm/private:import.bzl", "helm_import_repository")
+load("//helm/private:import_authn.bzl", "authn")
+load("//helm/private:oci_chart.bzl", "oci_chart")
 load(
     "//helm/private:repositories.bzl",
     "helm_host_alias_repository",
@@ -186,6 +190,45 @@ def _helm_impl(module_ctx):
         reproducible = True,
     )
 
+def _lookup_sha256(module_ctx, state, url):
+    if url not in state["sha256"]:
+        if "au" not in state:
+            state["au"] = authn.new(module_ctx)
+        state["sha256"][url] = oci_chart.resolve_sha256(module_ctx, state["au"], url)
+    return state["sha256"][url]
+
+def _helm_charts_impl(module_ctx):
+    # Digests persisted in the lockfile by a previous evaluation (Bazel 8.5+).
+    facts = getattr(module_ctx, "facts", {})
+    used_facts = {}
+    state = {"sha256": {}}
+    lookup = lambda url: _lookup_sha256(module_ctx, state, url)
+
+    for mod in module_ctx.modules:
+        for tag in mod.tags.chart:
+            if not chart_utils.is_chart_url(tag.url):
+                fail("helm_charts.chart(name = \"{}\") needs a url of the form `oci://<host>/<path>:<version>`, got `{}`".format(tag.name, tag.url))
+            if tag.sha256 and not chart_utils.is_sha256(tag.sha256):
+                fail("helm_charts.chart(name = \"{}\") needs a `sha256` of 64 lower case hexadecimal digits, got `{}`".format(tag.name, tag.sha256))
+
+            chart = chart_utils.chart_sha256(tag.sha256, tag.url, facts, lookup)
+            if chart.is_fact:
+                used_facts[tag.url] = chart.sha256
+
+            helm_import_repository(
+                name = tag.name,
+                url = tag.url,
+                sha256 = chart.sha256,
+            )
+
+    # Without facts, a looked-up digest is kept only if the extension is not reproducible:
+    # the lockfile then records the repositories, and with them the digests.
+    kwargs = {"reproducible": hasattr(module_ctx, "facts") or not used_facts}
+    if hasattr(module_ctx, "facts"):
+        kwargs["facts"] = used_facts
+
+    return module_ctx.extension_metadata(**kwargs)
+
 _host_tools = tag_class(
     doc = """\
 An extension for creating a host alias repository that provides a shorter name for the host platform's helm binary.
@@ -307,11 +350,74 @@ register_toolchains("@with_diff_toolchains//:all")
     },
 )
 
+_chart = tag_class(
+    doc = """\
+Fetch a Helm chart from an OCI registry with `helm_import_repository`.
+
+The repository holds a `helm_import` target named after the chart, which is the last \
+path segment of `url` without the version. Refer to it as `@<name>//:<chart>`. The \
+shorthand `@<name>` does not resolve to the chart.
+
+If `sha256` is unset, the extension reads the digest of the chart package from the \
+registry manifest, and trusts the registry for it on first use. On Bazel 8.5 and newer \
+the digest is stored as a fact in `MODULE.bazel.lock`, keyed by `url`, so later \
+evaluations make no registry request for it. Older Bazel versions record the digest in \
+the lockfile as part of the repository. Without a lockfile, the digest is looked up \
+whenever the extension is evaluated, and a version tag that the registry moves gives a \
+different chart. Set `sha256` to pin the digest in `MODULE.bazel`.
+
+A stored digest is not checked against the registry. If the registry replaces the \
+chart behind a version tag, the fetch fails with a checksum mismatch. Delete the \
+entry for `url` from the `facts` section of `MODULE.bazel.lock` to look the digest \
+up again.
+
+```python
+helm_charts = use_extension("@rules_helm//helm:extensions.bzl", "helm_charts")
+helm_charts.chart(
+    name = "karpenter",
+    url = "oci://public.ecr.aws/karpenter/karpenter:1.9.0",
+)
+use_repo(helm_charts, "karpenter")
+
+# Then you can use @karpenter//:karpenter as a dependency in your BUILD files
+```
+""",
+    attrs = {
+        "name": attr.string(
+            doc = "The name of the repository.",
+            mandatory = True,
+        ),
+        "sha256": attr.string(
+            doc = "The expected SHA-256 hash of the chart package. If unset, the extension looks it up in the registry.",
+        ),
+        "url": attr.string(
+            doc = "The chart url, in the form `oci://<host>/<path>:<version>`.",
+            mandatory = True,
+        ),
+    },
+)
+
 helm = module_extension(
     implementation = _helm_impl,
     tag_classes = {
         "host_tools": _host_tools,
         "plugin": _plugin,
         "toolchain": _toolchain,
+    },
+)
+
+helm_charts = module_extension(
+    doc = """\
+Module extension for fetching Helm charts from OCI registries.
+
+Charts live in their own extension, so an unreachable registry does not stop the `helm` \
+extension from resolving toolchains. All tags are resolved in one evaluation, so a \
+lookup that fails (an unknown version or an unreachable registry) fails every \
+repository from this extension. Set `sha256` to skip the lookup. Tags from every module \
+are used, so repository names must be unique across modules.
+""",
+    implementation = _helm_charts_impl,
+    tag_classes = {
+        "chart": _chart,
     },
 )
