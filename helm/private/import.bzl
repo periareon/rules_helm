@@ -1,5 +1,8 @@
 """Helm rules for managing external dependencies"""
 
+load("@bazel_skylib//lib:versions.bzl", "versions")
+load("@package_metadata//purl:purl.bzl", "purl")
+load("@package_metadata//rules:package_metadata.bzl", "package_metadata")
 load(":import_authn.bzl", "authn")
 load(":providers.bzl", "HelmPackageInfo")
 
@@ -39,6 +42,30 @@ helm_import = rule(
     },
 )
 
+def helm_import_package_metadata(name, chart_name, version, repository, **kwargs):
+    """Declares the [`package_metadata`](https://github.com/bazel-contrib/supply-chain/tree/main/metadata) of an imported Helm chart.
+
+    The chart is identified by an `oci` [purl](https://github.com/package-url/purl-spec) carrying
+    the chart repository and version as `repository_url` and `tag` qualifiers.
+
+    Args:
+        name (str): The name of the target.
+        chart_name (str): The name of the chart.
+        version (str): The version of the chart.
+        repository (str): The chart repository or OCI registry path the chart was fetched from.
+        **kwargs (dict): Additional keyword arguments for `package_metadata`.
+    """
+    package_metadata(
+        name = name,
+        purl = purl.builder()
+            .type("oci")
+            .name(chart_name)
+            .add_qualifier("repository_url", repository)
+            .add_qualifier("tag", version)
+            .build(),
+        **kwargs
+    )
+
 def _find_chart_url(repository_ctx, repo_file, chart_name, chart_version):
     # HTTP source for `repository_ctx.download`:
     chart_file = "{}-{}.tgz".format(chart_name, chart_version)
@@ -76,11 +103,20 @@ def _find_chart_digest(manifest):
     fail("could not find chart content layer")
 
 _HELM_DEP_BUILD_FILE = """\
-load("@rules_helm//helm:defs.bzl", "helm_import")
+load("@rules_helm//helm:defs.bzl", "helm_import", "helm_import_package_metadata")
+
+helm_import_package_metadata(
+    name = "package_metadata",
+    chart_name = "{chart_name}",
+    repository = "{repository_url}",
+    version = "{chart_version}",
+    visibility = ["//visibility:public"],
+)
 
 helm_import(
     name = "{chart_name}",
     chart = "{chart_file}",
+    {package_metadata_attr} = [":package_metadata"],
     visibility = ["//visibility:public"],
 )
 
@@ -201,10 +237,24 @@ def _helm_import_repository_impl(repository_ctx):
 
     chart_name, _, chart_version = chart_file.removesuffix(".tgz").rpartition("-")
 
+    if repository_ctx.attr.url:
+        # The chart's parent path, e.g. `oci://registry-1.docker.io/bitnamicharts`.
+        repository_url = chart_url.rpartition("/")[0]
+    else:
+        repository_url = repository_ctx.attr.repository
+
+    # Bazel 8.0.0 renamed the `applicable_licenses` common attribute to `package_metadata`.
+    package_metadata_attr = "applicable_licenses"
+    if not native.bazel_version or versions.is_at_least("8.0.0", native.bazel_version):
+        package_metadata_attr = "package_metadata"
+
     repository_ctx.file("BUILD.bazel", content = _HELM_DEP_BUILD_FILE.format(
         chart_name = chart_name,
         chart_file = chart_file,
+        chart_version = chart_version,
+        package_metadata_attr = package_metadata_attr,
         repository_name = repository_ctx.name,
+        repository_url = repository_url.rstrip("/"),
     ))
 
     if repository_ctx.attr.url:

@@ -5,6 +5,7 @@
 - [helm_chart](./helm_chart.md#helm_chart)
 - [helm_command](./helm_command.md#helm_command)
 - [helm_import](./helm_import.md#helm_import)
+- [helm_import_package_metadata](./helm_import.md#helm_import_package_metadata)
 - [helm_install](./helm_install.md#helm_install)
 - [helm_lint_aspect](./helm_lint.md#helm_lint_aspect)
 - [helm_lint_test](./helm_lint.md#helm_lint_test)
