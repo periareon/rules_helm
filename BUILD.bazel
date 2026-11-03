@@ -1,4 +1,16 @@
 load("@gazelle//:def.bzl", "gazelle")
+load("@package_metadata//purl:purl.bzl", "purl")
+load("@package_metadata//rules:package_metadata.bzl", "package_metadata")
+
+# Package metadata of every target of this module, applied through `REPO.bazel`.
+package_metadata(
+    name = "package_metadata",
+    purl = purl.bazel(
+        module_name(),
+        module_version(),
+    ),
+    visibility = ["//visibility:public"],
+)
 
 alias(
     name = "buildifier.check",
