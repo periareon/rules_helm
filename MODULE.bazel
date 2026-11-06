@@ -128,3 +128,34 @@ use_repo(
     "rules_helm_test_img_container_base",
     "rules_helm_test_oci_container_base",
 )
+
+helm_charts = use_extension(
+    "@rules_helm//helm:extensions.bzl",
+    "helm_charts",
+    dev_dependency = True,
+)
+helm_charts.chart(
+    name = "helm_charts_test_cert_manager",
+    url = "oci://quay.io/jetstack/charts/cert-manager:1.19.4",
+)
+helm_charts.chart(
+    name = "helm_charts_test_cert_manager_pinned",
+    sha256 = "d0c202f57b8653eb957fb5b2f9472c1b11cf6b51acc5c777e4b824f7b5a9ea87",
+    url = "oci://quay.io/jetstack/charts/cert-manager:1.19.4",
+)
+helm_charts.chart(
+    name = "helm_charts_test_pre_release",
+    sha256 = "0041fc0111fab7d62beed6d46d283f5ef4d851ad8c77055466bb4c82e36b6a6d",
+    url = "oci://quay.io/jetstack/charts/cert-manager:1.21.0-beta.0",
+)
+helm_charts.chart(
+    name = "helm_charts_test_vault_operator",
+    url = "oci://ghcr.io/bank-vaults/helm-charts/vault-operator:1.23.0",
+)
+use_repo(
+    helm_charts,
+    "helm_charts_test_cert_manager",
+    "helm_charts_test_cert_manager_pinned",
+    "helm_charts_test_pre_release",
+    "helm_charts_test_vault_operator",
+)

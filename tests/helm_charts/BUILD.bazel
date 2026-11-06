@@ -1,0 +1,45 @@
+load("@rules_go//go:def.bzl", "go_test")
+load(":chart_utils_test.bzl", "chart_utils_test_suite")
+
+chart_utils_test_suite(name = "chart_utils")
+
+# `looked_up` and `second_looked_up` have no `sha256` in their `MODULE.bazel` tags, so the
+# extension looks the digest up (and, on Bazel 8.5+, stores it as a lockfile fact). The two
+# charts are on different registries, to cover reuse of the authenticator and of the manifest
+# file. `pinned` and `pre_release` set `sha256` and make no lookup. The `pre_release` version
+# contains a dash, so the label `//:cert-manager` checks that the target is named after the
+# chart and not after part of the version. The expected digests match `tests/test_deps.bzl`,
+# except for `pre_release`, which is not in that file.
+_CHARTS = {
+    "looked_up": (
+        "@helm_charts_test_cert_manager//:cert-manager",
+        "d0c202f57b8653eb957fb5b2f9472c1b11cf6b51acc5c777e4b824f7b5a9ea87",
+    ),
+    "pinned": (
+        "@helm_charts_test_cert_manager_pinned//:cert-manager",
+        "d0c202f57b8653eb957fb5b2f9472c1b11cf6b51acc5c777e4b824f7b5a9ea87",
+    ),
+    "pre_release": (
+        "@helm_charts_test_pre_release//:cert-manager",
+        "0041fc0111fab7d62beed6d46d283f5ef4d851ad8c77055466bb4c82e36b6a6d",
+    ),
+    "second_looked_up": (
+        "@helm_charts_test_vault_operator//:vault-operator",
+        "9abd372c9d843b974d918442cd0e68c9669f57d8630566ce74dfaf63447c282a",
+    ),
+}
+
+[
+    go_test(
+        name = "chart_sha256_{}_test".format(name),
+        size = "small",
+        srcs = ["chart_sha256_test.go"],
+        data = [label],
+        env = {
+            "CHART": "$(rlocationpath {})".format(label),
+            "EXPECTED_SHA256": sha256,
+        },
+        deps = ["@rules_go//go/runfiles"],
+    )
+    for name, (label, sha256) in _CHARTS.items()
+]
