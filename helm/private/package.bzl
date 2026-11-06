@@ -297,6 +297,7 @@ helm_package = rule(
             default = Label("//helm/private:stamp"),
         ),
     },
+    provides = [HelmPackageInfo],
     toolchains = [
         str(Label("@rules_helm//helm:toolchain_type")),
     ],

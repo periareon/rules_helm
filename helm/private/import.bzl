@@ -40,6 +40,7 @@ helm_import = rule(
             doc = "The version fo the helm chart",
         ),
     },
+    provides = [HelmPackageInfo],
 )
 
 def helm_import_package_metadata(name, chart_name, version, repository, **kwargs):
