@@ -37,6 +37,7 @@ helm_import = rule(
             doc = "The version fo the helm chart",
         ),
     },
+    provides = [HelmPackageInfo],
 )
 
 def _find_chart_url(repository_ctx, repo_file, chart_name, chart_version):

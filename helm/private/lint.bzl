@@ -68,6 +68,7 @@ helm_lint_aspect = aspect(
             default = Label("//helm/settings:lint_default_strict"),
         ),
     },
+    required_providers = [HelmPackageInfo],
     toolchains = [
         str(Label("//helm:toolchain_type")),
     ],
