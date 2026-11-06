@@ -16,6 +16,7 @@ load(
 load(
     ":helm_import.bzl",
     _helm_import = "helm_import",
+    _helm_import_package_metadata = "helm_import_package_metadata",
     _helm_import_repository = "helm_import_repository",
 )
 load(
@@ -67,6 +68,7 @@ chart_file = _chart_file
 helm_chart = _helm_chart
 helm_command = _helm_command
 helm_import = _helm_import
+helm_import_package_metadata = _helm_import_package_metadata
 helm_import_repository = _helm_import_repository
 helm_install = _helm_install
 helm_lint_aspect = _helm_lint_aspect

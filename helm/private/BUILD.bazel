@@ -19,6 +19,9 @@ bzl_library(
     deps = [
         "@bazel_lib//lib:base64",
         "@bazel_lib//lib:repo_utils",
+        "@bazel_skylib//lib:versions",
         "@bazel_skylib//rules:common_settings",
+        "@package_metadata//purl:srcs",
+        "@package_metadata//rules:srcs",
     ],
 )
