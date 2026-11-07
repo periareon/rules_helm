@@ -18,6 +18,7 @@ exports_files(
         "helm_push.bzl",
         "helm_template.bzl",
         "helm_toolchain.bzl",
+        "rules_img.bzl",
     ],
     visibility = ["//visibility:public"],
 )
@@ -161,4 +162,16 @@ bzl_library(
     srcs = ["helm_toolchain.bzl"],
     visibility = ["//visibility:public"],
     deps = ["//helm/private:bzl_lib"],
+)
+
+bzl_library(
+    name = "rules_img_bzl",
+    srcs = ["rules_img.bzl"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//helm/private:bzl_lib",
+        "@rules_img//img:image",
+        "@rules_img//img:layer",
+        "@rules_img//img:push",
+    ],
 )
