@@ -1,0 +1,63 @@
+load("@rules_img//img:image.bzl", "image_manifest")
+load("@rules_img//img:layer.bzl", "image_layer")
+load("//:defs.bzl", "helm_chart", "helm_img_image", "helm_lint_test", "helm_template_test", "image_push")
+
+# A smoke test that the module resolves against a standalone `rules_helm` and
+# that a chart loaded from `@rules_helm_img//:defs.bzl` stamps `rules_img`
+# images. Run with `bazel test //...` from this directory.
+
+EXCLUDE_WINDOWS = select({
+    # TODO: rules_img may have platform-specific behavior
+    "@platforms//os:windows": ["@platforms//:incompatible"],
+    "//conditions:default": [],
+})
+
+image_layer(
+    name = "layer",
+    srcs = {},
+    target_compatible_with = EXCLUDE_WINDOWS,
+)
+
+image_manifest(
+    name = "image",
+    layers = [":layer"],
+    target_compatible_with = EXCLUDE_WINDOWS,
+)
+
+image_push(
+    name = "image.push",
+    image = ":image",
+    registry = "docker.io",
+    repository = "rules_helm/test_img/image",
+    tags = ["latest"],
+    target_compatible_with = EXCLUDE_WINDOWS,
+)
+
+helm_img_image(
+    name = "image.helm",
+    image = ":image.push",
+    target_compatible_with = EXCLUDE_WINDOWS,
+)
+
+helm_chart(
+    name = "chart",
+    images = [":image.helm"],
+    target_compatible_with = EXCLUDE_WINDOWS,
+)
+
+helm_lint_test(
+    name = "chart_lint_test",
+    chart = ":chart",
+    target_compatible_with = EXCLUDE_WINDOWS,
+)
+
+helm_template_test(
+    name = "chart_template_test",
+    chart = ":chart",
+    target_compatible_with = EXCLUDE_WINDOWS,
+    template_patterns = {
+        "rules-helm-img/templates/pod.yaml": [
+            r"image: \"docker.io/rules_helm/test_img/image@sha256:[a-z0-9]{64}\"",
+        ],
+    },
+)

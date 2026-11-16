@@ -13,6 +13,9 @@ Bazel rules for producing [helm charts][helm]
 bazel_dep(name = "rules_helm", version = "{version}")
 ```
 
+Charts that bundle container images use one of the companion modules instead.
+See [Container images](./images.md).
+
 ## Run as a tool
 
 ```bash

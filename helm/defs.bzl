@@ -14,6 +14,11 @@ load(
     _helm_command = "helm_command",
 )
 load(
+    ":helm_image.bzl",
+    _HelmImageInfo = "HelmImageInfo",
+    _helm_image = "helm_image",
+)
+load(
     ":helm_import.bzl",
     _helm_import = "helm_import",
     _helm_import_repository = "helm_import_repository",
@@ -66,6 +71,7 @@ chart_content = _chart_content
 chart_file = _chart_file
 helm_chart = _helm_chart
 helm_command = _helm_command
+helm_image = _helm_image
 helm_import = _helm_import
 helm_import_repository = _helm_import_repository
 helm_install = _helm_install
@@ -81,6 +87,7 @@ helm_template_test = _helm_template_test
 helm_toolchain = _helm_toolchain
 helm_uninstall = _helm_uninstall
 helm_upgrade = _helm_upgrade
+HelmImageInfo = _HelmImageInfo
 HelmOCIDigestInfo = _HelmOCIDigestInfo
 helm_oci_digest = _helm_oci_digest
 HelmPackageInfo = _HelmPackageInfo

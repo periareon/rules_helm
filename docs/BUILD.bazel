@@ -56,6 +56,15 @@ stardoc(
 )
 
 stardoc(
+    name = "helm_image",
+    out = "src/helm_image.md",
+    input = "//helm:helm_image.bzl",
+    table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
+    tags = ["manual"],
+    deps = ["//helm:helm_image_bzl"],
+)
+
+stardoc(
     name = "helm_import",
     out = "src/helm_import.md",
     input = "//helm:helm_import.bzl",
@@ -146,6 +155,24 @@ stardoc(
 )
 
 stardoc(
+    name = "helm_img_image",
+    out = "src/helm_img_image.md",
+    input = "@rules_helm_img//:helm_img_image.bzl",
+    table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
+    tags = ["manual"],
+    deps = ["@rules_helm_img//:helm_img_image_bzl"],
+)
+
+stardoc(
+    name = "helm_oci_image",
+    out = "src/helm_oci_image.md",
+    input = "@rules_helm_oci//:helm_oci_image.bzl",
+    table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
+    tags = ["manual"],
+    deps = ["@rules_helm_oci//:helm_oci_image_bzl"],
+)
+
+stardoc(
     name = "k8s_defs",
     out = "src/k8s_defs.md",
     input = "//k8s:defs.bzl",
@@ -171,10 +198,13 @@ mdbook(
         ":extensions",
         ":helm_chart",
         ":helm_command",
+        ":helm_image",
+        ":helm_img_image",
         ":helm_import",
         ":helm_install",
         ":helm_lint",
         ":helm_oci_digest",
+        ":helm_oci_image",
         ":helm_package",
         ":helm_package_info",
         ":helm_plugin",

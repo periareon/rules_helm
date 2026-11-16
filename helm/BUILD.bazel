@@ -8,6 +8,7 @@ exports_files(
         "extensions.bzl",
         "helm_chart.bzl",
         "helm_command.bzl",
+        "helm_image.bzl",
         "helm_import.bzl",
         "helm_install.bzl",
         "helm_lint.bzl",
@@ -59,6 +60,7 @@ bzl_library(
         ":extensions_bzl",
         ":helm_chart_bzl",
         ":helm_command_bzl",
+        ":helm_image_bzl",
         ":helm_import_bzl",
         ":helm_install_bzl",
         ":helm_lint_bzl",
@@ -89,6 +91,13 @@ bzl_library(
 bzl_library(
     name = "helm_command_bzl",
     srcs = ["helm_command.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["//helm/private:bzl_lib"],
+)
+
+bzl_library(
+    name = "helm_image_bzl",
+    srcs = ["helm_image.bzl"],
     visibility = ["//visibility:public"],
     deps = ["//helm/private:bzl_lib"],
 )

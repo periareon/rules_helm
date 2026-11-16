@@ -4,6 +4,7 @@
 - [chart_file](./chart_file.md#chart_file)
 - [helm_chart](./helm_chart.md#helm_chart)
 - [helm_command](./helm_command.md#helm_command)
+- [helm_image](./helm_image.md#helm_image)
 - [helm_import](./helm_import.md#helm_import)
 - [helm_install](./helm_install.md#helm_install)
 - [helm_lint_aspect](./helm_lint.md#helm_lint_aspect)
@@ -19,4 +20,5 @@
 - [helm_toolchain](./helm_toolchain.md#helm_toolchain)
 - [helm_uninstall](./helm_install.md#helm_uninstall)
 - [helm_upgrade](./helm_install.md#helm_upgrade)
+- [HelmImageInfo](./helm_image.md#HelmImageInfo)
 - [HelmPackageInfo](./helm_package_info.md#HelmPackageInfo)

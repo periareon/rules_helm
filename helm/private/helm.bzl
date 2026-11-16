@@ -57,7 +57,7 @@ def helm_chart(
         templates (list, optional): A list of template files to include in the package.
         schema (str, optional): A JSON Schema file for values. Defaults to `values.schema.json`.
         files (list, optional): Files accessed in templates via the [`.Files` api](https://helm.sh/docs/chart_template_guide/accessing_files/).
-        images (list, optional): A list of [oci_push](https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags) or [image_push](https://github.com/bazel-contrib/rules_img) targets
+        images (list, optional): The container images the chart refers to. See `helm_package.images`.
         deps (list, optional): A list of helm package dependencies.
         install_name (str, optional): The `helm install` name to use. `name` will be used if unset.
         registry_url (str, Optional): The registry url for the helm chart. `{name}.push_registry`

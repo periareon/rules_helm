@@ -1,0 +1,5 @@
+{
+  "integrity": "",
+  "strip_prefix": "extensions/oci",
+  "url": "https://github.com/{OWNER}/{REPO}/releases/download/{VERSION}/rules_helm-v{VERSION}.tar.gz"
+}

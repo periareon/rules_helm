@@ -20,6 +20,20 @@ bazel_dep(name = "rules_shell", version = "0.6.1", dev_dependency = True)
 bazel_dep(name = "buildifier_prebuilt", version = "8.5.1", dev_dependency = True)
 bazel_dep(name = "rules_cc", version = "0.2.17", dev_dependency = True)
 
+# The image modules under `extensions/` are developed against this checkout
+# and released from the same tag. Consumers get them from the registry.
+bazel_dep(name = "rules_helm_img", version = "0.35.0", dev_dependency = True)
+local_path_override(
+    module_name = "rules_helm_img",
+    path = "extensions/img",
+)
+
+bazel_dep(name = "rules_helm_oci", version = "0.35.0", dev_dependency = True)
+local_path_override(
+    module_name = "rules_helm_oci",
+    path = "extensions/oci",
+)
+
 # This override can be dropped when https://github.com/bazel-contrib/rules_oci/pull/891 is released.
 single_version_override(
     module_name = "rules_oci",

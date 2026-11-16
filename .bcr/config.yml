@@ -1,0 +1,7 @@
+# Every module released from this repository. The templates for a nested
+# module live under `.bcr/<module root>` and every module is published from
+# the one release archive.
+moduleRoots:
+  - "."
+  - "extensions/img"
+  - "extensions/oci"

@@ -4,7 +4,11 @@ load("//:version.bzl", "VERSION")
 go_test(
     name = "bzl_version_test",
     srcs = ["bzl_version_test.go"],
-    data = ["//:MODULE.bazel"],
+    data = [
+        "//:MODULE.bazel",
+        "@rules_helm_img//:MODULE.bazel",
+        "@rules_helm_oci//:MODULE.bazel",
+    ],
     env = {"VERSION": VERSION},
     deps = ["@rules_go//go/runfiles"],
 )

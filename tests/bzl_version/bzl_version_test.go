@@ -3,15 +3,26 @@ package main
 import (
 	"errors"
 	"os"
-	"reflect"
+	"regexp"
 	"strings"
 	"testing"
 
 	"github.com/bazelbuild/rules_go/go/runfiles"
 )
 
-func parseModuleBazel() (string, error) {
-	path, err := runfiles.Rlocation("rules_helm/MODULE.bazel")
+// The modules released from this repository. Each has a `MODULE.bazel` whose
+// version must match `version.bzl`, and the extension modules must depend on
+// the `rules_helm` released alongside them.
+var modules = []string{
+	"rules_helm",
+	"rules_helm_img",
+	"rules_helm_oci",
+}
+
+var rulesHelmDep = regexp.MustCompile(`(?m)^bazel_dep\(name = "rules_helm", version = "([^"]*)"`)
+
+func readModuleBazel(module string) (string, error) {
+	path, err := runfiles.Rlocation(module + "/MODULE.bazel")
 	if err != nil {
 		return "", err
 	}
@@ -21,8 +32,12 @@ func parseModuleBazel() (string, error) {
 		return "", err
 	}
 
+	return string(content), nil
+}
+
+func parseModuleVersion(content string) (string, error) {
 	var moduleFound bool = false
-	for _, line := range strings.Split(string(content), "\n") {
+	for _, line := range strings.Split(content, "\n") {
 		text := strings.TrimRight(line, "\r")
 		if moduleFound {
 			if strings.HasSuffix(text, ")") {
@@ -51,12 +66,33 @@ func TestVersionFiles(t *testing.T) {
 		t.Fatal("Couldn't parse VERSION from environment.")
 	}
 
-	module_bazel, err := parseModuleBazel()
-	if err != nil {
-		t.Fatalf("Error reading file MODULE.bazel: %v", err)
-	}
+	for _, module := range modules {
+		content, err := readModuleBazel(module)
+		if err != nil {
+			t.Fatalf("Error reading %s/MODULE.bazel: %v", module, err)
+		}
 
-	if !reflect.DeepEqual(version, module_bazel) {
-		t.Fatalf("version.bzl (%s) != MODULE.bazel (%s)", version, module_bazel)
+		moduleVersion, err := parseModuleVersion(content)
+		if err != nil {
+			t.Fatalf("Error parsing %s/MODULE.bazel: %v", module, err)
+		}
+
+		if version != moduleVersion {
+			t.Errorf("version.bzl (%s) != %s/MODULE.bazel (%s)", version, module, moduleVersion)
+		}
+
+		if module == "rules_helm" {
+			continue
+		}
+
+		match := rulesHelmDep.FindStringSubmatch(content)
+		if match == nil {
+			t.Errorf("%s/MODULE.bazel does not declare a `bazel_dep` on `rules_helm`", module)
+			continue
+		}
+
+		if version != match[1] {
+			t.Errorf("version.bzl (%s) != %s/MODULE.bazel bazel_dep on rules_helm (%s)", version, module, match[1])
+		}
 	}
 }
