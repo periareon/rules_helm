@@ -1,0 +1,153 @@
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+
+exports_files(
+    [
+        "defs.bzl",
+        "chart_file.bzl",
+        "helm_chart.bzl",
+        "helm_command.bzl",
+        "helm_image.bzl",
+        "helm_import.bzl",
+        "helm_install.bzl",
+        "helm_lint.bzl",
+        "helm_oci_digest.bzl",
+        "helm_package.bzl",
+        "helm_package_info.bzl",
+        "helm_plugin.bzl",
+        "helm_push.bzl",
+        "helm_template.bzl",
+        "helm_toolchain.bzl",
+        "helm_oci_image.bzl",
+        "MODULE.bazel",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+bzl_library(
+    name = "defs_bzl",
+    srcs = ["defs.bzl"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":chart_file_bzl",
+        ":helm_chart_bzl",
+        ":helm_command_bzl",
+        ":helm_image_bzl",
+        ":helm_import_bzl",
+        ":helm_install_bzl",
+        ":helm_lint_bzl",
+        ":helm_oci_digest_bzl",
+        ":helm_oci_image_bzl",
+        ":helm_package_bzl",
+        ":helm_package_info_bzl",
+        ":helm_plugin_bzl",
+        ":helm_push_bzl",
+        ":helm_template_bzl",
+        ":helm_toolchain_bzl",
+        "@rules_oci//oci:defs",
+    ],
+)
+
+bzl_library(
+    name = "chart_file_bzl",
+    srcs = ["chart_file.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["@rules_helm//helm:chart_file_bzl"],
+)
+
+bzl_library(
+    name = "helm_chart_bzl",
+    srcs = ["helm_chart.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["@rules_helm//helm:helm_chart_bzl"],
+)
+
+bzl_library(
+    name = "helm_command_bzl",
+    srcs = ["helm_command.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["@rules_helm//helm:helm_command_bzl"],
+)
+
+bzl_library(
+    name = "helm_image_bzl",
+    srcs = ["helm_image.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["@rules_helm//helm:helm_image_bzl"],
+)
+
+bzl_library(
+    name = "helm_import_bzl",
+    srcs = ["helm_import.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["@rules_helm//helm:helm_import_bzl"],
+)
+
+bzl_library(
+    name = "helm_install_bzl",
+    srcs = ["helm_install.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["@rules_helm//helm:helm_install_bzl"],
+)
+
+bzl_library(
+    name = "helm_lint_bzl",
+    srcs = ["helm_lint.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["@rules_helm//helm:helm_lint_bzl"],
+)
+
+bzl_library(
+    name = "helm_oci_digest_bzl",
+    srcs = ["helm_oci_digest.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["@rules_helm//helm:helm_oci_digest_bzl"],
+)
+
+bzl_library(
+    name = "helm_package_bzl",
+    srcs = ["helm_package.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["@rules_helm//helm:helm_package_bzl"],
+)
+
+bzl_library(
+    name = "helm_package_info_bzl",
+    srcs = ["helm_package_info.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["@rules_helm//helm:helm_package_info_bzl"],
+)
+
+bzl_library(
+    name = "helm_plugin_bzl",
+    srcs = ["helm_plugin.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["@rules_helm//helm:helm_plugin_bzl"],
+)
+
+bzl_library(
+    name = "helm_push_bzl",
+    srcs = ["helm_push.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["@rules_helm//helm:helm_push_bzl"],
+)
+
+bzl_library(
+    name = "helm_template_bzl",
+    srcs = ["helm_template.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["@rules_helm//helm:helm_template_bzl"],
+)
+
+bzl_library(
+    name = "helm_toolchain_bzl",
+    srcs = ["helm_toolchain.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["@rules_helm//helm:helm_toolchain_bzl"],
+)
+
+bzl_library(
+    name = "helm_oci_image_bzl",
+    srcs = ["helm_oci_image.bzl"],
+    visibility = ["//visibility:public"],
+    deps = ["//private:bzl_lib"],
+)

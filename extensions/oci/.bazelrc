@@ -1,0 +1,42 @@
+###############################################################################
+## Bazel Configuration Flags
+##
+## `.bazelrc` is a Bazel configuration file.
+## https://bazel.build/docs/best-practices#bazelrc-file
+###############################################################################
+###############################################################################
+## Incompatibility flags
+###############################################################################
+
+# https://github.com/bazelbuild/bazel/issues/8195
+build --incompatible_disallow_empty_glob=true
+
+# https://github.com/bazelbuild/bazel/issues/23043.
+build --incompatible_autoload_externally=
+
+# https://github.com/bazelbuild/bazel/issues/12821
+build --nolegacy_external_runfiles
+
+###############################################################################
+###############################################################################
+
+# Disable network access in sandboxes by default.
+build --sandbox_default_allow_network=false
+
+# Disable the bzlmod lockfile, so we don't accidentally commit MODULE.bazel.lock
+common --lockfile_mode=off
+
+# Resolve `rules_helm` to the checkout this module lives in. Doing this with a
+# flag rather than a `local_path_override` keeps the override out of
+# `MODULE.bazel`, where it would be published to consumers.
+common --override_module=rules_helm=../../
+
+###############################################################################
+## Custom user flags
+##
+## This should always be the last thing in the `.bazelrc` file to ensure
+## consistent behavior when setting flags in that file as `.bazelrc` files are
+## evaluated top to bottom.
+###############################################################################
+
+try-import %workspace%/user.bazelrc

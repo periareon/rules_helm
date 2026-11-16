@@ -1,0 +1,7 @@
+load("@rules_go//go:def.bzl", "go_binary")
+
+go_binary(
+    name = "layout_manifest",
+    srcs = ["layout_manifest.go"],
+    visibility = ["//visibility:public"],
+)

@@ -1,6 +1,6 @@
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
-load("@rules_oci//oci:defs.bzl", "oci_image", "oci_push")
-load("//helm:defs.bzl", "helm_chart", "helm_lint_test", "helm_template_test")
+load("@rules_helm_oci//:defs.bzl", "helm_chart", "helm_lint_test", "helm_oci_image", "helm_template_test", "oci_push")
+load("@rules_oci//oci:defs.bzl", "oci_image")
 load("//tests:test_defs.bzl", "helm_package_regex_test")
 
 exports_files(["Chart.lock"])
@@ -89,4 +89,32 @@ oci_push(
     remote_tags = ["1.2.3"],
     repository = "docker.io/rules_helm/test/image_c",
     target_compatible_with = EXCLUDE_WINDOWS,
+)
+
+# The same chart with its images described by `helm_oci_image` instead of
+# relying on the aspect in `rules_helm`.
+[
+    helm_oci_image(
+        name = "{}.helm".format(name),
+        image = ":{}.push".format(name),
+        target_compatible_with = EXCLUDE_WINDOWS,
+    )
+    for name in _IMAGES
+]
+
+helm_chart(
+    name = "with_image_deps_adapted",
+    images = ["{}.helm".format(name) for name in _IMAGES],
+    target_compatible_with = EXCLUDE_WINDOWS,
+)
+
+helm_package_regex_test(
+    name = "with_image_deps_adapted_regex_test",
+    package = ":with_image_deps_adapted",
+    target_compatible_with = EXCLUDE_WINDOWS,
+    values_patterns = [
+        r"image_a:\s+url:\s+\"docker.io/rules_helm/test/image_a@sha256:[a-z0-9]{64}\"",
+        r"image_b:\s+url:\s+\"docker.io/rules_helm/test/image_b@sha256:[a-z0-9]{64}\"",
+        r"image_c:\s+url:\s+\"docker.io/rules_helm/test/image_c:1.2.3\"",
+    ],
 )

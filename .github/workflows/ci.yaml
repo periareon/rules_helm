@@ -123,6 +123,40 @@ jobs:
         env:
           USE_BAZEL_VERSION: 7.x
 
+  # Each module under `extensions/` is its own Bazel module and resolves
+  # `rules_helm` to this checkout via its `.bazelrc`. Testing from inside the
+  # module directory is the closest thing to how a consumer uses it.
+  ci-extensions:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - macos-latest
+          - ubuntu-22.04
+        module:
+          - img
+          - oci
+    defaults:
+      run:
+        working-directory: extensions/${{ matrix.module }}
+    steps:
+      # Checkout the code
+      - uses: actions/checkout@v4
+
+      - uses: bazel-contrib/setup-bazel@0.14.0
+        with:
+          bazelisk-cache: true
+          disk-cache: ${{ github.workflow }}
+          repository-cache: true
+
+      - name: Setup Bazelrc
+        run: |
+          echo "common --keep_going" >> ./user.bazelrc
+
+      # Build and Test the code
+      - name: Test
+        run: bazel ${BAZEL_STARTUP_FLAGS[@]} test //...
+
   ci-buildifier:
     runs-on: ubuntu-latest
     steps:

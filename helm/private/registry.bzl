@@ -7,12 +7,10 @@ def _get_image_push_commands(ctx, pkg_info):
     image_pushers = []
     image_runfiles = []
     for image in pkg_info.images:
-        # Pulled images (e.g. `image_import` targets from `img_pull`) are not
-        # executable and have nothing to push.
-        executable = image[DefaultInfo].files_to_run.executable
-        if executable:
-            image_pushers.append(executable)
-            image_runfiles.append(image[DefaultInfo].default_runfiles)
+        # Pulled images have nothing to push.
+        if image.pusher:
+            image_pushers.append(image.pusher)
+            image_runfiles.append(image.runfiles)
 
     runfiles = ctx.runfiles(files = image_pushers)
     for ir in image_runfiles:

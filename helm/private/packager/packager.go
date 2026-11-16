@@ -36,25 +36,14 @@ type ImageInfo struct {
 	RemoteTag  string
 }
 
+// ImageManifest mirrors the document `helm_package` writes for each entry of
+// `images` from its `HelmImageInfo`.
 type ImageManifest struct {
 	Label          string   `json:"label"`
 	Aliases        []string `json:"aliases"`
 	RepositoryPath string   `json:"repository_path"`
-	OciLayoutDir   string   `json:"oci_layout_dir"`
-	ManifestFile   string   `json:"manifest_file"`
+	ManifestPath   string   `json:"manifest_path"`
 	RemoteTagsPath string   `json:"remote_tags_path"`
-}
-
-type ImageIndexManifest struct {
-	MediaType string `json:"mediaType"`
-	Size      int    `json:"size"`
-	Digest    string `json:"digest"`
-}
-
-type ImageIndex struct {
-	SchemaVersion int                  `json:"schemaVersion"`
-	MediaType     string               `json:"mediaType"`
-	Manifests     []ImageIndexManifest `json:"manifests"`
 }
 
 // OCI Image Manifest structures
@@ -221,52 +210,22 @@ func imageManifestToImageInfo(imageManifest ImageManifest) (ImageInfo, error) {
 	}
 	imageInfo.Repository = string(repository)
 
-	// Validate that exactly one of OciLayoutDir or ManifestFile is set
-	hasOciLayout := imageManifest.OciLayoutDir != ""
-	hasManifestFile := imageManifest.ManifestFile != ""
-
-	if !hasOciLayout && !hasManifestFile {
-		return imageInfo, fmt.Errorf("Image %s: neither oci_layout_dir nor manifest_file is set", imageManifest.Label)
-	}
-	if hasOciLayout && hasManifestFile {
-		return imageInfo, fmt.Errorf("Image %s: both oci_layout_dir and manifest_file are set (mutually exclusive)", imageManifest.Label)
+	manifestContent, err := os.ReadFile(imageManifest.ManifestPath)
+	if err != nil {
+		return imageInfo, fmt.Errorf("Error reading manifest file %s: %w", imageManifest.ManifestPath, err)
 	}
 
-	if hasOciLayout {
-		// rules_oci format: OCI layout directory with index.json
-		imageIndexPath := filepath.Join(imageManifest.OciLayoutDir, "index.json")
-		imageIndexContent, err := os.ReadFile(imageIndexPath)
-		if err != nil {
-			return imageInfo, fmt.Errorf("Error reading file %s: %w", imageIndexPath, err)
-		}
-
-		var imageIndex ImageIndex
-		err = json.Unmarshal(imageIndexContent, &imageIndex)
-		if err != nil {
-			return imageInfo, fmt.Errorf("Error unmarshalling file %s: %w", imageIndexPath, err)
-		}
-
-		imageInfo.Digest = imageIndex.Manifests[0].Digest
-	} else {
-		// rules_img format: direct manifest JSON file
-		manifestContent, err := os.ReadFile(imageManifest.ManifestFile)
-		if err != nil {
-			return imageInfo, fmt.Errorf("Error reading manifest file %s: %w", imageManifest.ManifestFile, err)
-		}
-
-		// Manifests are JSON documents. Parse them as such since registries
-		// may emit JSON escapes (e.g. `\/`) that a YAML parser rejects.
-		var ociManifest OCIManifest
-		err = json.Unmarshal(manifestContent, &ociManifest)
-		if err != nil {
-			return imageInfo, fmt.Errorf("Error unmarshalling manifest file %s: %w", imageManifest.ManifestFile, err)
-		}
-
-		// For rules_img, we need to compute the digest of the manifest itself
-		// The digest should be sha256 of the manifest content
-		hash := sha256.Sum256(manifestContent)
-		imageInfo.Digest = "sha256:" + hex.EncodeToString(hash[:])
+	// Manifests are JSON documents. Parse them as such since registries
+	// may emit JSON escapes (e.g. `\/`) that a YAML parser rejects.
+	var ociManifest OCIManifest
+	err = json.Unmarshal(manifestContent, &ociManifest)
+	if err != nil {
+		return imageInfo, fmt.Errorf("Error unmarshalling manifest file %s: %w", imageManifest.ManifestPath, err)
 	}
+
+	// The digest of an image is the digest of its manifest (or index) bytes.
+	hash := sha256.Sum256(manifestContent)
+	imageInfo.Digest = "sha256:" + hex.EncodeToString(hash[:])
 
 	if imageManifest.RemoteTagsPath != "" {
 		remoteTagsContent, err := os.ReadFile(imageManifest.RemoteTagsPath)

@@ -2,6 +2,7 @@
 
 # Bazel
 /bazel-*
+/extensions/*/bazel-*
 user.bazelrc
 
 # Helm

@@ -1,0 +1,57 @@
+load("@rules_oci//oci:defs.bzl", "oci_image")
+load("//:defs.bzl", "helm_chart", "helm_lint_test", "helm_oci_image", "helm_template_test", "oci_push")
+
+# A smoke test that the module resolves against a standalone `rules_helm` and
+# that a chart loaded from `@rules_helm_oci//:defs.bzl` stamps `rules_oci`
+# images. Run with `bazel test //...` from this directory.
+
+EXCLUDE_WINDOWS = select({
+    # TODO: rules_oci is broken on simple windows systems such as the windows github runners
+    # https://github.com/periareon/rules_helm/issues/53
+    "@platforms//os:windows": ["@platforms//:incompatible"],
+    "//conditions:default": [],
+})
+
+oci_image(
+    name = "image",
+    architecture = "amd64",
+    os = "linux",
+    target_compatible_with = EXCLUDE_WINDOWS,
+)
+
+oci_push(
+    name = "image.push",
+    image = ":image",
+    remote_tags = ["latest"],
+    repository = "docker.io/rules_helm/test/image",
+    target_compatible_with = EXCLUDE_WINDOWS,
+)
+
+helm_oci_image(
+    name = "image.helm",
+    image = ":image.push",
+    target_compatible_with = EXCLUDE_WINDOWS,
+)
+
+helm_chart(
+    name = "chart",
+    images = [":image.helm"],
+    target_compatible_with = EXCLUDE_WINDOWS,
+)
+
+helm_lint_test(
+    name = "chart_lint_test",
+    chart = ":chart",
+    target_compatible_with = EXCLUDE_WINDOWS,
+)
+
+helm_template_test(
+    name = "chart_template_test",
+    chart = ":chart",
+    target_compatible_with = EXCLUDE_WINDOWS,
+    template_patterns = {
+        "rules-helm-oci/templates/pod.yaml": [
+            r"image: \"docker.io/rules_helm/test/image@sha256:[a-z0-9]{64}\"",
+        ],
+    },
+)

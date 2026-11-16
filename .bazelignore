@@ -2,3 +2,4 @@ bazel-out
 bazel-bin
 bazel-rules_helm
 bazel-testlogs
+extensions
