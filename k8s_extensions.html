@@ -155,44 +155,8 @@
 
                 <div id="content" class="content">
                     <main>
-                        <!-- Generated with Stardoc: http://skydoc.bazel.build -->
-<p>Bzlmod extensions for Kubernetes tooling</p>
-<h2 id="module-extensions"><a class="header" href="#module-extensions">Module Extensions</a></h2>
-<ul>
-<li><a href="#k8s">k8s</a></li>
-</ul>
-<p><a id="k8s"></a></p>
-<h2 id="k8s"><a class="header" href="#k8s">k8s</a></h2>
-<pre>
-k8s = use_extension("@rules_helm//k8s:extensions.bzl", "k8s")
-k8s.kubectl(<a href="#k8s.kubectl-name">name</a>, <a href="#k8s.kubectl-version">version</a>)
-</pre>
-<p>Module extension for fetching Kubernetes tooling such as <code>kubectl</code>.</p>
-<p><strong>TAG CLASSES</strong></p>
-<p><a id="k8s.kubectl"></a></p>
-<h3 id="kubectl"><a class="header" href="#kubectl">kubectl</a></h3>
-<p>Fetch a <code>kubectl</code> binary for the host platform and register toolchains for it.</p>
-<p>Each tag creates a host alias repository (default <code>@kubectl</code>) that exposes the binary as <code>@{name}//:kubectl</code>, which is the quickest way to inspect a cluster after a <code>helm_install</code> / <code>helm_upgrade</code>:</p>
-<pre><code class="language-python">k8s = use_extension("@rules_helm//k8s:extensions.bzl", "k8s")
-k8s.kubectl()
-use_repo(k8s, "kubectl", "kubectl_toolchains")
-register_toolchains("@kubectl_toolchains//:all")
-</code></pre>
-<pre><code class="language-bash">bazel run @kubectl//:kubectl -- get pods --namespace my-release
-bazel run @kubectl//:kubectl -- describe deployment my-release
-bazel run @kubectl//:kubectl -- logs deployment/my-release --tail 100
-</code></pre>
-<p>The toolchains in <code>@kubectl_toolchains</code> serve the version requested by the root module's first <code>kubectl</code> tag (or the default when the root module has none).</p>
-<h3 id="versions"><a class="header" href="#versions">Versions</a></h3>
-<p><code>rules_helm</code> ships checksums for a single default version. Requesting any other version makes the extension download the upstream <code>.sha256</code> files for that release while it is evaluated. On Bazel 8.5 and newer the digests are then stored as facts in <code>MODULE.bazel.lock</code>, so the lookup only happens once per version and airgapped builds work from the lockfile. Older Bazel versions repeat the lookup whenever the extension is re-evaluated.</p>
-<pre><code class="language-python">k8s.kubectl(version = "1.36.5")
-</code></pre>
-<p><strong>Attributes</strong></p>
-<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
-<tr><td style="text-align: left"><a id="k8s.kubectl-name"></a>name</td><td style="text-align: left">The name of the host alias repository.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>"kubectl"</code></td></tr>
-<tr><td style="text-align: left"><a id="k8s.kubectl-version"></a>version</td><td style="text-align: left">The version of kubectl to fetch, without a leading <code>v</code>.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>"1.37.1"</code></td></tr>
-</tbody></table>
-</div>
+                        <h1 id="k8s-extension"><a class="header" href="#k8s-extension">k8s extension</a></h1>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">

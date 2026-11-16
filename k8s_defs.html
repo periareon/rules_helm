@@ -155,39 +155,8 @@
 
                 <div id="content" class="content">
                     <main>
-                        <!-- Generated with Stardoc: http://skydoc.bazel.build -->
-<h1 id="bazel-rules-for-kubernetes-tooling"><a class="header" href="#bazel-rules-for-kubernetes-tooling">Bazel rules for Kubernetes tooling.</a></h1>
-<p>Rules for the tools that sit next to Helm when operating a cluster. Today this
-is <code>kubectl</code>, fetched hermetically so <code>helm_install</code> / <code>helm_upgrade</code> failures
-can be debugged with <code>bazel run @kubectl//:kubectl -- ...</code> without a locally
-installed copy.</p>
-<h2 id="rules"><a class="header" href="#rules">Rules</a></h2>
-<ul>
-<li><a href="#kubectl_toolchain">kubectl_toolchain</a></li>
-</ul>
-<p><a id="kubectl_toolchain"></a></p>
-<h2 id="kubectl_toolchain"><a class="header" href="#kubectl_toolchain">kubectl_toolchain</a></h2>
-<pre>
-load("@rules_helm//k8s:defs.bzl", "kubectl_toolchain")
+                        <h1 id="kubectl_toolchain"><a class="header" href="#kubectl_toolchain">kubectl_toolchain</a></h1>
 
-kubectl_toolchain(<a href="#kubectl_toolchain-name">name</a>, <a href="#kubectl_toolchain-kubectl">kubectl</a>)
-</pre>
-<p>A kubectl toolchain.</p>
-<p>Exposes the binary as <code>KUBECTL_BIN</code> to rules that consume
-<code>@rules_helm//k8s:current_kubectl_toolchain</code> via <code>toolchains</code>, e.g.</p>
-<pre><code class="language-python">genrule(
-    name = "pods",
-    outs = ["pods.txt"],
-    cmd = "$(KUBECTL_BIN) version --client &gt; $@",
-    toolchains = ["@rules_helm//k8s:current_kubectl_toolchain"],
-)
-</code></pre>
-<p><strong>ATTRIBUTES</strong></p>
-<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
-<tr><td style="text-align: left"><a id="kubectl_toolchain-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
-<tr><td style="text-align: left"><a id="kubectl_toolchain-kubectl"></a>kubectl</td><td style="text-align: left">A kubectl binary</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
-</tbody></table>
-</div>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
