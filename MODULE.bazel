@@ -11,6 +11,7 @@ bazel_dep(name = "bazel_skylib", version = "1.9.2")
 bazel_dep(name = "rules_go", version = "0.63.0")
 bazel_dep(name = "gazelle", version = "0.53.0")
 bazel_dep(name = "bazel_lib", version = "3.0.0")
+bazel_dep(name = "package_metadata", version = "0.0.15")
 
 bazel_dep(name = "rules_oci", version = "2.3.0", dev_dependency = True)
 bazel_dep(name = "rules_img", version = "0.3.18", dev_dependency = True)
@@ -139,6 +140,7 @@ use_repo(
     "helm_test_deps__with_external_deps_postgresql",
     "helm_test_deps__with_external_deps_redis",
     "helm_test_deps__with_external_deps_trust_manager",
+    "helm_test_deps__with_external_deps_vault",
     "rules_helm_test_img_container_base",
     "rules_helm_test_oci_container_base",
 )

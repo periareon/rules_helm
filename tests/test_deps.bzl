@@ -48,6 +48,14 @@ def helm_test_deps():
         sha256 = "38d9b6657aa3b0cc16d190570dbaf96796e997d03a1665264dac9966343e4d1b",
     )
 
+    # A chart shipping its license text without naming it in `Chart.yaml`:
+    maybe(
+        helm_import_repository,
+        name = "helm_test_deps__with_external_deps_vault",
+        url = "https://helm.releases.hashicorp.com/vault-0.31.0.tgz",
+        sha256 = "fe80fae6a8838c75da9fbde1398f2c10bb4b5c31c425e559507ba99373297de2",
+    )
+
     # Directly download charts from an OCI URL:
     maybe(
         helm_import_repository,
