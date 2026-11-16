@@ -172,3 +172,31 @@ jobs:
       - uses: Jerome1337/gofmt-action@v1.0.5
         with:
           gofmt-flags: -e -d
+
+  # The one status branch protection requires. Every job above feeds it, so
+  # matrix entries and jobs can be added or removed without touching the
+  # protection rule. A skipped dependency is fine; a failed or cancelled one
+  # is not.
+  ci-success:
+    name: CI Success
+    if: always()
+    needs:
+      - ci
+      - ci-aspects
+      - ci-min-bazel
+      - ci-extensions
+      - ci-buildifier
+      - ci-gofmt
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check the result of every job
+      env:
+        RESULTS: ${{ join(needs.*.result, ' ') }}
+      run: |
+        echo "Job results: ${RESULTS}"
+        for result in ${RESULTS}; do
+          if [[ "${result}" != "success" ]]; then
+            echo "::error::A required job did not succeed (${result})."
+            exit 1
+          fi
+        done
