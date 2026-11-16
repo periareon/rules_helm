@@ -162,6 +162,8 @@
 <a href="https://registry.bazel.build/modules/rules_helm">Bazel Central Registry</a>:</p>
 <pre><code class="language-python">bazel_dep(name = "rules_helm", version = "{version}")
 </code></pre>
+<p>Charts that bundle container images use one of the companion modules instead.
+See <a href="./images.html">Container images</a>.</p>
 <h2 id="run-as-a-tool"><a class="header" href="#run-as-a-tool">Run as a tool</a></h2>
 <pre><code class="language-bash">bazel run @helm//:helm -- ...
 </code></pre>

@@ -172,7 +172,7 @@ HelmPackageInfo(<a href="#HelmPackageInfo-chart">chart</a>, <a href="#HelmPackag
 <p><strong>FIELDS</strong></p>
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th></tr></thead><tbody>
 <tr><td style="text-align: left"><a id="HelmPackageInfo-chart"></a>chart</td><td style="text-align: left">File: The result of <code>helm package</code></td></tr>
-<tr><td style="text-align: left"><a id="HelmPackageInfo-images"></a>images</td><td style="text-align: left">list[Target]: A list of <a href="https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags">@rules_oci//oci:defs.bzl%oci_push</a> or <a href="https://github.com/bazel-contrib/rules_img">@rules_img//img:push.bzl%image_push</a> targets</td></tr>
+<tr><td style="text-align: left"><a id="HelmPackageInfo-images"></a>images</td><td style="text-align: left">list[HelmImageInfo]: The images bundled into the chart</td></tr>
 <tr><td style="text-align: left"><a id="HelmPackageInfo-metadata"></a>metadata</td><td style="text-align: left">File: A json encoded file containing metadata about the helm chart</td></tr>
 </tbody></table>
 </div>

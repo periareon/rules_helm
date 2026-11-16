@@ -163,6 +163,8 @@
 <a href="https://registry.bazel.build/modules/rules_helm">Bazel Central Registry</a>:</p>
 <pre><code class="language-python">bazel_dep(name = "rules_helm", version = "{version}")
 </code></pre>
+<p>Charts that bundle container images use one of the companion modules instead.
+See <a href="./images.html">Container images</a>.</p>
 <h2 id="run-as-a-tool"><a class="header" href="#run-as-a-tool">Run as a tool</a></h2>
 <pre><code class="language-bash">bazel run @helm//:helm -- ...
 </code></pre>
@@ -199,6 +201,7 @@ makes a single failing push easier to follow.</p>
 <li><a href="./chart_file.html#chart_file">chart_file</a></li>
 <li><a href="./helm_chart.html#helm_chart">helm_chart</a></li>
 <li><a href="./helm_command.html#helm_command">helm_command</a></li>
+<li><a href="./helm_image.html#helm_image">helm_image</a></li>
 <li><a href="./helm_import.html#helm_import">helm_import</a></li>
 <li><a href="./helm_install.html#helm_install">helm_install</a></li>
 <li><a href="./helm_lint.html#helm_lint_aspect">helm_lint_aspect</a></li>
@@ -214,6 +217,7 @@ makes a single failing push easier to follow.</p>
 <li><a href="./helm_toolchain.html#helm_toolchain">helm_toolchain</a></li>
 <li><a href="./helm_install.html#helm_uninstall">helm_uninstall</a></li>
 <li><a href="./helm_install.html#helm_upgrade">helm_upgrade</a></li>
+<li><a href="./helm_image.html#HelmImageInfo">HelmImageInfo</a></li>
 <li><a href="./helm_package_info.html#HelmPackageInfo">HelmPackageInfo</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
@@ -256,7 +260,7 @@ helm_chart(*, <a href="helm_chart.html#helm_chart-name">name</a>, <a href="helm_
 <tr><td style="text-align: left"><a id="helm_chart-templates"></a>templates</td><td style="text-align: left">A list of template files to include in the package.</td><td style="text-align: left"><code>None</code></td></tr>
 <tr><td style="text-align: left"><a id="helm_chart-schema"></a>schema</td><td style="text-align: left">A JSON Schema file for values. Defaults to <code>values.schema.json</code>.</td><td style="text-align: left"><code>None</code></td></tr>
 <tr><td style="text-align: left"><a id="helm_chart-files"></a>files</td><td style="text-align: left">Files accessed in templates via the <a href="https://helm.sh/docs/chart_template_guide/accessing_files/"><code>.Files</code> api</a>.</td><td style="text-align: left"><code>[]</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_chart-images"></a>images</td><td style="text-align: left">A list of <a href="https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags">oci_push</a> or <a href="https://github.com/bazel-contrib/rules_img">image_push</a> targets</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_chart-images"></a>images</td><td style="text-align: left">The container images the chart refers to. See <code>helm_package.images</code>.</td><td style="text-align: left"><code>[]</code></td></tr>
 <tr><td style="text-align: left"><a id="helm_chart-deps"></a>deps</td><td style="text-align: left">A list of helm package dependencies.</td><td style="text-align: left"><code>None</code></td></tr>
 <tr><td style="text-align: left"><a id="helm_chart-install_name"></a>install_name</td><td style="text-align: left">The <code>helm install</code> name to use. <code>name</code> will be used if unset.</td><td style="text-align: left"><code>None</code></td></tr>
 <tr><td style="text-align: left"><a id="helm_chart-registry_url"></a>registry_url</td><td style="text-align: left">The registry url for the helm chart. <code>{name}.push_registry</code> is only defined when a value is passed here. Mutually exclusive with <code>registry_url_file</code>.</td><td style="text-align: left"><code>None</code></td></tr>
@@ -310,8 +314,73 @@ helm_command(
 <tr><td style="text-align: left"><a id="helm_command-values"></a>values</td><td style="text-align: left">Values files to pass to the subcommand via <code>--values</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
-<h1 id="helm_import-rules"><a class="header" href="#helm_import-rules">helm_import rules.</a></h1>
+<h1 id="helm-images"><a class="header" href="#helm-images">Helm images</a></h1>
+<p><code>HelmImageInfo</code> is the contract between <code>rules_helm</code> and the rules that build
+container images. <code>helm_package.images</code> accepts any target that provides it.</p>
+<p><code>rules_helm</code> provides it itself for <code>oci_push</code>, <code>image_push</code> and <code>image_import</code>
+targets by recognising them by shape. The companion modules provide it from
+the image rules' own providers instead:</p>
+<ul>
+<li><code>rules_helm_img</code>: <code>helm_img_image</code></li>
+<li><code>rules_helm_oci</code>: <code>helm_oci_image</code></li>
+</ul>
+<p><code>helm_image</code> is the reference implementation for anything else.</p>
 <h2 id="rules-1"><a class="header" href="#rules-1">Rules</a></h2>
+<ul>
+<li><a href="helm_image.html#helm_image">helm_image</a></li>
+</ul>
+<h2 id="providers"><a class="header" href="#providers">Providers</a></h2>
+<ul>
+<li><a href="helm_image.html#HelmImageInfo">HelmImageInfo</a></li>
+</ul>
+<p><a id="helm_image"></a></p>
+<h2 id="helm_image"><a class="header" href="#helm_image">helm_image</a></h2>
+<pre>
+load("@rules_helm//helm:helm_image.bzl", "helm_image")
+
+helm_image(<a href="helm_image.html#helm_image-name">name</a>, <a href="helm_image.html#helm_image-manifest">manifest</a>, <a href="helm_image.html#helm_image-pusher">pusher</a>, <a href="helm_image.html#helm_image-remote_tags">remote_tags</a>, <a href="helm_image.html#helm_image-repository">repository</a>)
+</pre>
+<p>Describe a container image to <code>rules_helm</code> from plain files.</p>
+<p>This is the reference implementation of <code>HelmImageInfo</code>, for images that are
+built or pushed by something <code>rules_helm</code> does not know about. Values refer to
+it by this target's label, e.g. <code>{@//app:image}</code>.</p>
+<p><strong>ATTRIBUTES</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="helm_image-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm_image-manifest"></a>manifest</td><td style="text-align: left">The raw OCI manifest or index exactly as it is pushed. Its sha256 is the digest stamped into the chart.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm_image-pusher"></a>pusher</td><td style="text-align: left">An executable that pushes the image. Run before the chart is installed or pushed. Leave unset for images that are only referenced.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_image-remote_tags"></a>remote_tags</td><td style="text-align: left">A file containing the remote tags, one per line. With exactly one tag, values may stamp <code>{@label.tag}</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_image-repository"></a>repository</td><td style="text-align: left">A file containing <code>&lt;registry&gt;/&lt;repository&gt;</code> on a single line, with no scheme.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+</tbody></table>
+</div>
+<p><a id="HelmImageInfo"></a></p>
+<h2 id="helmimageinfo"><a class="header" href="#helmimageinfo">HelmImageInfo</a></h2>
+<pre>
+load("@rules_helm//helm:helm_image.bzl", "HelmImageInfo")
+
+HelmImageInfo(<a href="helm_image.html#HelmImageInfo-aliases">aliases</a>, <a href="helm_image.html#HelmImageInfo-label">label</a>, <a href="helm_image.html#HelmImageInfo-manifest">manifest</a>, <a href="helm_image.html#HelmImageInfo-pusher">pusher</a>, <a href="helm_image.html#HelmImageInfo-repository">repository</a>, <a href="helm_image.html#HelmImageInfo-runfiles">runfiles</a>, <a href="helm_image.html#HelmImageInfo-tags">tags</a>)
+</pre>
+<p>A container image a helm chart refers to.</p>
+<p>This is the contract between <code>rules_helm</code> and the rules that build images.
+<code>rules_helm</code> only reads it: the chart's <code>values.yaml</code> has <code>{@label}</code> style
+references replaced with <code>repository@digest</code>, and <code>pusher</code> is run before the
+chart is installed or pushed. Any rule may provide it. <code>rules_helm</code> adapts
+<code>oci_push</code>, <code>image_push</code> and <code>image_import</code> targets itself and the companion
+modules (<code>rules_helm_img</code>, <code>rules_helm_oci</code>) provide it from their image
+rules' own providers.</p>
+<p><strong>FIELDS</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="HelmImageInfo-aliases"></a>aliases</td><td style="text-align: left">list[Label]: Other labels values may use to refer to the image.</td></tr>
+<tr><td style="text-align: left"><a id="HelmImageInfo-label"></a>label</td><td style="text-align: left">Label: The label values use to refer to the image, e.g. <code>{@//app:image.push}</code>.</td></tr>
+<tr><td style="text-align: left"><a id="HelmImageInfo-manifest"></a>manifest</td><td style="text-align: left">File: The raw OCI manifest or index, byte for byte what is pushed or was pulled. Its sha256 is the image digest.</td></tr>
+<tr><td style="text-align: left"><a id="HelmImageInfo-pusher"></a>pusher</td><td style="text-align: left">File (optional): An executable that pushes the image. <code>None</code> for pulled images, which are referenced but never pushed.</td></tr>
+<tr><td style="text-align: left"><a id="HelmImageInfo-repository"></a>repository</td><td style="text-align: left">File: A single line, <code>&lt;registry&gt;/&lt;repository&gt;</code>, with no scheme.</td></tr>
+<tr><td style="text-align: left"><a id="HelmImageInfo-runfiles"></a>runfiles</td><td style="text-align: left">runfiles: Everything <code>pusher</code> needs at run time.</td></tr>
+<tr><td style="text-align: left"><a id="HelmImageInfo-tags"></a>tags</td><td style="text-align: left">File (optional): The remote tags, one per line.</td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
+<h1 id="helm_import-rules"><a class="header" href="#helm_import-rules">helm_import rules.</a></h1>
+<h2 id="rules-2"><a class="header" href="#rules-2">Rules</a></h2>
 <ul>
 <li><a href="helm_import.html#helm_import">helm_import</a></li>
 </ul>
@@ -353,7 +422,7 @@ helm_import_repository(<a href="helm_import.html#helm_import_repository-name">na
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
 <h1 id="helm_install-rules"><a class="header" href="#helm_install-rules">helm_install rules.</a></h1>
-<h2 id="rules-2"><a class="header" href="#rules-2">Rules</a></h2>
+<h2 id="rules-3"><a class="header" href="#rules-3">Rules</a></h2>
 <ul>
 <li><a href="helm_install.html#helm_install">helm_install</a></li>
 <li><a href="helm_install.html#helm_uninstall">helm_uninstall</a></li>
@@ -419,7 +488,7 @@ helm_upgrade(<a href="helm_install.html#helm_upgrade-name">name</a>, <a href="he
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
 <h1 id="helm_lint-rules"><a class="header" href="#helm_lint-rules">helm_lint rules.</a></h1>
-<h2 id="rules-3"><a class="header" href="#rules-3">Rules</a></h2>
+<h2 id="rules-4"><a class="header" href="#rules-4">Rules</a></h2>
 <ul>
 <li><a href="helm_lint.html#helm_lint_test">helm_lint_test</a></li>
 </ul>
@@ -456,11 +525,11 @@ helm_lint_aspect()
 <p><strong>ATTRIBUTES</strong></p>
 <div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
 <h1 id="helm_oci_digest-rules"><a class="header" href="#helm_oci_digest-rules">helm_oci_digest rules.</a></h1>
-<h2 id="rules-4"><a class="header" href="#rules-4">Rules</a></h2>
+<h2 id="rules-5"><a class="header" href="#rules-5">Rules</a></h2>
 <ul>
 <li><a href="helm_oci_digest.html#helm_oci_digest">helm_oci_digest</a></li>
 </ul>
-<h2 id="providers"><a class="header" href="#providers">Providers</a></h2>
+<h2 id="providers-1"><a class="header" href="#providers-1">Providers</a></h2>
 <ul>
 <li><a href="helm_oci_digest.html#HelmOCIDigestInfo">HelmOCIDigestInfo</a></li>
 </ul>
@@ -502,7 +571,7 @@ HelmOCIDigestInfo(<a href="helm_oci_digest.html#HelmOCIDigestInfo-config">config
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
 <h1 id="helm_package-rule"><a class="header" href="#helm_package-rule">helm_package rule.</a></h1>
-<h2 id="rules-5"><a class="header" href="#rules-5">Rules</a></h2>
+<h2 id="rules-6"><a class="header" href="#rules-6">Rules</a></h2>
 <ul>
 <li><a href="helm_package.html#helm_package">helm_package</a></li>
 </ul>
@@ -523,7 +592,7 @@ helm_package(<a href="helm_package.html#helm_package-name">name</a>, <a href="he
 <tr><td style="text-align: left"><a id="helm_package-chart_json"></a>chart_json</td><td style="text-align: left">The <code>Chart.yaml</code> file of the helm chart as a json object</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
 <tr><td style="text-align: left"><a id="helm_package-crds"></a>crds</td><td style="text-align: left">All <a href="https://helm.sh/docs/chart_best_practices/custom_resource_definitions/">Custom Resource Definitions</a> associated with the current helm chart. E.g., the <code>./crds</code> directory</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
 <tr><td style="text-align: left"><a id="helm_package-files"></a>files</td><td style="text-align: left">Files accessed in templates via the <a href="https://helm.sh/docs/chart_template_guide/accessing_files/"><code>.Files</code> api</a></td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
-<tr><td style="text-align: left"><a id="helm_package-images"></a>images</td><td style="text-align: left">A list of                 <a href="https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags">oci_push</a>,                 <a href="https://github.com/bazel-contrib/rules_img">image_push</a> or                 <a href="https://github.com/bazel-contrib/rules_img">image_import</a> (as generated by <code>img_pull</code>)                 targets. Pulled images are referenced by their source registry and are never pushed.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_package-images"></a>images</td><td style="text-align: left">The container images the chart refers to. Each is a target providing <code>HelmImageInfo</code>, or an                 <a href="https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags">oci_push</a>,                 <a href="https://github.com/bazel-contrib/rules_img">image_push</a> or                 <a href="https://github.com/bazel-contrib/rules_img">image_import</a> (as generated by <code>img_pull</code>)                 target, which <code>rules_helm</code> describes itself. Pulled images are referenced by their source                 registry and are never pushed.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">List of labels</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
 <tr><td style="text-align: left"><a id="helm_package-opts"></a>opts</td><td style="text-align: left">Additional arguments to pass to <code>helm package</code> commands.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
 <tr><td style="text-align: left"><a id="helm_package-schema"></a>schema</td><td style="text-align: left">The <code>values.schema.json</code> file for the current package.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
 <tr><td style="text-align: left"><a id="helm_package-stamp"></a>stamp</td><td style="text-align: left">Whether to encode build information into the helm actions. Possible values:<br><br>- <code>stamp = 1</code>: Always stamp the build information into the helm actions, even in                 <a href="https://docs.bazel.build/versions/main/user-manual.html#flag--stamp">--nostamp</a> builds.                 This setting should be avoided, since it potentially kills remote caching for the target and                 any downstream actions that depend on it.<br><br>- <code>stamp = 0</code>: Always replace build information by constant values. This gives good build result caching.<br><br>- <code>stamp = -1</code>: Embedding of build information is controlled by the                 <a href="https://docs.bazel.build/versions/main/user-manual.html#flag--stamp">--[no]stamp</a> flag.<br><br>Stamped targets are not rebuilt unless their dependencies change.</td><td style="text-align: left">Integer</td><td style="text-align: left">optional</td><td style="text-align: left"><code>-1</code></td></tr>
@@ -534,7 +603,7 @@ helm_package(<a href="helm_package.html#helm_package-name">name</a>, <a href="he
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
 <h1 id="helmpackageinfo-provider"><a class="header" href="#helmpackageinfo-provider">HelmPackageInfo provider</a></h1>
-<h2 id="providers-1"><a class="header" href="#providers-1">Providers</a></h2>
+<h2 id="providers-2"><a class="header" href="#providers-2">Providers</a></h2>
 <ul>
 <li><a href="helm_package_info.html#HelmPackageInfo">HelmPackageInfo</a></li>
 </ul>
@@ -549,12 +618,12 @@ HelmPackageInfo(<a href="helm_package_info.html#HelmPackageInfo-chart">chart</a>
 <p><strong>FIELDS</strong></p>
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th></tr></thead><tbody>
 <tr><td style="text-align: left"><a id="HelmPackageInfo-chart"></a>chart</td><td style="text-align: left">File: The result of <code>helm package</code></td></tr>
-<tr><td style="text-align: left"><a id="HelmPackageInfo-images"></a>images</td><td style="text-align: left">list[Target]: A list of <a href="https://github.com/bazel-contrib/rules_oci/blob/main/docs/push.md#oci_push_rule-remote_tags">@rules_oci//oci:defs.bzl%oci_push</a> or <a href="https://github.com/bazel-contrib/rules_img">@rules_img//img:push.bzl%image_push</a> targets</td></tr>
+<tr><td style="text-align: left"><a id="HelmPackageInfo-images"></a>images</td><td style="text-align: left">list[HelmImageInfo]: The images bundled into the chart</td></tr>
 <tr><td style="text-align: left"><a id="HelmPackageInfo-metadata"></a>metadata</td><td style="text-align: left">File: A json encoded file containing metadata about the helm chart</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
 <h1 id="helm_plugin-rule"><a class="header" href="#helm_plugin-rule">helm_plugin rule.</a></h1>
-<h2 id="rules-6"><a class="header" href="#rules-6">Rules</a></h2>
+<h2 id="rules-7"><a class="header" href="#rules-7">Rules</a></h2>
 <ul>
 <li><a href="helm_plugin.html#helm_plugin">helm_plugin</a></li>
 </ul>
@@ -575,7 +644,7 @@ helm_plugin(<a href="helm_plugin.html#helm_plugin-name">name</a>, <a href="helm_
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
 <h1 id="helm_push-rules"><a class="header" href="#helm_push-rules">helm_push rules.</a></h1>
-<h2 id="rules-7"><a class="header" href="#rules-7">Rules</a></h2>
+<h2 id="rules-8"><a class="header" href="#rules-8">Rules</a></h2>
 <ul>
 <li><a href="helm_push.html#helm_push">helm_push</a></li>
 <li><a href="helm_push.html#helm_push_images">helm_push_images</a></li>
@@ -661,7 +730,7 @@ time and stream each pusher's output live.</p>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
 <h1 id="helm_template-rules"><a class="header" href="#helm_template-rules">helm_template rules.</a></h1>
-<h2 id="rules-8"><a class="header" href="#rules-8">Rules</a></h2>
+<h2 id="rules-9"><a class="header" href="#rules-9">Rules</a></h2>
 <ul>
 <li><a href="helm_template.html#helm_template">helm_template</a></li>
 <li><a href="helm_template.html#helm_template_test">helm_template_test</a></li>
@@ -702,7 +771,7 @@ helm_template_test(<a href="helm_template.html#helm_template_test-name">name</a>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
 <h1 id="helm_toolchain-rule"><a class="header" href="#helm_toolchain-rule">helm_toolchain rule.</a></h1>
-<h2 id="rules-9"><a class="header" href="#rules-9">Rules</a></h2>
+<h2 id="rules-10"><a class="header" href="#rules-10">Rules</a></h2>
 <ul>
 <li><a href="helm_toolchain.html#helm_toolchain">helm_toolchain</a></li>
 </ul>
@@ -807,13 +876,136 @@ register_toolchains("@with_diff_toolchains//:all")
 <tr><td style="text-align: left"><a id="helm.toolchain-name"></a>name</td><td style="text-align: left">Name prefix for the hub repository. Produces <code>@{name}_toolchains</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
 <tr><td style="text-align: left"><a id="helm.toolchain-plugins"></a>plugins</td><td style="text-align: left">Plugin names (from <code>helm.plugin()</code> tags) to include in these toolchains.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
 </tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="container-images"><a class="header" href="#container-images">Container images</a></h1>
+<p>A chart's <code>images</code> attribute accepts push targets from
+<a href="https://github.com/bazel-contrib/rules_oci">rules_oci</a> and
+<a href="https://github.com/bazel-contrib/rules_img">rules_img</a>, and <code>rules_helm</code>
+stamps the pushed repository and digest into the chart. <code>rules_helm</code> itself
+depends on neither. Each is wired up by a companion module that lives in this
+repository under <a href="https://github.com/periareon/rules_helm/tree/main/extensions">extensions/</a>
+and is released from the same tag, with the same version, as <code>rules_helm</code>.</p>
+<div class="table-wrapper"><table><thead><tr><th>Module</th><th>Depends on</th><th>Load from</th></tr></thead><tbody>
+<tr><td><code>rules_helm_img</code></td><td><code>rules_img</code></td><td><code>@rules_helm_img//:defs.bzl</code></td></tr>
+<tr><td><code>rules_helm_oci</code></td><td><code>rules_oci</code></td><td><code>@rules_helm_oci//:defs.bzl</code></td></tr>
+</tbody></table>
+</div>
+<p>As in <code>rules_helm</code>, each rule also has its own file next to <code>defs.bzl</code>, e.g.
+<code>@rules_helm_img//:helm_img_image.bzl</code>, for <code>BUILD</code> files that only want one
+thing.</p>
+<p>Each module re-exports every public symbol of <code>@rules_helm//helm:defs.bzl</code>
+plus the push rule its image rules provide (<code>image_push</code> or <code>oci_push</code>), so a
+chart that bundles images is written against one <code>load</code>. Rules that are
+specific to one set of image rules land in its module rather than in
+<code>rules_helm</code>.</p>
+<h2 id="the-contract"><a class="header" href="#the-contract">The contract</a></h2>
+<p><code>rules_helm</code> reads one thing from an image:
+<a href="./helm_image.html#HelmImageInfo">HelmImageInfo</a>. It carries the label values
+refer to, a repository file, the raw manifest whose sha256 is the digest, the
+remote tags, and the executable that pushes the image. <code>helm_package.images</code>
+accepts any target that provides it.</p>
+<p>Three things provide it today:</p>
+<ul>
+<li><code>rules_helm</code> itself, for <code>oci_push</code>, <code>image_push</code> and <code>image_import</code> targets
+listed directly in <code>images</code>. An aspect recognises them by shape and reads
+their attributes, which is all it can do without depending on either
+ruleset. This is what keeps existing charts working unchanged.</li>
+<li><a href="./helm_img_image.html#helm_img_image">helm_img_image</a> from <code>rules_helm_img</code>
+and <a href="./helm_oci_image.html#helm_oci_image">helm_oci_image</a> from
+<code>rules_helm_oci</code>. These read the image rules' own providers (<code>DeployInfo</code>
+and <code>PullInfo</code> in the case of <code>rules_img</code>) and are the preferred path for
+new charts. Values keep referring to the wrapped push target.</li>
+<li><a href="./helm_image.html#helm_image">helm_image</a> from <code>rules_helm</code>, which takes the
+files directly, for images built by something else entirely.</li>
+</ul>
+<h2 id="setup"><a class="header" href="#setup">Setup</a></h2>
+<pre><code class="language-python">bazel_dep(name = "rules_helm_img", version = "{version}")
+</code></pre>
+<p>A <code>bazel_dep</code> on the companion module pulls in <code>rules_helm</code>, so it does not
+need to be listed separately. The rules for building the images themselves
+(<code>image_manifest</code>, <code>oci_image</code> and friends) are still loaded from <code>rules_img</code>
+or <code>rules_oci</code>, which means a direct <code>bazel_dep</code> on whichever one you use.</p>
+<h2 id="example"><a class="header" href="#example">Example</a></h2>
+<pre><code class="language-python">load("@rules_helm_img//:defs.bzl", "helm_chart", "helm_img_image", "image_push")
+load("@rules_img//img:image.bzl", "image_manifest")
+
+image_manifest(
+    name = "app",
+    layers = [":app_layer"],
+)
+
+image_push(
+    name = "app.push",
+    image = ":app",
+    registry = "docker.io",
+    repository = "my-org/app",
+    tags = ["latest"],
+)
+
+helm_img_image(
+    name = "app.helm",
+    image = ":app.push",
+)
+
+helm_chart(
+    name = "chart",
+    images = [":app.helm"],
+)
+</code></pre>
+<p>With <code>values.yaml</code> referencing the push target by label:</p>
+<pre><code class="language-yaml">image: "{@//:app.push}"
+</code></pre>
+<p>The packaged chart carries <code>docker.io/my-org/app@sha256:...</code> in its place.</p>
+<div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
+<h1 id="helm_img_image-rule"><a class="header" href="#helm_img_image-rule">helm_img_image rule.</a></h1>
+<h2 id="rules-11"><a class="header" href="#rules-11">Rules</a></h2>
+<ul>
+<li><a href="helm_img_image.html#helm_img_image">helm_img_image</a></li>
+</ul>
+<p><a id="helm_img_image"></a></p>
+<h2 id="helm_img_image"><a class="header" href="#helm_img_image">helm_img_image</a></h2>
+<pre>
+load("@rules_helm_img//:helm_img_image.bzl", "helm_img_image")
+
+helm_img_image(<a href="helm_img_image.html#helm_img_image-name">name</a>, <a href="helm_img_image.html#helm_img_image-image">image</a>)
+</pre>
+<p>Describe a <code>rules_img</code> image to <code>rules_helm</code>.</p>
+<p>Accepts an <code>image_push</code> target, or an <code>image_import</code> target as generated by
+<code>img_pull</code>, and provides <code>HelmImageInfo</code> from their <code>DeployInfo</code> and <code>PullInfo</code>
+providers. Values keep referring to the wrapped target, e.g.
+<code>{@//app:image.push}</code>.</p>
+<p><strong>ATTRIBUTES</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="helm_img_image-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm_img_image-image"></a>image</td><td style="text-align: left">An <code>image_push</code> or <code>image_import</code> target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
+<h1 id="helm_oci_image-rule"><a class="header" href="#helm_oci_image-rule">helm_oci_image rule.</a></h1>
+<h2 id="rules-12"><a class="header" href="#rules-12">Rules</a></h2>
+<ul>
+<li><a href="helm_oci_image.html#helm_oci_image">helm_oci_image</a></li>
+</ul>
+<p><a id="helm_oci_image"></a></p>
+<h2 id="helm_oci_image"><a class="header" href="#helm_oci_image">helm_oci_image</a></h2>
+<pre>
+load("@rules_helm_oci//:helm_oci_image.bzl", "helm_oci_image")
+
+helm_oci_image(<a href="helm_oci_image.html#helm_oci_image-name">name</a>, <a href="helm_oci_image.html#helm_oci_image-image">image</a>)
+</pre>
+<p>Describe a <code>rules_oci</code> image to <code>rules_helm</code>.</p>
+<p>Accepts an <code>oci_push</code> target and provides <code>HelmImageInfo</code> for the image it
+pushes. Values keep referring to the wrapped target, e.g. <code>{@//app:image.push}</code>.</p>
+<p><strong>ATTRIBUTES</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="helm_oci_image-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm_oci_image-image"></a>image</td><td style="text-align: left">An <code>oci_push</code> target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+</tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="kubernetes-tools"><a class="header" href="#kubernetes-tools">Kubernetes tools</a></h1>
 <p><code>rules_helm</code> can fetch <code>kubectl</code> the same way it fetches <code>helm</code>, so a release
 driven by <a href="./helm_install.html#helm_install">helm_install</a> or
 <a href="./helm_install.html#helm_upgrade">helm_upgrade</a> can be inspected from the same
 workspace without installing anything on the host. Everyone on a project gets
 the same <code>kubectl</code> version, on every platform Bazel runs on.</p>
-<h2 id="setup"><a class="header" href="#setup">Setup</a></h2>
+<h2 id="setup-1"><a class="header" href="#setup-1">Setup</a></h2>
 <p><code>rules_helm</code> registers the <code>kubectl</code> toolchains itself. To get the <code>@kubectl</code>
 repository for <code>bazel run</code>, add the extension to your <code>MODULE.bazel</code>:</p>
 <pre><code class="language-python">k8s = use_extension("@rules_helm//k8s:extensions.bzl", "k8s")
@@ -879,7 +1071,7 @@ for the provider fields and the <a href="./k8s_extensions.html">k8s extension</a
 is <code>kubectl</code>, fetched hermetically so <code>helm_install</code> / <code>helm_upgrade</code> failures
 can be debugged with <code>bazel run @kubectl//:kubectl -- ...</code> without a locally
 installed copy.</p>
-<h2 id="rules-10"><a class="header" href="#rules-10">Rules</a></h2>
+<h2 id="rules-13"><a class="header" href="#rules-13">Rules</a></h2>
 <ul>
 <li><a href="k8s_defs.html#kubectl_toolchain">kubectl_toolchain</a></li>
 </ul>

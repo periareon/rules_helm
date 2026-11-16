@@ -1,0 +1,274 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>helm_image - rules_helm</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">rules_helm</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/periareon/rules_helm/" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <!-- Generated with Stardoc: http://skydoc.bazel.build -->
+<h1 id="helm-images"><a class="header" href="#helm-images">Helm images</a></h1>
+<p><code>HelmImageInfo</code> is the contract between <code>rules_helm</code> and the rules that build
+container images. <code>helm_package.images</code> accepts any target that provides it.</p>
+<p><code>rules_helm</code> provides it itself for <code>oci_push</code>, <code>image_push</code> and <code>image_import</code>
+targets by recognising them by shape. The companion modules provide it from
+the image rules' own providers instead:</p>
+<ul>
+<li><code>rules_helm_img</code>: <code>helm_img_image</code></li>
+<li><code>rules_helm_oci</code>: <code>helm_oci_image</code></li>
+</ul>
+<p><code>helm_image</code> is the reference implementation for anything else.</p>
+<h2 id="rules"><a class="header" href="#rules">Rules</a></h2>
+<ul>
+<li><a href="#helm_image">helm_image</a></li>
+</ul>
+<h2 id="providers"><a class="header" href="#providers">Providers</a></h2>
+<ul>
+<li><a href="#HelmImageInfo">HelmImageInfo</a></li>
+</ul>
+<p><a id="helm_image"></a></p>
+<h2 id="helm_image"><a class="header" href="#helm_image">helm_image</a></h2>
+<pre>
+load("@rules_helm//helm:helm_image.bzl", "helm_image")
+
+helm_image(<a href="#helm_image-name">name</a>, <a href="#helm_image-manifest">manifest</a>, <a href="#helm_image-pusher">pusher</a>, <a href="#helm_image-remote_tags">remote_tags</a>, <a href="#helm_image-repository">repository</a>)
+</pre>
+<p>Describe a container image to <code>rules_helm</code> from plain files.</p>
+<p>This is the reference implementation of <code>HelmImageInfo</code>, for images that are
+built or pushed by something <code>rules_helm</code> does not know about. Values refer to
+it by this target's label, e.g. <code>{@//app:image}</code>.</p>
+<p><strong>ATTRIBUTES</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="helm_image-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm_image-manifest"></a>manifest</td><td style="text-align: left">The raw OCI manifest or index exactly as it is pushed. Its sha256 is the digest stamped into the chart.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm_image-pusher"></a>pusher</td><td style="text-align: left">An executable that pushes the image. Run before the chart is installed or pushed. Leave unset for images that are only referenced.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_image-remote_tags"></a>remote_tags</td><td style="text-align: left">A file containing the remote tags, one per line. With exactly one tag, values may stamp <code>{@label.tag}</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_image-repository"></a>repository</td><td style="text-align: left">A file containing <code>&lt;registry&gt;/&lt;repository&gt;</code> on a single line, with no scheme.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+</tbody></table>
+</div>
+<p><a id="HelmImageInfo"></a></p>
+<h2 id="helmimageinfo"><a class="header" href="#helmimageinfo">HelmImageInfo</a></h2>
+<pre>
+load("@rules_helm//helm:helm_image.bzl", "HelmImageInfo")
+
+HelmImageInfo(<a href="#HelmImageInfo-aliases">aliases</a>, <a href="#HelmImageInfo-label">label</a>, <a href="#HelmImageInfo-manifest">manifest</a>, <a href="#HelmImageInfo-pusher">pusher</a>, <a href="#HelmImageInfo-repository">repository</a>, <a href="#HelmImageInfo-runfiles">runfiles</a>, <a href="#HelmImageInfo-tags">tags</a>)
+</pre>
+<p>A container image a helm chart refers to.</p>
+<p>This is the contract between <code>rules_helm</code> and the rules that build images.
+<code>rules_helm</code> only reads it: the chart's <code>values.yaml</code> has <code>{@label}</code> style
+references replaced with <code>repository@digest</code>, and <code>pusher</code> is run before the
+chart is installed or pushed. Any rule may provide it. <code>rules_helm</code> adapts
+<code>oci_push</code>, <code>image_push</code> and <code>image_import</code> targets itself and the companion
+modules (<code>rules_helm_img</code>, <code>rules_helm_oci</code>) provide it from their image
+rules' own providers.</p>
+<p><strong>FIELDS</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="HelmImageInfo-aliases"></a>aliases</td><td style="text-align: left">list[Label]: Other labels values may use to refer to the image.</td></tr>
+<tr><td style="text-align: left"><a id="HelmImageInfo-label"></a>label</td><td style="text-align: left">Label: The label values use to refer to the image, e.g. <code>{@//app:image.push}</code>.</td></tr>
+<tr><td style="text-align: left"><a id="HelmImageInfo-manifest"></a>manifest</td><td style="text-align: left">File: The raw OCI manifest or index, byte for byte what is pushed or was pulled. Its sha256 is the image digest.</td></tr>
+<tr><td style="text-align: left"><a id="HelmImageInfo-pusher"></a>pusher</td><td style="text-align: left">File (optional): An executable that pushes the image. <code>None</code> for pulled images, which are referenced but never pushed.</td></tr>
+<tr><td style="text-align: left"><a id="HelmImageInfo-repository"></a>repository</td><td style="text-align: left">File: A single line, <code>&lt;registry&gt;/&lt;repository&gt;</code>, with no scheme.</td></tr>
+<tr><td style="text-align: left"><a id="HelmImageInfo-runfiles"></a>runfiles</td><td style="text-align: left">runfiles: Everything <code>pusher</code> needs at run time.</td></tr>
+<tr><td style="text-align: left"><a id="HelmImageInfo-tags"></a>tags</td><td style="text-align: left">File (optional): The remote tags, one per line.</td></tr>
+</tbody></table>
+</div>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="helm_command.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="helm_import.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="helm_command.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="helm_import.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
