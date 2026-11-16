@@ -1,7 +1,18 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load(":helm_utils.bzl", "stamp_build_setting")
+load(":package_metadata.bzl", "license_kind")
 
 stamp_build_setting(name = "stamp")
+
+# The `license` of an imported chart that neither names its license in
+# `Chart.yaml` nor ships a recognizable license file. `NOASSERTION` is the SPDX
+# term for a license nobody has made a claim about.
+license_kind(
+    name = "noassertion",
+    full_name = "No license asserted",
+    identifier = "NOASSERTION",
+    visibility = ["//visibility:public"],
+)
 
 filegroup(
     name = "bzl_srcs",
@@ -20,5 +31,8 @@ bzl_library(
         "@bazel_lib//lib:base64",
         "@bazel_lib//lib:repo_utils",
         "@bazel_skylib//rules:common_settings",
+        "@package_metadata//licenses:srcs",
+        "@package_metadata//purl:srcs",
+        "@package_metadata//rules:srcs",
     ],
 )
