@@ -23,6 +23,7 @@
 
 - [Container images](./images.md)
   - [helm_img_image](./helm_img_image.md)
+  - [helm_oci_manifest](./helm_oci_manifest.md)
   - [helm_oci_image](./helm_oci_image.md)
 
 - [Kubernetes tools](./k8s.md)

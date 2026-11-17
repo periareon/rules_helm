@@ -164,6 +164,15 @@ stardoc(
 )
 
 stardoc(
+    name = "helm_oci_manifest",
+    out = "src/helm_oci_manifest.md",
+    input = "@rules_helm_img//:helm_oci_manifest.bzl",
+    table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
+    tags = ["manual"],
+    deps = ["@rules_helm_img//:helm_oci_manifest_bzl"],
+)
+
+stardoc(
     name = "helm_oci_image",
     out = "src/helm_oci_image.md",
     input = "@rules_helm_oci//:helm_oci_image.bzl",
@@ -187,6 +196,7 @@ mdbook(
         ":helm_lint",
         ":helm_oci_digest",
         ":helm_oci_image",
+        ":helm_oci_manifest",
         ":helm_package",
         ":helm_package_info",
         ":helm_plugin",

@@ -93,3 +93,30 @@ image: "{@//:app.push}"
 ```
 
 The packaged chart carries `docker.io/my-org/app@sha256:...` in its place.
+
+## Pushing the chart with `multi_deploy`
+
+`rules_img`'s `multi_deploy` pushes all of its `operations` in one run, but
+only targets that provide `DeployInfo` or `MultipleDeployInfo` can be
+operations, and `helm_push` provides neither. [helm_oci_manifest](./helm_oci_manifest.md#helm_oci_manifest)
+from `rules_helm_img` describes the chart as the OCI artifact `helm push`
+creates, so the chart and its images can be pushed together:
+
+```python
+load("@rules_helm_img//:defs.bzl", "helm_oci_manifest")
+load("@rules_img//img:multi_deploy.bzl", "multi_deploy")
+
+helm_oci_manifest(
+    name = "chart.oci_manifest",
+    chart = ":chart",
+    registry_url = "oci://registry.example.com/charts",
+)
+
+multi_deploy(
+    name = "deploy",
+    operations = [
+        ":app.push",
+        ":chart.oci_manifest",
+    ],
+)
+```

@@ -69,6 +69,10 @@ load(
     _helm_oci_digest = "helm_oci_digest",
 )
 load(
+    ":helm_oci_manifest.bzl",
+    _helm_oci_manifest = "helm_oci_manifest",
+)
+load(
     ":helm_package.bzl",
     _helm_package = "helm_package",
 )
@@ -124,3 +128,4 @@ HelmPackageInfo = _HelmPackageInfo
 image_push = _image_push
 
 helm_img_image = _helm_img_image
+helm_oci_manifest = _helm_oci_manifest
