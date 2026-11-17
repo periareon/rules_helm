@@ -37,9 +37,11 @@ def _helm_lint_aspect_impl(target, ctx):
         args.add("-promote_info")
 
     ctx.actions.run(
+        toolchain = Label("//helm:toolchain_type"),
         outputs = [output],
         executable = ctx.executable._linter,
         mnemonic = "HelmLintCheck",
+        progress_message = "HelmLintCheck %{label}",
         inputs = [helm_pkg_info.chart],
         tools = [toolchain.helm, toolchain.helm_plugins],
         arguments = [args],

@@ -163,6 +163,7 @@ def _helm_template_impl(ctx):
         args.add_all(ctx.attr.opts)
 
     ctx.actions.run(
+        toolchain = Label("//helm:toolchain_type"),
         executable = ctx.executable._templater,
         outputs = [output],
         inputs = depset([chart_info.chart] + ctx.files.values),

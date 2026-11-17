@@ -154,6 +154,7 @@ def _helm_package_impl(ctx):
         args.add_all(ctx.attr.opts)
 
     ctx.actions.run(
+        toolchain = Label("@rules_helm//helm:toolchain_type"),
         executable = ctx.executable._packager,
         outputs = [output, metadata_output],
         inputs = depset(
