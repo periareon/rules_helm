@@ -28,7 +28,9 @@ common --lockfile_mode=off
 
 # Resolve `rules_helm` to the checkout this module lives in. Doing this with a
 # flag rather than a `local_path_override` keeps the override out of
-# `MODULE.bazel`, where it would be published to consumers.
+# `MODULE.bazel`, where it would be published to consumers. The release
+# archive has this line commented out by `.github/workflows/release_prep.sh`,
+# since the path does not exist once the module is extracted on its own.
 common --override_module=rules_helm=../../
 
 ###############################################################################
