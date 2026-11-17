@@ -34,6 +34,18 @@ if [[ "${ON_DISK_VERSION}" != "${TAG}" ]]; then
     exit 1
 fi
 
+# The modules under `extensions/` resolve `rules_helm` to this checkout via
+# `--override_module` in their `.bazelrc`. That path does not exist once the
+# module is extracted on its own, which is how the BCR presubmit builds it
+# (`strip_prefix` leaves only the module directory), so comment the override
+# out before archiving. Consumers get `rules_helm` from the registry.
+find "${WORKSPACE}/extensions" -name ".bazelrc" -type f | while read -r file; do
+    if grep -q "^common --override_module=rules_helm=" "${file}"; then
+        echo "Commenting out module override in: ${file}"
+        sed -i 's/^common --override_module=rules_helm=/# &/' "${file}"
+    fi
+done
+
 # Build the source archive. Exclude .git (history isn't needed by
 # consumers), .github (release infrastructure isn't part of the
 # ruleset), examples (kept out to reduce archive size — matches

@@ -1,12 +1,25 @@
 # {version}
 
+Additional documentation can be found at: https://periareon.github.io/rules_helm/
+
 ```python
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-http_archive(
-    name = "rules_helm",
-    integrity = "sha256-{sha256_base64}",
-    urls = ["https://github.com/periareon/rules_helm/releases/download/{version}/rules_helm-v{version}.tar.gz"],
-)
+bazel_dep(name = "rules_helm", version = "{version}")
 ```
 
-Additional documentation can be found at: https://github.com/periareon/rules_helm
+## Extensions
+
+Companion modules for charts that bundle container images. Each carries the
+dependency on its image ruleset and re-exports the `rules_helm` API. See
+https://periareon.github.io/rules_helm/images.html
+
+### rules_img
+
+```python
+bazel_dep(name = "rules_helm_img", version = "{version}")
+```
+
+### rules_oci
+
+```python
+bazel_dep(name = "rules_helm_oci", version = "{version}")
+```
