@@ -234,6 +234,29 @@ helm_chart(
 <pre><code class="language-yaml">image: "{@//:app.push}"
 </code></pre>
 <p>The packaged chart carries <code>docker.io/my-org/app@sha256:...</code> in its place.</p>
+<h2 id="pushing-the-chart-with-multi_deploy"><a class="header" href="#pushing-the-chart-with-multi_deploy">Pushing the chart with <code>multi_deploy</code></a></h2>
+<p><code>rules_img</code>'s <code>multi_deploy</code> pushes all of its <code>operations</code> in one run, but
+only targets that provide <code>DeployInfo</code> or <code>MultipleDeployInfo</code> can be
+operations, and <code>helm_push</code> provides neither. <a href="./helm_oci_manifest.html#helm_oci_manifest">helm_oci_manifest</a>
+from <code>rules_helm_img</code> describes the chart as the OCI artifact <code>helm push</code>
+creates, so the chart and its images can be pushed together:</p>
+<pre><code class="language-python">load("@rules_helm_img//:defs.bzl", "helm_oci_manifest")
+load("@rules_img//img:multi_deploy.bzl", "multi_deploy")
+
+helm_oci_manifest(
+    name = "chart.oci_manifest",
+    chart = ":chart",
+    registry_url = "oci://registry.example.com/charts",
+)
+
+multi_deploy(
+    name = "deploy",
+    operations = [
+        ":app.push",
+        ":chart.oci_manifest",
+    ],
+)
+</code></pre>
 
                     </main>
 

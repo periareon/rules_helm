@@ -550,7 +550,7 @@ helm_lint_aspect()
 <pre>
 load("@rules_helm//helm:helm_oci_digest.bzl", "helm_oci_digest")
 
-helm_oci_digest(<a href="helm_oci_digest.html#helm_oci_digest-name">name</a>, <a href="helm_oci_digest.html#helm_oci_digest-chart">chart</a>)
+helm_oci_digest(<a href="helm_oci_digest.html#helm_oci_digest-name">name</a>, <a href="helm_oci_digest.html#helm_oci_digest-chart">chart</a>, <a href="helm_oci_digest.html#helm_oci_digest-registry_url">registry_url</a>, <a href="helm_oci_digest.html#helm_oci_digest-registry_url_file">registry_url_file</a>)
 </pre>
 <p>Compute the OCI manifest digest for a Helm chart at build time.</p>
 <p>This rule constructs the OCI manifest that <code>helm push</code> (Helm v4) would
@@ -559,12 +559,17 @@ the chart's own <code>org.opencontainers.image.created</code> annotation, resolv
 the stamping pass, and is formatted in UTC to match the push side.</p>
 <p>The digest file contains a single line: <code>sha256:&lt;hex&gt;</code>.</p>
 <p>The manifest and config blobs are also emitted, so a pusher that uploads
-them itself can PUT the exact bytes this digest was computed over. They are
-not in the default outputs; read them off <code>HelmOCIDigestInfo</code>.</p>
+them itself can PUT the exact bytes this digest was computed over. The
+manifest annotations and the tag are emitted for a pusher that builds the
+manifest itself. With <code>registry_url</code> or <code>registry_url_file</code>, so is the
+repository <code>helm push</code> would push to. None of these are in the default
+outputs; read them off <code>HelmOCIDigestInfo</code> or its output groups.</p>
 <p><strong>ATTRIBUTES</strong></p>
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
 <tr><td style="text-align: left"><a id="helm_oci_digest-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
 <tr><td style="text-align: left"><a id="helm_oci_digest-chart"></a>chart</td><td style="text-align: left">A helm_chart target providing HelmPackageInfo.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm_oci_digest-registry_url"></a>registry_url</td><td style="text-align: left">The registry URL given to <code>helm push</code>, for example <code>oci://registry.example.com/charts</code>. Sets <code>HelmOCIDigestInfo.repository</code>. Only <code>oci://</code> URLs are accepted; any other scheme fails the target, digest included. Mutually exclusive with <code>registry_url_file</code>.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_oci_digest-registry_url_file"></a>registry_url_file</td><td style="text-align: left">A file containing the registry URL given to <code>helm push</code>. Sets <code>HelmOCIDigestInfo.repository</code>. As with <code>registry_url</code>, only <code>oci://</code> URLs are accepted. Mutually exclusive with <code>registry_url</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
 </tbody></table>
 </div>
 <p><a id="HelmOCIDigestInfo"></a></p>
@@ -572,14 +577,17 @@ not in the default outputs; read them off <code>HelmOCIDigestInfo</code>.</p>
 <pre>
 load("@rules_helm//helm:helm_oci_digest.bzl", "HelmOCIDigestInfo")
 
-HelmOCIDigestInfo(<a href="helm_oci_digest.html#HelmOCIDigestInfo-config">config</a>, <a href="helm_oci_digest.html#HelmOCIDigestInfo-digest">digest</a>, <a href="helm_oci_digest.html#HelmOCIDigestInfo-manifest">manifest</a>)
+HelmOCIDigestInfo(<a href="helm_oci_digest.html#HelmOCIDigestInfo-annotations">annotations</a>, <a href="helm_oci_digest.html#HelmOCIDigestInfo-config">config</a>, <a href="helm_oci_digest.html#HelmOCIDigestInfo-digest">digest</a>, <a href="helm_oci_digest.html#HelmOCIDigestInfo-manifest">manifest</a>, <a href="helm_oci_digest.html#HelmOCIDigestInfo-repository">repository</a>, <a href="helm_oci_digest.html#HelmOCIDigestInfo-tag">tag</a>)
 </pre>
 <p>OCI manifest digest for a Helm chart, computed at build time.</p>
 <p><strong>FIELDS</strong></p>
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="HelmOCIDigestInfo-annotations"></a>annotations</td><td style="text-align: left">File: The manifest annotations, as a JSON object of strings</td></tr>
 <tr><td style="text-align: left"><a id="HelmOCIDigestInfo-config"></a>config</td><td style="text-align: left">File: The raw OCI config blob (application/vnd.cncf.helm.config.v1+json)</td></tr>
 <tr><td style="text-align: left"><a id="HelmOCIDigestInfo-digest"></a>digest</td><td style="text-align: left">File: Text file containing the OCI manifest digest (sha256:...)</td></tr>
 <tr><td style="text-align: left"><a id="HelmOCIDigestInfo-manifest"></a>manifest</td><td style="text-align: left">File: The raw OCI manifest bytes whose digest is in <code>digest</code></td></tr>
+<tr><td style="text-align: left"><a id="HelmOCIDigestInfo-repository"></a>repository</td><td style="text-align: left">File: <code>&lt;registry&gt;/&lt;repository&gt;</code> that <code>helm push</code> pushes to, or <code>None</code> when no registry URL is set</td></tr>
+<tr><td style="text-align: left"><a id="HelmOCIDigestInfo-tag"></a>tag</td><td style="text-align: left">File: The tag <code>helm push</code> uses, which is the chart version with <code>+</code> replaced by <code>_</code></td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
 <h1 id="helm_package-rule"><a class="header" href="#helm_package-rule">helm_package rule.</a></h1>
@@ -967,6 +975,29 @@ helm_chart(
 <pre><code class="language-yaml">image: "{@//:app.push}"
 </code></pre>
 <p>The packaged chart carries <code>docker.io/my-org/app@sha256:...</code> in its place.</p>
+<h2 id="pushing-the-chart-with-multi_deploy"><a class="header" href="#pushing-the-chart-with-multi_deploy">Pushing the chart with <code>multi_deploy</code></a></h2>
+<p><code>rules_img</code>'s <code>multi_deploy</code> pushes all of its <code>operations</code> in one run, but
+only targets that provide <code>DeployInfo</code> or <code>MultipleDeployInfo</code> can be
+operations, and <code>helm_push</code> provides neither. <a href="./helm_oci_manifest.html#helm_oci_manifest">helm_oci_manifest</a>
+from <code>rules_helm_img</code> describes the chart as the OCI artifact <code>helm push</code>
+creates, so the chart and its images can be pushed together:</p>
+<pre><code class="language-python">load("@rules_helm_img//:defs.bzl", "helm_oci_manifest")
+load("@rules_img//img:multi_deploy.bzl", "multi_deploy")
+
+helm_oci_manifest(
+    name = "chart.oci_manifest",
+    chart = ":chart",
+    registry_url = "oci://registry.example.com/charts",
+)
+
+multi_deploy(
+    name = "deploy",
+    operations = [
+        ":app.push",
+        ":chart.oci_manifest",
+    ],
+)
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
 <h1 id="helm_img_image-rule"><a class="header" href="#helm_img_image-rule">helm_img_image rule.</a></h1>
 <h2 id="rules-11"><a class="header" href="#rules-11">Rules</a></h2>
@@ -989,6 +1020,70 @@ providers. Values keep referring to the wrapped target, e.g.
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
 <tr><td style="text-align: left"><a id="helm_img_image-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
 <tr><td style="text-align: left"><a id="helm_img_image-image"></a>image</td><td style="text-align: left">An <code>image_push</code> or <code>image_import</code> target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
+<h1 id="helm_oci_manifest-macro"><a class="header" href="#helm_oci_manifest-macro">helm_oci_manifest macro.</a></h1>
+<h2 id="functions-1"><a class="header" href="#functions-1">Functions</a></h2>
+<ul>
+<li><a href="helm_oci_manifest.html#helm_oci_manifest">helm_oci_manifest</a></li>
+</ul>
+<p><a id="helm_oci_manifest"></a></p>
+<h2 id="helm_oci_manifest"><a class="header" href="#helm_oci_manifest">helm_oci_manifest</a></h2>
+<pre>
+load("@rules_helm_img//:helm_oci_manifest.bzl", "helm_oci_manifest")
+
+helm_oci_manifest(*, <a href="helm_oci_manifest.html#helm_oci_manifest-name">name</a>, <a href="helm_oci_manifest.html#helm_oci_manifest-chart">chart</a>, <a href="helm_oci_manifest.html#helm_oci_manifest-registry_url">registry_url</a>, <a href="helm_oci_manifest.html#helm_oci_manifest-registry_url_file">registry_url_file</a>, <a href="helm_oci_manifest.html#helm_oci_manifest-visibility">visibility</a>, <a href="helm_oci_manifest.html#helm_oci_manifest-kwargs">**kwargs</a>)
+</pre>
+<p>Describe a chart as the OCI artifact <code>helm push</code> creates, for <code>rules_img</code>'s <code>multi_deploy</code>.</p>
+<p>The target is an <code>image_manifest</code> that provides <code>DeployInfo</code>, so it can be listed in the
+<code>operations</code> of a <a href="https://github.com/bazel-contrib/rules_img"><code>multi_deploy</code></a>. Running the
+<code>multi_deploy</code> pushes the chart to <code>&lt;registry_url&gt;/&lt;chart name&gt;:&lt;chart version&gt;</code>, with <code>+</code>
+in the version replaced by <code>_</code>, as <code>helm push</code> would. Only the chart is pushed; push its
+images with their own targets.</p>
+<pre><code class="language-python">load("@rules_helm_img//:defs.bzl", "helm_oci_manifest")
+load("@rules_img//img:multi_deploy.bzl", "multi_deploy")
+
+helm_oci_manifest(
+    name = "my_chart_oci_manifest",
+    chart = ":my_chart",
+    registry_url = "oci://registry.example.com/charts",
+)
+
+multi_deploy(
+    name = "deploy",
+    operations = [":my_chart_oci_manifest"],
+)
+</code></pre>
+<p>The pushed manifest is the one <code>helm push</code> creates when it runs in UTC, so its digest is the
+one <a href="./helm_oci_digest.html#helm_oci_digest">helm_oci_digest</a> gives. Helm writes the
+<code>org.opencontainers.image.created</code> annotation in the local time zone, so <code>helm push</code> in
+another zone pushes a different digest for the same chart.</p>
+<p>Compared with <a href="./helm_push.html#helm_push">helm_push</a>:</p>
+<ul>
+<li>Only <code>oci://</code> registries are supported, so <code>push_cmd</code> and plugins such as <code>cm-push</code> are not.</li>
+<li>Registry credentials come from <code>rules_img</code> (Docker config and credential helpers), not from
+the <code>HELM_REGISTRY_*</code> variables (<code>HELM_REGISTRY_USERNAME</code>, <code>HELM_REGISTRY_PASSWORD</code> and
+<code>HELM_REGISTRY_PASSWORD_FILE</code>).</li>
+<li>There is no <code>include_images</code>.</li>
+</ul>
+<p><code>rules_img</code> expands Go templates in annotation values. <code>{{</code> in a chart's metadata is escaped,
+so the annotations match the chart.</p>
+<div class="table-wrapper"><table><thead><tr><th>target</th><th>rule</th></tr></thead><tbody>
+<tr><td><code>{name}</code></td><td><code>image_manifest</code></td></tr>
+<tr><td><code>{name}.oci_digest</code></td><td><a href="./helm_oci_digest.html#helm_oci_digest">helm_oci_digest</a></td></tr>
+<tr><td><code>{name}.files</code></td><td>config blob, annotations, tag, repository and layer files</td></tr>
+<tr><td><code>{name}.layer</code></td><td><code>layer_from_file</code></td></tr>
+<tr><td><code>{name}.push_spec</code></td><td><code>image_push_spec</code></td></tr>
+</tbody></table>
+</div>
+<p><strong>PARAMETERS</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Default Value</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="helm_oci_manifest-name"></a>name</td><td style="text-align: left">The name of the <code>image_manifest</code> target.</td><td style="text-align: left">none</td></tr>
+<tr><td style="text-align: left"><a id="helm_oci_manifest-chart"></a>chart</td><td style="text-align: left">A <a href="./helm_chart.html#helm_chart">helm_chart</a> or <a href="./helm_package.html#helm_package">helm_package</a> target. Charts from <a href="./helm_import.html#helm_import">helm_import</a> are not supported.</td><td style="text-align: left">none</td></tr>
+<tr><td style="text-align: left"><a id="helm_oci_manifest-registry_url"></a>registry_url</td><td style="text-align: left">The registry URL given to <code>helm push</code>, for example <code>oci://registry.example.com/charts</code>. Mutually exclusive with <code>registry_url_file</code>.</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_oci_manifest-registry_url_file"></a>registry_url_file</td><td style="text-align: left">A file containing the registry URL. Mutually exclusive with <code>registry_url</code>.</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_oci_manifest-visibility"></a>visibility</td><td style="text-align: left">The visibility of <code>{name}</code>. The other targets are private.</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_oci_manifest-kwargs"></a>kwargs</td><td style="text-align: left">Common attributes such as <code>tags</code>, <code>target_compatible_with</code> and <code>testonly</code>, applied to every target.</td><td style="text-align: left">none</td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><!-- Generated with Stardoc: http://skydoc.bazel.build -->
 <h1 id="helm_oci_image-rule"><a class="header" href="#helm_oci_image-rule">helm_oci_image rule.</a></h1>

@@ -1,0 +1,273 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>helm_oci_manifest - rules_helm</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">rules_helm</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/periareon/rules_helm/" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <!-- Generated with Stardoc: http://skydoc.bazel.build -->
+<h1 id="helm_oci_manifest-macro"><a class="header" href="#helm_oci_manifest-macro">helm_oci_manifest macro.</a></h1>
+<h2 id="functions"><a class="header" href="#functions">Functions</a></h2>
+<ul>
+<li><a href="#helm_oci_manifest">helm_oci_manifest</a></li>
+</ul>
+<p><a id="helm_oci_manifest"></a></p>
+<h2 id="helm_oci_manifest"><a class="header" href="#helm_oci_manifest">helm_oci_manifest</a></h2>
+<pre>
+load("@rules_helm_img//:helm_oci_manifest.bzl", "helm_oci_manifest")
+
+helm_oci_manifest(*, <a href="#helm_oci_manifest-name">name</a>, <a href="#helm_oci_manifest-chart">chart</a>, <a href="#helm_oci_manifest-registry_url">registry_url</a>, <a href="#helm_oci_manifest-registry_url_file">registry_url_file</a>, <a href="#helm_oci_manifest-visibility">visibility</a>, <a href="#helm_oci_manifest-kwargs">**kwargs</a>)
+</pre>
+<p>Describe a chart as the OCI artifact <code>helm push</code> creates, for <code>rules_img</code>'s <code>multi_deploy</code>.</p>
+<p>The target is an <code>image_manifest</code> that provides <code>DeployInfo</code>, so it can be listed in the
+<code>operations</code> of a <a href="https://github.com/bazel-contrib/rules_img"><code>multi_deploy</code></a>. Running the
+<code>multi_deploy</code> pushes the chart to <code>&lt;registry_url&gt;/&lt;chart name&gt;:&lt;chart version&gt;</code>, with <code>+</code>
+in the version replaced by <code>_</code>, as <code>helm push</code> would. Only the chart is pushed; push its
+images with their own targets.</p>
+<pre><code class="language-python">load("@rules_helm_img//:defs.bzl", "helm_oci_manifest")
+load("@rules_img//img:multi_deploy.bzl", "multi_deploy")
+
+helm_oci_manifest(
+    name = "my_chart_oci_manifest",
+    chart = ":my_chart",
+    registry_url = "oci://registry.example.com/charts",
+)
+
+multi_deploy(
+    name = "deploy",
+    operations = [":my_chart_oci_manifest"],
+)
+</code></pre>
+<p>The pushed manifest is the one <code>helm push</code> creates when it runs in UTC, so its digest is the
+one <a href="./helm_oci_digest.html#helm_oci_digest">helm_oci_digest</a> gives. Helm writes the
+<code>org.opencontainers.image.created</code> annotation in the local time zone, so <code>helm push</code> in
+another zone pushes a different digest for the same chart.</p>
+<p>Compared with <a href="./helm_push.html#helm_push">helm_push</a>:</p>
+<ul>
+<li>Only <code>oci://</code> registries are supported, so <code>push_cmd</code> and plugins such as <code>cm-push</code> are not.</li>
+<li>Registry credentials come from <code>rules_img</code> (Docker config and credential helpers), not from
+the <code>HELM_REGISTRY_*</code> variables (<code>HELM_REGISTRY_USERNAME</code>, <code>HELM_REGISTRY_PASSWORD</code> and
+<code>HELM_REGISTRY_PASSWORD_FILE</code>).</li>
+<li>There is no <code>include_images</code>.</li>
+</ul>
+<p><code>rules_img</code> expands Go templates in annotation values. <code>{{</code> in a chart's metadata is escaped,
+so the annotations match the chart.</p>
+<div class="table-wrapper"><table><thead><tr><th>target</th><th>rule</th></tr></thead><tbody>
+<tr><td><code>{name}</code></td><td><code>image_manifest</code></td></tr>
+<tr><td><code>{name}.oci_digest</code></td><td><a href="./helm_oci_digest.html#helm_oci_digest">helm_oci_digest</a></td></tr>
+<tr><td><code>{name}.files</code></td><td>config blob, annotations, tag, repository and layer files</td></tr>
+<tr><td><code>{name}.layer</code></td><td><code>layer_from_file</code></td></tr>
+<tr><td><code>{name}.push_spec</code></td><td><code>image_push_spec</code></td></tr>
+</tbody></table>
+</div>
+<p><strong>PARAMETERS</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Default Value</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="helm_oci_manifest-name"></a>name</td><td style="text-align: left">The name of the <code>image_manifest</code> target.</td><td style="text-align: left">none</td></tr>
+<tr><td style="text-align: left"><a id="helm_oci_manifest-chart"></a>chart</td><td style="text-align: left">A <a href="./helm_chart.html#helm_chart">helm_chart</a> or <a href="./helm_package.html#helm_package">helm_package</a> target. Charts from <a href="./helm_import.html#helm_import">helm_import</a> are not supported.</td><td style="text-align: left">none</td></tr>
+<tr><td style="text-align: left"><a id="helm_oci_manifest-registry_url"></a>registry_url</td><td style="text-align: left">The registry URL given to <code>helm push</code>, for example <code>oci://registry.example.com/charts</code>. Mutually exclusive with <code>registry_url_file</code>.</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_oci_manifest-registry_url_file"></a>registry_url_file</td><td style="text-align: left">A file containing the registry URL. Mutually exclusive with <code>registry_url</code>.</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_oci_manifest-visibility"></a>visibility</td><td style="text-align: left">The visibility of <code>{name}</code>. The other targets are private.</td><td style="text-align: left"><code>None</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_oci_manifest-kwargs"></a>kwargs</td><td style="text-align: left">Common attributes such as <code>tags</code>, <code>target_compatible_with</code> and <code>testonly</code>, applied to every target.</td><td style="text-align: left">none</td></tr>
+</tbody></table>
+</div>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="helm_img_image.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="helm_oci_image.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="helm_img_image.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="helm_oci_image.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

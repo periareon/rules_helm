@@ -170,7 +170,7 @@
 <pre>
 load("@rules_helm//helm:helm_oci_digest.bzl", "helm_oci_digest")
 
-helm_oci_digest(<a href="#helm_oci_digest-name">name</a>, <a href="#helm_oci_digest-chart">chart</a>)
+helm_oci_digest(<a href="#helm_oci_digest-name">name</a>, <a href="#helm_oci_digest-chart">chart</a>, <a href="#helm_oci_digest-registry_url">registry_url</a>, <a href="#helm_oci_digest-registry_url_file">registry_url_file</a>)
 </pre>
 <p>Compute the OCI manifest digest for a Helm chart at build time.</p>
 <p>This rule constructs the OCI manifest that <code>helm push</code> (Helm v4) would
@@ -179,12 +179,17 @@ the chart's own <code>org.opencontainers.image.created</code> annotation, resolv
 the stamping pass, and is formatted in UTC to match the push side.</p>
 <p>The digest file contains a single line: <code>sha256:&lt;hex&gt;</code>.</p>
 <p>The manifest and config blobs are also emitted, so a pusher that uploads
-them itself can PUT the exact bytes this digest was computed over. They are
-not in the default outputs; read them off <code>HelmOCIDigestInfo</code>.</p>
+them itself can PUT the exact bytes this digest was computed over. The
+manifest annotations and the tag are emitted for a pusher that builds the
+manifest itself. With <code>registry_url</code> or <code>registry_url_file</code>, so is the
+repository <code>helm push</code> would push to. None of these are in the default
+outputs; read them off <code>HelmOCIDigestInfo</code> or its output groups.</p>
 <p><strong>ATTRIBUTES</strong></p>
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
 <tr><td style="text-align: left"><a id="helm_oci_digest-name"></a>name</td><td style="text-align: left">A unique name for this target.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
 <tr><td style="text-align: left"><a id="helm_oci_digest-chart"></a>chart</td><td style="text-align: left">A helm_chart target providing HelmPackageInfo.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm_oci_digest-registry_url"></a>registry_url</td><td style="text-align: left">The registry URL given to <code>helm push</code>, for example <code>oci://registry.example.com/charts</code>. Sets <code>HelmOCIDigestInfo.repository</code>. Only <code>oci://</code> URLs are accepted; any other scheme fails the target, digest included. Mutually exclusive with <code>registry_url_file</code>.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_oci_digest-registry_url_file"></a>registry_url_file</td><td style="text-align: left">A file containing the registry URL given to <code>helm push</code>. Sets <code>HelmOCIDigestInfo.repository</code>. As with <code>registry_url</code>, only <code>oci://</code> URLs are accepted. Mutually exclusive with <code>registry_url</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels">Label</a></td><td style="text-align: left">optional</td><td style="text-align: left"><code>None</code></td></tr>
 </tbody></table>
 </div>
 <p><a id="HelmOCIDigestInfo"></a></p>
@@ -192,14 +197,17 @@ not in the default outputs; read them off <code>HelmOCIDigestInfo</code>.</p>
 <pre>
 load("@rules_helm//helm:helm_oci_digest.bzl", "HelmOCIDigestInfo")
 
-HelmOCIDigestInfo(<a href="#HelmOCIDigestInfo-config">config</a>, <a href="#HelmOCIDigestInfo-digest">digest</a>, <a href="#HelmOCIDigestInfo-manifest">manifest</a>)
+HelmOCIDigestInfo(<a href="#HelmOCIDigestInfo-annotations">annotations</a>, <a href="#HelmOCIDigestInfo-config">config</a>, <a href="#HelmOCIDigestInfo-digest">digest</a>, <a href="#HelmOCIDigestInfo-manifest">manifest</a>, <a href="#HelmOCIDigestInfo-repository">repository</a>, <a href="#HelmOCIDigestInfo-tag">tag</a>)
 </pre>
 <p>OCI manifest digest for a Helm chart, computed at build time.</p>
 <p><strong>FIELDS</strong></p>
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="HelmOCIDigestInfo-annotations"></a>annotations</td><td style="text-align: left">File: The manifest annotations, as a JSON object of strings</td></tr>
 <tr><td style="text-align: left"><a id="HelmOCIDigestInfo-config"></a>config</td><td style="text-align: left">File: The raw OCI config blob (application/vnd.cncf.helm.config.v1+json)</td></tr>
 <tr><td style="text-align: left"><a id="HelmOCIDigestInfo-digest"></a>digest</td><td style="text-align: left">File: Text file containing the OCI manifest digest (sha256:...)</td></tr>
 <tr><td style="text-align: left"><a id="HelmOCIDigestInfo-manifest"></a>manifest</td><td style="text-align: left">File: The raw OCI manifest bytes whose digest is in <code>digest</code></td></tr>
+<tr><td style="text-align: left"><a id="HelmOCIDigestInfo-repository"></a>repository</td><td style="text-align: left">File: <code>&lt;registry&gt;/&lt;repository&gt;</code> that <code>helm push</code> pushes to, or <code>None</code> when no registry URL is set</td></tr>
+<tr><td style="text-align: left"><a id="HelmOCIDigestInfo-tag"></a>tag</td><td style="text-align: left">File: The tag <code>helm push</code> uses, which is the chart version with <code>+</code> replaced by <code>_</code></td></tr>
 </tbody></table>
 </div>
                     </main>
