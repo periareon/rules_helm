@@ -5,153 +5,153 @@ load("@stardoc//stardoc:stardoc.bzl", "stardoc")
 stardoc(
     name = "defs",
     out = "src/defs.md",
-    input = "//helm:defs.bzl",
+    input = "@rules_helm//helm:defs.bzl",
     table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
-    deps = ["//helm:defs_bzl"],
+    deps = ["@rules_helm//helm:defs_bzl"],
 )
 
 stardoc(
     name = "settings",
     out = "src/settings.md",
     func_template = "settings_func.vm",
-    input = "//helm/settings:settings.bzl",
+    input = "@rules_helm//helm/settings:settings.bzl",
     tags = ["manual"],
-    deps = ["//helm/settings:settings_bzl"],
+    deps = ["@rules_helm//helm/settings:settings_bzl"],
 )
 
 stardoc(
     name = "chart_file",
     out = "src/chart_file.md",
-    input = "//helm:chart_file.bzl",
+    input = "@rules_helm//helm:chart_file.bzl",
     table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
     tags = ["manual"],
-    deps = ["//helm:chart_file_bzl"],
+    deps = ["@rules_helm//helm:chart_file_bzl"],
 )
 
 stardoc(
     name = "extensions",
     out = "src/extensions.md",
-    input = "//helm:extensions.bzl",
+    input = "@rules_helm//helm:extensions.bzl",
     table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
     tags = ["manual"],
-    deps = ["//helm:extensions_bzl"],
+    deps = ["@rules_helm//helm:extensions_bzl"],
 )
 
 stardoc(
     name = "helm_chart",
     out = "src/helm_chart.md",
-    input = "//helm:helm_chart.bzl",
+    input = "@rules_helm//helm:helm_chart.bzl",
     table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
     tags = ["manual"],
-    deps = ["//helm:helm_chart_bzl"],
+    deps = ["@rules_helm//helm:helm_chart_bzl"],
 )
 
 stardoc(
     name = "helm_command",
     out = "src/helm_command.md",
-    input = "//helm:helm_command.bzl",
+    input = "@rules_helm//helm:helm_command.bzl",
     table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
     tags = ["manual"],
-    deps = ["//helm:helm_command_bzl"],
+    deps = ["@rules_helm//helm:helm_command_bzl"],
 )
 
 stardoc(
     name = "helm_image",
     out = "src/helm_image.md",
-    input = "//helm:helm_image.bzl",
+    input = "@rules_helm//helm:helm_image.bzl",
     table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
     tags = ["manual"],
-    deps = ["//helm:helm_image_bzl"],
+    deps = ["@rules_helm//helm:helm_image_bzl"],
 )
 
 stardoc(
     name = "helm_import",
     out = "src/helm_import.md",
-    input = "//helm:helm_import.bzl",
+    input = "@rules_helm//helm:helm_import.bzl",
     table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
     tags = ["manual"],
-    deps = ["//helm:helm_import_bzl"],
+    deps = ["@rules_helm//helm:helm_import_bzl"],
 )
 
 stardoc(
     name = "helm_install",
     out = "src/helm_install.md",
-    input = "//helm:helm_install.bzl",
+    input = "@rules_helm//helm:helm_install.bzl",
     table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
     tags = ["manual"],
-    deps = ["//helm:helm_install_bzl"],
+    deps = ["@rules_helm//helm:helm_install_bzl"],
 )
 
 stardoc(
     name = "helm_lint",
     out = "src/helm_lint.md",
-    input = "//helm:helm_lint.bzl",
+    input = "@rules_helm//helm:helm_lint.bzl",
     table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
     tags = ["manual"],
-    deps = ["//helm:helm_lint_bzl"],
+    deps = ["@rules_helm//helm:helm_lint_bzl"],
 )
 
 stardoc(
     name = "helm_oci_digest",
     out = "src/helm_oci_digest.md",
-    input = "//helm:helm_oci_digest.bzl",
+    input = "@rules_helm//helm:helm_oci_digest.bzl",
     table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
     tags = ["manual"],
-    deps = ["//helm:helm_oci_digest_bzl"],
+    deps = ["@rules_helm//helm:helm_oci_digest_bzl"],
 )
 
 stardoc(
     name = "helm_package",
     out = "src/helm_package.md",
-    input = "//helm:helm_package.bzl",
+    input = "@rules_helm//helm:helm_package.bzl",
     table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
     tags = ["manual"],
-    deps = ["//helm:helm_package_bzl"],
+    deps = ["@rules_helm//helm:helm_package_bzl"],
 )
 
 stardoc(
     name = "helm_package_info",
     out = "src/helm_package_info.md",
-    input = "//helm:helm_package_info.bzl",
+    input = "@rules_helm//helm:helm_package_info.bzl",
     table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
     tags = ["manual"],
-    deps = ["//helm:helm_package_info_bzl"],
+    deps = ["@rules_helm//helm:helm_package_info_bzl"],
 )
 
 stardoc(
     name = "helm_plugin",
     out = "src/helm_plugin.md",
-    input = "//helm:helm_plugin.bzl",
+    input = "@rules_helm//helm:helm_plugin.bzl",
     table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
     tags = ["manual"],
-    deps = ["//helm:helm_plugin_bzl"],
+    deps = ["@rules_helm//helm:helm_plugin_bzl"],
 )
 
 stardoc(
     name = "helm_push",
     out = "src/helm_push.md",
-    input = "//helm:helm_push.bzl",
+    input = "@rules_helm//helm:helm_push.bzl",
     table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
     tags = ["manual"],
-    deps = ["//helm:helm_push_bzl"],
+    deps = ["@rules_helm//helm:helm_push_bzl"],
 )
 
 stardoc(
     name = "helm_template",
     out = "src/helm_template.md",
-    input = "//helm:helm_template.bzl",
+    input = "@rules_helm//helm:helm_template.bzl",
     table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
     tags = ["manual"],
-    deps = ["//helm:helm_template_bzl"],
+    deps = ["@rules_helm//helm:helm_template_bzl"],
 )
 
 stardoc(
     name = "helm_toolchain",
     out = "src/helm_toolchain.md",
-    input = "//helm:helm_toolchain.bzl",
+    input = "@rules_helm//helm:helm_toolchain.bzl",
     table_of_contents_template = "@stardoc//stardoc:templates/markdown_tables/table_of_contents.vm",
     tags = ["manual"],
-    deps = ["//helm:helm_toolchain_bzl"],
+    deps = ["@rules_helm//helm:helm_toolchain_bzl"],
 )
 
 stardoc(

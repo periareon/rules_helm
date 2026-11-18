@@ -20,7 +20,8 @@ exports_files(
         "README.md",
         "MODULE.bazel",
     ],
-    visibility = ["//:__subpackages__"],
+    # `MODULE.bazel` is read by the version test in `docs/`.
+    visibility = ["//visibility:public"],
 )
 
 filegroup(

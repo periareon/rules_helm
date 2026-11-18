@@ -2,4 +2,4 @@
 
 set -euo pipefail
 
-cp -r "${BOOK_DIR}" "${BUILD_WORKSPACE_DIRECTORY}/docs/book"
+cp -r "${BOOK_DIR}" "${BUILD_WORKSPACE_DIRECTORY}/book"

@@ -11,10 +11,14 @@ jobs:
     permissions:
       contents: write
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        # The book is its own Bazel module.
+        working-directory: docs
     steps:
       - uses: actions/checkout@master
-      - name: Run tests
-        run: bazel run --compilation_mode=opt --stamp //docs:publish_book
+      - name: Build the book
+        run: bazel run --compilation_mode=opt --stamp //:publish_book
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@4.1.7
         with:

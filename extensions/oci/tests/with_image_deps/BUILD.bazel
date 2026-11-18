@@ -1,7 +1,7 @@
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
-load("@rules_helm_oci//:defs.bzl", "helm_chart", "helm_lint_test", "helm_oci_image", "helm_template_test", "oci_push")
+load("@rules_helm//tests:test_defs.bzl", "helm_package_regex_test")
 load("@rules_oci//oci:defs.bzl", "oci_image")
-load("//tests:test_defs.bzl", "helm_package_regex_test")
+load("//:defs.bzl", "helm_chart", "helm_lint_test", "helm_oci_image", "helm_template_test", "oci_push")
 
 exports_files(["Chart.lock"])
 
@@ -16,8 +16,8 @@ helm_chart(
     name = "with_image_deps",
     images = [
         ":image_a.push",
-        "//tests/with_image_deps_oci:image_b.push",
-        "//tests/with_image_deps_oci:image_c.push",
+        ":image_b.push",
+        ":image_c.push",
     ],
     target_compatible_with = EXCLUDE_WINDOWS,
 )
@@ -51,10 +51,14 @@ _IMAGES = [
     "image_c",
 ]
 
+# Built without a base image: `oci_pull` under bzlmod needs a patched
+# `rules_oci` (https://github.com/bazel-contrib/rules_oci/pull/891), and
+# these images only need to exist to be pushed.
 [
     oci_image(
         name = name,
-        base = "@rules_helm_test_oci_container_base",
+        architecture = "amd64",
+        os = "linux",
         target_compatible_with = EXCLUDE_WINDOWS,
     )
     for name in _IMAGES

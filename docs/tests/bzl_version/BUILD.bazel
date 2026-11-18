@@ -1,0 +1,17 @@
+load("@rules_go//go:def.bzl", "go_test")
+load("@rules_helm//:version.bzl", "VERSION")
+
+# The modules released from this repository share one version, and each
+# extension must depend on the `rules_helm` released alongside it. This is the
+# one module that depends on all of them, so the check lives here.
+go_test(
+    name = "bzl_version_test",
+    srcs = ["bzl_version_test.go"],
+    data = [
+        "@rules_helm//:MODULE.bazel",
+        "@rules_helm_img//:MODULE.bazel",
+        "@rules_helm_oci//:MODULE.bazel",
+    ],
+    env = {"VERSION": VERSION},
+    deps = ["@rules_go//go/runfiles"],
+)

@@ -2,8 +2,6 @@
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
-load("@rules_img//img:pull.bzl", img_pull = "pull")
-load("@rules_oci//oci:pull.bzl", "oci_pull")
 load("//helm:defs.bzl", "helm_import_repository")
 
 _CM_HELM_PUSH_BUILD_CONTENT = """\
@@ -80,22 +78,6 @@ def helm_test_deps():
         name = "helm_test_deps__with_external_deps_cert_manager",
         sha256 = "d0c202f57b8653eb957fb5b2f9472c1b11cf6b51acc5c777e4b824f7b5a9ea87",
         url = "oci://quay.io/jetstack/charts/cert-manager:1.19.4",
-    )
-
-    maybe(
-        oci_pull,
-        name = "rules_helm_test_oci_container_base",
-        digest = "sha256:2042a492bcdd847a01cd7f119cd48caa180da696ed2aedd085001a78664407d6",
-        image = "alpine",
-    )
-
-    maybe(
-        img_pull,
-        name = "rules_helm_test_img_container_base",
-        digest = "sha256:25109184c71bdad752c8312a8623239686a9a2071e8825f20acb8f2198c3f659",
-        tag = "3.23.3",
-        registry = "index.docker.io",
-        repository = "library/alpine",
     )
 
     maybe(
