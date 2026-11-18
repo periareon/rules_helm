@@ -9,10 +9,10 @@
 // but module_override only works in the root Bazel module, forcing every consumer
 // of rules_helm to replicate it.
 //
-// The only thing the oci_digest and oci_parts tools need from Helm is the
-// Metadata struct (and its field types) so that json.Marshal produces
-// byte-identical output to what helm push creates. Vendoring these three structs
-// plus the sanitization function eliminates the Helm dependency entirely.
+// The only thing the oci_digest tool needs from Helm is the Metadata struct (and
+// its field types) so that json.Marshal produces byte-identical output to what
+// helm push creates. Vendoring these three structs plus the sanitization function
+// eliminates the Helm dependency entirely.
 //
 // Source: helm.sh/helm/v4 v4.1.4
 //   - pkg/chart/v2/metadata.go

@@ -2,7 +2,10 @@ load("@rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
     name = "ociartifact",
-    srcs = ["ociartifact.go"],
+    srcs = [
+        "ociartifact.go",
+        "reference.go",
+    ],
     importpath = "github.com/periareon/rules_helm/helm/private/oci_digest/ociartifact",
     visibility = ["//helm/private:__subpackages__"],
     deps = [
@@ -16,6 +19,9 @@ go_library(
 
 go_test(
     name = "ociartifact_test",
-    srcs = ["ociartifact_test.go"],
+    srcs = [
+        "ociartifact_test.go",
+        "reference_test.go",
+    ],
     embed = [":ociartifact"],
 )

@@ -27,10 +27,12 @@ helm_chart(
     values_json = json.encode({}),
 )
 
-# A description that `rules_img` would otherwise expand as a Go template.
+# `{{` in a description, an annotation value and an annotation key. All three
+# must reach the registry unchanged.
 helm_chart(
     name = "template",
     chart_json = json.encode({
+        "annotations": {"example.com/{{ key }}": "value {{"},
         "apiVersion": "v2",
         "description": "Renders {{ .Values.name }} and a lone {{",
         "name": "template",

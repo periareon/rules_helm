@@ -1,6 +1,6 @@
 """`helm_oci_manifest`, which describes a chart to `rules_img` as the OCI artifact `helm push` creates."""
 
-load("@rules_helm//helm:defs.bzl", "HelmPackageInfo")
+load("@rules_helm//helm:defs.bzl", "HelmOCIDigestInfo", "HelmPackageInfo", "helm_oci_digest")
 load("@rules_img//img:image.bzl", "image_manifest")
 load("@rules_img//img:layer.bzl", "layer_from_file")
 load("@rules_img//img:push.bzl", "image_push_spec")
@@ -8,63 +8,59 @@ load("@rules_img//img:push.bzl", "image_push_spec")
 _HELM_CHART_MEDIA_TYPE = "application/vnd.cncf.helm.chart.content.v1.tar+gzip"
 _HELM_CONFIG_MEDIA_TYPE = "application/vnd.cncf.helm.config.v1+json"
 
-def _helm_oci_parts_impl(ctx):
-    if ctx.attr.registry_url and ctx.attr.registry_url_file:
-        fail("`registry_url` and `registry_url_file` are mutually exclusive. Only one may be specified for target `{}`.".format(ctx.label))
-    if not ctx.attr.registry_url and not ctx.attr.registry_url_file:
-        fail("Either `registry_url` or `registry_url_file` must be specified for target `{}`.".format(ctx.label))
+# `rules_img` expands Go templates in each `annotations_file` value, but not in
+# the keys. This writes the annotations back as a JSON object with every `{{`
+# in a value replaced by `{{"{{"}}`, which expands back to `{{`.
+_ESCAPE_ANNOTATIONS = "".join([
+    '{{ "{" }}{{ $sep := "" }}{{ range $k, $v := . }}{{ $sep }}',
+    r'{{ toJson $k }}:{{ $v | replace "{{" "{{\"{{\"}}" | toJson }}',
+    '{{ $sep = "," }}{{ end }}{{ "}" }}',
+])
 
-    pkg_info = ctx.attr.chart[HelmPackageInfo]
-    inputs = [pkg_info.chart, pkg_info.metadata]
-    outputs = [
-        ctx.outputs.config_out,
-        ctx.outputs.annotations_out,
-        ctx.outputs.tag_out,
-        ctx.outputs.destination_out,
-    ]
+def _helm_oci_manifest_files_impl(ctx):
+    digest_info = ctx.attr.digest[HelmOCIDigestInfo]
+    if not digest_info.repository:
+        fail("`helm_oci_manifest` `{}` needs `registry_url` or `registry_url_file`.".format(
+            ctx.label.name.removesuffix(".files"),
+        ))
 
     args = ctx.actions.args()
-    args.add("-chart", pkg_info.chart)
-    args.add("-metadata", pkg_info.metadata)
-    if ctx.attr.registry_url:
-        args.add("-registry_url", ctx.attr.registry_url)
-    else:
-        args.add("-registry_url_file", ctx.file.registry_url_file)
-        inputs.append(ctx.file.registry_url_file)
-    args.add("-config_output", ctx.outputs.config_out)
-    args.add("-annotations_output", ctx.outputs.annotations_out)
-    args.add("-tag_output", ctx.outputs.tag_out)
-    args.add("-destination_output", ctx.outputs.destination_out)
-
+    args.add("-input", digest_info.annotations)
+    args.add("-output", ctx.outputs.annotations_out)
+    args.add("-template", _ESCAPE_ANNOTATIONS)
     ctx.actions.run(
-        executable = ctx.executable._oci_parts_tool,
+        executable = ctx.executable._json_extractor,
         arguments = [args],
-        inputs = inputs,
-        outputs = outputs,
-        mnemonic = "HelmOCIParts",
-        progress_message = "Computing OCI artifact parts for %s" % ctx.label,
+        inputs = [digest_info.annotations],
+        outputs = [ctx.outputs.annotations_out],
+        mnemonic = "HelmOCIAnnotations",
+        progress_message = "Escaping OCI annotations for %s" % ctx.label,
     )
 
-    # The layer must be the same .tgz the other parts were read from, which is
-    # not always the chart target's default output.
-    ctx.actions.symlink(
-        output = ctx.outputs.chart_out,
-        target_file = pkg_info.chart,
-    )
+    # The layer is the .tgz from `HelmPackageInfo`, the one the digest was
+    # computed over, which is not always the chart target's default output.
+    for output, target_file in [
+        (ctx.outputs.chart_out, ctx.attr.digest[HelmPackageInfo].chart),
+        (ctx.outputs.config_out, digest_info.config),
+        (ctx.outputs.repository_out, digest_info.repository),
+        (ctx.outputs.tag_out, digest_info.tag),
+    ]:
+        ctx.actions.symlink(output = output, target_file = target_file)
 
-    return [DefaultInfo(files = depset(outputs + [ctx.outputs.chart_out]))]
+    return [DefaultInfo(files = depset([
+        ctx.outputs.annotations_out,
+        ctx.outputs.chart_out,
+        ctx.outputs.config_out,
+        ctx.outputs.repository_out,
+        ctx.outputs.tag_out,
+    ]))]
 
-_helm_oci_parts = rule(
-    implementation = _helm_oci_parts_impl,
-    doc = "Write the config blob, annotations, tag, destination and layer of the OCI artifact `helm push` creates for a chart.",
+_helm_oci_manifest_files = rule(
+    implementation = _helm_oci_manifest_files_impl,
+    doc = "Hand the files of a `helm_oci_digest` target to `rules_img`, with the annotations escaped for its template expansion.",
     attrs = {
         "annotations_out": attr.output(
-            doc = "The manifest annotations, as a JSON object.",
-            mandatory = True,
-        ),
-        "chart": attr.label(
-            doc = "A helm_chart target providing HelmPackageInfo.",
-            providers = [HelmPackageInfo],
+            doc = "The manifest annotations, as a JSON object, escaped for `rules_img`.",
             mandatory = True,
         ),
         "chart_out": attr.output(
@@ -75,25 +71,23 @@ _helm_oci_parts = rule(
             doc = "The config blob.",
             mandatory = True,
         ),
-        "destination_out": attr.output(
-            doc = "`<registry>/<repository>`.",
+        "digest": attr.label(
+            doc = "A `helm_oci_digest` target with a registry URL.",
+            providers = [HelmOCIDigestInfo, HelmPackageInfo],
             mandatory = True,
         ),
-        "registry_url": attr.string(
-            doc = "The registry URL given to `helm push`. Mutually exclusive with `registry_url_file`.",
-        ),
-        "registry_url_file": attr.label(
-            doc = "A file containing the registry URL given to `helm push`. Mutually exclusive with `registry_url`.",
-            allow_single_file = True,
+        "repository_out": attr.output(
+            doc = "`<registry>/<repository>`.",
+            mandatory = True,
         ),
         "tag_out": attr.output(
             doc = "The tag.",
             mandatory = True,
         ),
-        "_oci_parts_tool": attr.label(
-            executable = True,
+        "_json_extractor": attr.label(
             cfg = "exec",
-            default = Label("@rules_helm//helm/private/oci_parts"),
+            executable = True,
+            default = Label("@rules_helm//helm/private/json_extractor"),
         ),
     },
 )
@@ -148,7 +142,8 @@ def helm_oci_manifest(
     | target | rule |
     | --- | --- |
     | `{name}` | `image_manifest` |
-    | `{name}.oci_parts` | config blob, annotations, tag, destination and layer files |
+    | `{name}.oci_digest` | [helm_oci_digest](./helm_oci_digest.md#helm_oci_digest) |
+    | `{name}.files` | config blob, annotations, tag, repository and layer files |
     | `{name}.layer` | `layer_from_file` |
     | `{name}.push_spec` | `image_push_spec` |
 
@@ -164,23 +159,39 @@ def helm_oci_manifest(
         **kwargs (dict): Common attributes such as `tags`, `target_compatible_with` and
             `testonly`, applied to every target.
     """
-    _helm_oci_parts(
-        name = name + ".oci_parts",
+
+    # A `select()` is only resolved at analysis, where `helm_oci_digest` and
+    # `_helm_oci_manifest_files` check it.
+    if type(registry_url) != "select" and type(registry_url_file) != "select":
+        if registry_url and registry_url_file:
+            fail("`helm_oci_manifest` `{}` takes `registry_url` or `registry_url_file`, not both.".format(name))
+        if not registry_url and not registry_url_file:
+            fail("`helm_oci_manifest` `{}` needs `registry_url` or `registry_url_file`.".format(name))
+
+    helm_oci_digest(
+        name = name + ".oci_digest",
         chart = chart,
         registry_url = registry_url,
         registry_url_file = registry_url_file,
-        annotations_out = name + ".oci_parts.annotations.json",
-        chart_out = name + ".oci_parts.tgz",
-        config_out = name + ".oci_parts.config.json",
-        destination_out = name + ".oci_parts.destination.txt",
-        tag_out = name + ".oci_parts.tag.txt",
+        visibility = ["//visibility:private"],
+        **kwargs
+    )
+
+    _helm_oci_manifest_files(
+        name = name + ".files",
+        digest = name + ".oci_digest",
+        annotations_out = name + ".files.annotations.json",
+        chart_out = name + ".files.tgz",
+        config_out = name + ".files.config.json",
+        repository_out = name + ".files.repository.txt",
+        tag_out = name + ".files.tag.txt",
         visibility = ["//visibility:private"],
         **kwargs
     )
 
     layer_from_file(
         name = name + ".layer",
-        src = name + ".oci_parts.tgz",
+        src = name + ".files.tgz",
         media_type = _HELM_CHART_MEDIA_TYPE,
         visibility = ["//visibility:private"],
         **kwargs
@@ -188,16 +199,16 @@ def helm_oci_manifest(
 
     image_push_spec(
         name = name + ".push_spec",
-        destination_file = name + ".oci_parts.destination.txt",
-        tag_file = name + ".oci_parts.tag.txt",
+        destination_file = name + ".files.repository.txt",
+        tag_file = name + ".files.tag.txt",
         visibility = ["//visibility:private"],
         **kwargs
     )
 
     image_manifest(
         name = name,
-        annotations_file = name + ".oci_parts.annotations.json",
-        config_fragment = name + ".oci_parts.config.json",
+        annotations_file = name + ".files.annotations.json",
+        config_fragment = name + ".files.config.json",
         config_media_type = _HELM_CONFIG_MEDIA_TYPE,
         layers = [name + ".layer"],
         push_specs = [name + ".push_spec"],

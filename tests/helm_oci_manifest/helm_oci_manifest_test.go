@@ -159,6 +159,9 @@ func TestDeploy(t *testing.T) {
 	if got, want := template.manifest.Annotations["org.opencontainers.image.description"], "Renders {{ .Values.name }} and a lone {{"; got != want {
 		t.Errorf("description annotation = %q, want %q", got, want)
 	}
+	if got, want := template.manifest.Annotations["example.com/{{ key }}"], "value {{"; got != want {
+		t.Errorf("`example.com/{{ key }}` annotation = %q, want %q; annotations: %v", got, want, template.manifest.Annotations)
+	}
 
 	plus, ok := charts["localhost:5051/charts/plus:0.1.0_build.1"]
 	if !ok {
