@@ -168,13 +168,18 @@ def helm_oci_manifest(
         if not registry_url and not registry_url_file:
             fail("`helm_oci_manifest` `{}` needs `registry_url` or `registry_url_file`.".format(name))
 
+    # `helm_oci_digest` forwards the chart's `HelmPackageInfo`, so
+    # `helm_lint_aspect` would lint the chart again here, without the chart's
+    # own `no-helm-lint` tag. The chart target is where it is linted.
+    digest_kwargs = dict(kwargs)
+    digest_kwargs["tags"] = kwargs.get("tags", []) + ["no-helm-lint"]
     helm_oci_digest(
         name = name + ".oci_digest",
         chart = chart,
         registry_url = registry_url,
         registry_url_file = registry_url_file,
         visibility = ["//visibility:private"],
-        **kwargs
+        **digest_kwargs
     )
 
     _helm_oci_manifest_files(
