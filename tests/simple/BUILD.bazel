@@ -4,6 +4,7 @@ load(
     "//helm:defs.bzl",
     "helm_chart",
     "helm_lint_test",
+    "helm_oci_digest",
     "helm_push",
     "helm_template",
     "helm_template_test",
@@ -79,4 +80,49 @@ diff_test(
     name = "simple_oci_config_test",
     file1 = "simple.oci_config.golden",
     file2 = ":simple_oci_config",
+)
+
+# Lock the annotations, tag and repository that a pusher building its own
+# manifest reads. `helm_chart`'s own `.oci_digest` has no registry URL, so the
+# repository comes from a second target.
+helm_oci_digest(
+    name = "simple.oci_digest_with_url",
+    chart = ":simple",
+    registry_url = "oci://localhost/helm-registry/",
+)
+
+filegroup(
+    name = "simple_oci_annotations",
+    srcs = [":simple.oci_digest"],
+    output_group = "annotations",
+)
+
+filegroup(
+    name = "simple_oci_tag",
+    srcs = [":simple.oci_digest"],
+    output_group = "tag",
+)
+
+filegroup(
+    name = "simple_oci_repository",
+    srcs = [":simple.oci_digest_with_url"],
+    output_group = "repository",
+)
+
+diff_test(
+    name = "simple_oci_annotations_test",
+    file1 = "simple.oci_annotations.golden",
+    file2 = ":simple_oci_annotations",
+)
+
+diff_test(
+    name = "simple_oci_tag_test",
+    file1 = "simple.oci_tag.golden",
+    file2 = ":simple_oci_tag",
+)
+
+diff_test(
+    name = "simple_oci_repository_test",
+    file1 = "simple.oci_repository.golden",
+    file2 = ":simple_oci_repository",
 )

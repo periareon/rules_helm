@@ -6,6 +6,9 @@ bzl_library(
     visibility = ["//:__subpackages__"],
     deps = [
         "@rules_helm//helm:defs_bzl",
+        "@rules_img//img:image",
+        "@rules_img//img:layer",
         "@rules_img//img:providers",
+        "@rules_img//img:push",
     ],
 )

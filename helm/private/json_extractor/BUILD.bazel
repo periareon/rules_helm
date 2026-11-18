@@ -1,7 +1,23 @@
-load("@rules_go//go:def.bzl", "go_binary")
+load("@rules_go//go:def.bzl", "go_binary", "go_library", "go_test")
 
+go_library(
+    name = "json_extractor_lib",
+    srcs = ["json_extractor.go"],
+    importpath = "github.com/periareon/rules_helm/helm/private/json_extractor",
+    visibility = ["//visibility:private"],
+)
+
+# `@rules_helm_img` runs this binary with templates that call its functions. MVS
+# can pair a released `rules_helm_img` with a newer `rules_helm`, so flags and
+# functions may be added but not renamed or removed.
 go_binary(
     name = "json_extractor",
-    srcs = ["json_extractor.go"],
+    embed = [":json_extractor_lib"],
     visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "json_extractor_test",
+    srcs = ["json_extractor_test.go"],
+    embed = [":json_extractor_lib"],
 )
