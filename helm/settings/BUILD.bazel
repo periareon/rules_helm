@@ -8,6 +8,9 @@ load(
 
 package(default_visibility = ["//visibility:public"])
 
+# Read by the stardoc targets in `docs/`, which is a separate module.
+exports_files(["settings.bzl"])
+
 bzl_library(
     name = "settings_bzl",
     srcs = glob(["*.bzl"]),

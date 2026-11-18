@@ -63,8 +63,8 @@ helm_template_test(
     },
 )
 
-# Pushing is tested in `//tests/helm_oci_manifest` of `rules_helm`. This only
-# checks that the macro loads and builds against the declared dependencies.
+# Pushing is tested in `//tests/helm_oci_manifest`. This only checks that the
+# macro loads and builds against the declared dependencies.
 helm_oci_manifest(
     name = "chart.oci_manifest",
     chart = ":chart",

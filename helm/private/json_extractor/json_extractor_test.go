@@ -37,8 +37,8 @@ func TestRenderRejectsTrailingData(t *testing.T) {
 
 // escapeAnnotations is a copy of `_ESCAPE_ANNOTATIONS` in
 // `extensions/img/private/oci_manifest.bzl`. This test shows `toJson` and
-// `replace` can escape values only; `//tests/helm_oci_manifest` checks the
-// `.bzl` copy end to end against `helm_oci_digest`.
+// `replace` can escape values only; `//tests/helm_oci_manifest` in
+// `rules_helm_img` checks the `.bzl` copy end to end against `helm_oci_digest`.
 const escapeAnnotations = `{{ "{" }}{{ $sep := "" }}{{ range $k, $v := . }}{{ $sep }}` +
 	`{{ toJson $k }}:{{ $v | replace "{{" "{{\"{{\"}}" | toJson }}` +
 	`{{ $sep = "," }}{{ end }}{{ "}" }}`
