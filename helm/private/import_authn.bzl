@@ -1,4 +1,4 @@
-"""Repository rule for OCI repo authentication."""
+"""OCI registry authentication for repository rules and module extensions."""
 
 load("@bazel_lib//lib:base64.bzl", "base64")
 load("@bazel_lib//lib:repo_utils.bzl", "repo_utils")
@@ -73,6 +73,14 @@ def _get_auth_file_path(repository_ctx):
 
     return None
 
+def _remove(ctx, path):
+    """Delete a file, or blank it where the context has no `delete` (`module_ctx`)."""
+    if hasattr(ctx, "delete"):
+        ctx.delete(path)
+    else:
+        # Blank the file so a token does not stay on disk.
+        ctx.file(path, content = "")
+
 def _fetch_auth_via_creds_helper(repository_ctx, raw_host, helper_name, allow_fail = False):
     credential_helper_name = "docker-credential-{}".format(helper_name)
     credential_helper = repository_ctx.which(credential_helper_name)
@@ -103,7 +111,7 @@ exec "{}" get <<< "$1" """.format(credential_helper),
         else:
             return {}
 
-    repository_ctx.delete(executable)
+    _remove(repository_ctx, executable)
     response = json.decode(result.stdout)
 
     # If the username and secret are empty, the user does not have a login.
@@ -205,10 +213,10 @@ def _get_token(repository_ctx, state, hostname, chart_path):
             )
             if allow_fail and not result.success:
                 repository_ctx.file("www-authenticate.json", content = "")
-                repository_ctx.delete("www-authenticate.json")
+                _remove(repository_ctx, "www-authenticate.json")
                 return {}
             auth_raw = repository_ctx.read("www-authenticate.json")
-            repository_ctx.delete("www-authenticate.json")
+            _remove(repository_ctx, "www-authenticate.json")
 
             auth = json.decode(auth_raw)
 
