@@ -188,8 +188,16 @@ load("@rules_helm//helm:helm_import.bzl", "helm_import_repository")
 helm_import_repository(<a href="#helm_import_repository-name">name</a>, <a href="#helm_import_repository-chart_name">chart_name</a>, <a href="#helm_import_repository-repository">repository</a>, <a href="#helm_import_repository-sha256">sha256</a>, <a href="#helm_import_repository-url">url</a>, <a href="#helm_import_repository-version">version</a>)
 </pre>
 <p>A rule for fetching external Helm charts from an arbitrary URL or repository.</p>
-<p>The repository exposes the chart as a <code>helm_import</code> target named after the chart,
-aliased to the repository name, and describes it for supply-chain tooling built on
+<p>With bzlmod, the <code>helm_charts</code> extension in <code>@rules_helm//helm:extensions.bzl</code> fetches
+<code>oci://</code> charts with this rule and stores the digest it looks up in <code>MODULE.bazel.lock</code>.</p>
+<p>The repository exposes the chart as a <code>helm_import</code> target. The target takes its name and
+<code>version</code> from the <code>Chart.yaml</code> of the chart, not from the file name or the tag of the url.
+A chart fetched from <code>oci://.../cert-manager:1.19.4</code> has the version <code>v1.19.4</code> if its
+<code>Chart.yaml</code> says so, and <code>helm push</code> uses that version as the tag. The name can use
+letters, digits, <code>-</code>, <code>.</code> and <code>_</code>, and the version the same characters and <code>+</code>. Neither the
+chart name nor the repository name can be <code>license</code> or <code>package_metadata</code>. The target is
+aliased to the repository name, so <code>@&lt;name&gt;</code> resolves to it, unless the chart has the same
+name as the repository. The repository also describes the chart for supply-chain tooling built on
 <a href="https://github.com/bazel-contrib/supply-chain">package_metadata</a>:</p>
 <ul>
 <li><code>//:package_metadata</code> identifies the chart by <a href="https://github.com/package-url/purl-spec">purl</a>,

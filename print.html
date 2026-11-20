@@ -411,8 +411,16 @@ load("@rules_helm//helm:helm_import.bzl", "helm_import_repository")
 helm_import_repository(<a href="helm_import.html#helm_import_repository-name">name</a>, <a href="helm_import.html#helm_import_repository-chart_name">chart_name</a>, <a href="helm_import.html#helm_import_repository-repository">repository</a>, <a href="helm_import.html#helm_import_repository-sha256">sha256</a>, <a href="helm_import.html#helm_import_repository-url">url</a>, <a href="helm_import.html#helm_import_repository-version">version</a>)
 </pre>
 <p>A rule for fetching external Helm charts from an arbitrary URL or repository.</p>
-<p>The repository exposes the chart as a <code>helm_import</code> target named after the chart,
-aliased to the repository name, and describes it for supply-chain tooling built on
+<p>With bzlmod, the <code>helm_charts</code> extension in <code>@rules_helm//helm:extensions.bzl</code> fetches
+<code>oci://</code> charts with this rule and stores the digest it looks up in <code>MODULE.bazel.lock</code>.</p>
+<p>The repository exposes the chart as a <code>helm_import</code> target. The target takes its name and
+<code>version</code> from the <code>Chart.yaml</code> of the chart, not from the file name or the tag of the url.
+A chart fetched from <code>oci://.../cert-manager:1.19.4</code> has the version <code>v1.19.4</code> if its
+<code>Chart.yaml</code> says so, and <code>helm push</code> uses that version as the tag. The name can use
+letters, digits, <code>-</code>, <code>.</code> and <code>_</code>, and the version the same characters and <code>+</code>. Neither the
+chart name nor the repository name can be <code>license</code> or <code>package_metadata</code>. The target is
+aliased to the repository name, so <code>@&lt;name&gt;</code> resolves to it, unless the chart has the same
+name as the repository. The repository also describes the chart for supply-chain tooling built on
 <a href="https://github.com/bazel-contrib/supply-chain">package_metadata</a>:</p>
 <ul>
 <li><code>//:package_metadata</code> identifies the chart by <a href="https://github.com/package-url/purl-spec">purl</a>,
@@ -814,6 +822,7 @@ helm_toolchain(<a href="helm_toolchain.html#helm_toolchain-name">name</a>, <a hr
 <h2 id="module-extensions"><a class="header" href="#module-extensions">Module Extensions</a></h2>
 <ul>
 <li><a href="extensions.html#helm">helm</a></li>
+<li><a href="extensions.html#helm_charts">helm_charts</a></li>
 </ul>
 <p><a id="helm"></a></p>
 <h2 id="helm"><a class="header" href="#helm">helm</a></h2>
@@ -895,6 +904,38 @@ register_toolchains("@with_diff_toolchains//:all")
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
 <tr><td style="text-align: left"><a id="helm.toolchain-name"></a>name</td><td style="text-align: left">Name prefix for the hub repository. Produces <code>@{name}_toolchains</code>.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
 <tr><td style="text-align: left"><a id="helm.toolchain-plugins"></a>plugins</td><td style="text-align: left">Plugin names (from <code>helm.plugin()</code> tags) to include in these toolchains.</td><td style="text-align: left">List of strings</td><td style="text-align: left">optional</td><td style="text-align: left"><code>[]</code></td></tr>
+</tbody></table>
+</div>
+<p><a id="helm_charts"></a></p>
+<h2 id="helm_charts"><a class="header" href="#helm_charts">helm_charts</a></h2>
+<pre>
+helm_charts = use_extension("@rules_helm//helm:extensions.bzl", "helm_charts")
+helm_charts.chart(<a href="extensions.html#helm_charts.chart-name">name</a>, <a href="extensions.html#helm_charts.chart-sha256">sha256</a>, <a href="extensions.html#helm_charts.chart-url">url</a>)
+</pre>
+<p>Module extension for fetching Helm charts from OCI registries.</p>
+<p>Charts live in their own extension, so an unreachable registry does not stop the <code>helm</code> extension from resolving toolchains. All tags are resolved in one evaluation, so a lookup that fails (an unknown version or an unreachable registry) fails every repository from this extension. Set <code>sha256</code> to skip the lookup. A command that loads a target from one of these repositories, such as <code>bazel query</code>, needs every lookup that has no stored fact. Tags from every module are used, so repository names must be unique across modules.</p>
+<p><strong>TAG CLASSES</strong></p>
+<p><a id="helm_charts.chart"></a></p>
+<h3 id="chart"><a class="header" href="#chart">chart</a></h3>
+<p>Fetch a Helm chart from an OCI registry with <code>helm_import_repository</code>.</p>
+<p>The repository holds a <code>helm_import</code> target named after the <code>name</code> in the <code>Chart.yaml</code> of the chart, which is normally the last path segment of <code>url</code> without the version. Refer to it as <code>@&lt;name&gt;//:&lt;chart&gt;</code>. The shorthand <code>@&lt;name&gt;</code> is an alias of it, but only when the name in <code>use_repo</code> is the same as the tag <code>name</code>, because Bazel reads <code>@x</code> as <code>@x//:x</code>. Neither <code>name</code> nor the chart can be called <code>license</code> or <code>package_metadata</code>.</p>
+<p>If <code>sha256</code> is unset, the extension reads the digest of the chart package from the registry manifest, and trusts the registry for it on first use. On Bazel 8.5 and newer the digest is stored as a fact in <code>MODULE.bazel.lock</code>, keyed by <code>url</code>, so later evaluations make no registry request for it. Older Bazel versions record the digest in the lockfile as part of the repository. Without a lockfile, the digest is looked up whenever the extension is evaluated, and a version tag that the registry moves gives a different chart. Set <code>sha256</code> to pin the digest in <code>MODULE.bazel</code>.</p>
+<p>Each lookup is a token request and a manifest download, and the lookups run one after another. While a lookup is needed, an unreachable registry fails the evaluation, and so fails every target that depends on a repository from this extension. This applies whenever no stored fact exists: with the lockfile off, on the first evaluation, or after you delete the fact. A tag with <code>sha256</code> makes no lookup while the extension evaluates. Fetching the chart can still contact the registry, unless the chart is in the repository cache.</p>
+<p>A stored digest is not checked against the registry. If the registry replaces the chart behind a version tag, the fetch fails with a checksum mismatch. Delete the entry for <code>url</code> from the <code>facts</code> section of <code>MODULE.bazel.lock</code> to look the digest up again.</p>
+<pre><code class="language-python">helm_charts = use_extension("@rules_helm//helm:extensions.bzl", "helm_charts")
+helm_charts.chart(
+    name = "karpenter",
+    url = "oci://public.ecr.aws/karpenter/karpenter:1.9.0",
+)
+use_repo(helm_charts, "karpenter")
+
+# Then you can use @karpenter//:karpenter as a dependency in your BUILD files
+</code></pre>
+<p><strong>Attributes</strong></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Name</th><th style="text-align: left">Description</th><th style="text-align: left">Type</th><th style="text-align: left">Mandatory</th><th style="text-align: left">Default</th></tr></thead><tbody>
+<tr><td style="text-align: left"><a id="helm_charts.chart-name"></a>name</td><td style="text-align: left">The name of the repository.</td><td style="text-align: left"><a href="https://bazel.build/concepts/labels#target-names">Name</a></td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
+<tr><td style="text-align: left"><a id="helm_charts.chart-sha256"></a>sha256</td><td style="text-align: left">The expected SHA-256 hash of the chart package. If unset, the extension looks it up in the registry.</td><td style="text-align: left">String</td><td style="text-align: left">optional</td><td style="text-align: left"><code>""</code></td></tr>
+<tr><td style="text-align: left"><a id="helm_charts.chart-url"></a>url</td><td style="text-align: left">The chart url, in the form <code>oci://&lt;host&gt;/&lt;path&gt;:&lt;version&gt;</code>.</td><td style="text-align: left">String</td><td style="text-align: left">required</td><td style="text-align: left"></td></tr>
 </tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="container-images"><a class="header" href="#container-images">Container images</a></h1>
 <p>A chart's <code>images</code> attribute accepts push targets from
