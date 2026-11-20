@@ -14,15 +14,48 @@ def _parse_url(chart_url):
         chart_url (str): The chart url.
 
     Returns:
-        struct: The `hostname`, `path` and `version` of the chart.
+        struct: The `hostname`, `path`, `version` and `name` of the chart, where
+            `name` is the last segment of `path`. `None` if the url does not have
+            the form `oci://<host>/<path>:<version>`.
     """
+    for char in chart_url.elems():
+        if char.isspace():
+            return None
+
     url, _, version = chart_url.rpartition(":")
     hostname, _, path = url.removeprefix("oci://").partition("/")
+    if not (
+        chart_url.startswith("oci://") and
+        hostname and
+        path and
+        "" not in path.split("/") and
+        version and
+        "/" not in version and
+        ":" not in path and
+        "@" not in path
+    ):
+        return None
+
     return struct(
         hostname = hostname,
         path = path,
         version = version,
+        name = path.rpartition("/")[2],
     )
+
+def _parse_url_or_fail(chart_url):
+    """Like `parse_url`, but fail with a message that names the url if it is malformed.
+
+    Args:
+        chart_url (str): The chart url.
+
+    Returns:
+        struct: The chart, as for `parse_url`.
+    """
+    chart = _parse_url(chart_url)
+    if not chart:
+        fail("`{}` is not a chart url of the form `oci://<host>/<path>:<version>`".format(chart_url))
+    return chart
 
 def _blob_url(chart, digest):
     """Return the url of a blob in the chart's repository.
@@ -48,7 +81,7 @@ def _find_chart_layer(ctx, au, chart_url):
         struct: The `digest` of the layer, in the form `sha256:<hex>`, and the
             `token` that authenticates requests to the registry.
     """
-    chart = _parse_url(chart_url)
+    chart = _parse_url_or_fail(chart_url)
     token = au.get_token(chart.hostname, chart.path)
 
     manifest_json = "manifest.json"
@@ -105,5 +138,6 @@ oci_chart = struct(
     blob_url = _blob_url,
     find_chart_layer = _find_chart_layer,
     parse_url = _parse_url,
+    parse_url_or_fail = _parse_url_or_fail,
     resolve_sha256 = _resolve_sha256,
 )

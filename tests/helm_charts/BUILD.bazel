@@ -1,16 +1,25 @@
 load("@rules_go//go:def.bzl", "go_test")
+load(":chart_metadata.bzl", "chart_metadata")
 load(":chart_utils_test.bzl", "chart_utils_test_suite")
 
 chart_utils_test_suite(name = "chart_utils")
 
-# `looked_up` and `second_looked_up` have no `sha256` in their `MODULE.bazel` tags, so the
-# extension looks the digest up (and, on Bazel 8.5+, stores it as a lockfile fact). The two
-# charts are on different registries, to cover reuse of the authenticator and of the manifest
-# file. `pinned` and `pre_release` set `sha256` and make no lookup. The `pre_release` version
-# contains a dash, so the label `//:cert-manager` checks that the target is named after the
-# chart and not after part of the version. The expected digests match `tests/test_deps.bzl`,
-# except for `pre_release`, which is not in that file.
+# Only `looked_up` has no `sha256` in its `MODULE.bazel` tag, so the extension looks its digest
+# up (and, on Bazel 8.5+, stores it as a lockfile fact). That makes it the only chart that needs
+# a registry request, so a single registry can fail the evaluation. `ghcr_pinned` is on a
+# second registry. `alias` uses `@<name>`, which is the alias target of a repository with
+# another name than its chart. `same_name` uses the repository `@cert-manager`, which has the
+# name of its chart and so no alias. The expected digests match `tests/test_deps.bzl`, except
+# for `pre_release`, which is not in that file.
 _CHARTS = {
+    "alias": (
+        "@helm_charts_test_cert_manager_pinned",
+        "d0c202f57b8653eb957fb5b2f9472c1b11cf6b51acc5c777e4b824f7b5a9ea87",
+    ),
+    "ghcr_pinned": (
+        "@helm_charts_test_vault_operator//:vault-operator",
+        "9abd372c9d843b974d918442cd0e68c9669f57d8630566ce74dfaf63447c282a",
+    ),
     "looked_up": (
         "@helm_charts_test_cert_manager//:cert-manager",
         "d0c202f57b8653eb957fb5b2f9472c1b11cf6b51acc5c777e4b824f7b5a9ea87",
@@ -23,9 +32,9 @@ _CHARTS = {
         "@helm_charts_test_pre_release//:cert-manager",
         "0041fc0111fab7d62beed6d46d283f5ef4d851ad8c77055466bb4c82e36b6a6d",
     ),
-    "second_looked_up": (
-        "@helm_charts_test_vault_operator//:vault-operator",
-        "9abd372c9d843b974d918442cd0e68c9669f57d8630566ce74dfaf63447c282a",
+    "same_name": (
+        "@cert-manager",
+        "d0c202f57b8653eb957fb5b2f9472c1b11cf6b51acc5c777e4b824f7b5a9ea87",
     ),
 }
 
@@ -33,7 +42,10 @@ _CHARTS = {
     go_test(
         name = "chart_sha256_{}_test".format(name),
         size = "small",
-        srcs = ["chart_sha256_test.go"],
+        srcs = [
+            "chart_sha256_test.go",
+            "env_test.go",
+        ],
         data = [label],
         env = {
             "CHART": "$(rlocationpath {})".format(label),
@@ -42,4 +54,46 @@ _CHARTS = {
         deps = ["@rules_go//go/runfiles"],
     )
     for name, (label, sha256) in _CHARTS.items()
+]
+
+# The `version` of a `helm_import` target is the one in the `Chart.yaml` of the chart, not the
+# tag of the url: the cert-manager tag `1.19.4` is the chart version `v1.19.4`.
+_METADATA = {
+    "cert_manager": (
+        "@helm_charts_test_cert_manager_pinned//:cert-manager",
+        "cert-manager",
+        "v1.19.4",
+    ),
+    "pre_release": (
+        "@helm_charts_test_pre_release//:cert-manager",
+        "cert-manager",
+        "v1.21.0-beta.0",
+    ),
+}
+
+[
+    chart_metadata(
+        name = "chart_{}_metadata".format(name),
+        chart = label,
+    )
+    for name, (label, _, _) in _METADATA.items()
+]
+
+[
+    go_test(
+        name = "chart_metadata_{}_test".format(name),
+        size = "small",
+        srcs = [
+            "chart_metadata_test.go",
+            "env_test.go",
+        ],
+        data = [":chart_{}_metadata".format(name)],
+        env = {
+            "EXPECTED_NAME": chart_name,
+            "EXPECTED_VERSION": version,
+            "METADATA": "$(rlocationpath :chart_{}_metadata)".format(name),
+        },
+        deps = ["@rules_go//go/runfiles"],
+    )
+    for name, (_, chart_name, version) in _METADATA.items()
 ]

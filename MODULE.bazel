@@ -115,10 +115,17 @@ helm_charts.chart(
 )
 helm_charts.chart(
     name = "helm_charts_test_vault_operator",
+    sha256 = "9abd372c9d843b974d918442cd0e68c9669f57d8630566ce74dfaf63447c282a",
     url = "oci://ghcr.io/bank-vaults/helm-charts/vault-operator:1.23.0",
+)
+helm_charts.chart(
+    name = "cert-manager",
+    sha256 = "d0c202f57b8653eb957fb5b2f9472c1b11cf6b51acc5c777e4b824f7b5a9ea87",
+    url = "oci://quay.io/jetstack/charts/cert-manager:1.19.4",
 )
 use_repo(
     helm_charts,
+    "cert-manager",
     "helm_charts_test_cert_manager",
     "helm_charts_test_cert_manager_pinned",
     "helm_charts_test_pre_release",

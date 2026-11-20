@@ -64,44 +64,40 @@ def _find_chart_url(repository_ctx, repo_file, chart_name, chart_version):
                 return "{}/{}".format(repository_ctx.attr.repository, url)
     fail("cannot find {} (version {}) in {}".format(chart_name, chart_version, repository_ctx.attr.repository))
 
-def _get_chart_name_and_version(chart_url, chart_file):
-    if chart_url.startswith("oci"):
-        # The url names the chart and the version exactly.
-        chart_name, chart_version = chart_url.split("/")[-1].split(":")
-        return chart_name, chart_version
-    return chart_utils.split_chart_file(chart_file)
-
-def _get_chart_file_name(chart_url):
+def _get_chart_file_name(chart_url, oci):
     if chart_url.startswith("http") and chart_url.endswith(".tgz"):
         return chart_url.split("/")[-1]
-    if chart_url.startswith("oci"):
-        chart_name, chart_version = chart_url.split("/")[-1].split(":")
-        return "{}-{}.tgz".format(chart_name, chart_version)
+    if oci:
+        return "{}-{}.tgz".format(oci.name, oci.version)
     fail("cannot determine chart file name from {}".format(chart_url))
 
-def _chart_purl(chart_url, chart_name, chart_version, sha256):
+def _chart_purl(chart_url, oci, chart_name, chart_version, sha256):
     """Builds the [purl](https://github.com/package-url/purl-spec) identifying an imported chart.
 
     Args:
         chart_url (str): The `https://` or `oci://` url the chart was fetched from.
-        chart_name (str): The name of the chart.
-        chart_version (str): The version of the chart.
+        oci (struct): The chart from `oci_chart.parse_url` for an `oci://` url, otherwise `None`.
+            An `oci://` chart is identified by this alone, so `chart_name`, `chart_version`
+            and `sha256` are not used for it.
+        chart_name (str): The name of the chart, from its `Chart.yaml`.
+        chart_version (str): The version of the chart, from its `Chart.yaml`.
         sha256 (str): The sha256 of the chart `.tgz`.
 
     Returns:
         str: A `pkg:oci/...` purl for a chart from an OCI registry, `pkg:generic/...` otherwise.
     """
-    if chart_url.startswith("oci://"):
+    if oci:
         # https://github.com/package-url/purl-spec/blob/main/types/oci-definition.json
         # The version of an `oci` purl is the manifest digest, which a chart
         # served from the repository cache never fetches, so the chart is
-        # identified by its tag alone.
-        repository_url, _, _ = chart_url.removeprefix("oci://").rpartition(":")
+        # identified by its tag alone. The tag is taken from the url: an OCI
+        # tag cannot hold the `+` of a chart version, so it can differ from
+        # the version in `Chart.yaml`.
         return (purl.builder()
             .type("oci")
-            .name(chart_name)
-            .add_qualifier("repository_url", repository_url)
-            .add_qualifier("tag", chart_version)
+            .name(oci.name)
+            .add_qualifier("repository_url", "{}/{}".format(oci.hostname, oci.path))
+            .add_qualifier("tag", oci.version)
             .build())
 
     # https://github.com/package-url/purl-spec/blob/main/types/generic-definition.json
@@ -112,44 +108,6 @@ def _chart_purl(chart_url, chart_name, chart_version, sha256):
         .add_qualifier("download_url", chart_url)
         .add_qualifier("checksum", "sha256:" + sha256)
         .build())
-
-def _unquote(value):
-    for quote in ["'", '"']:
-        if len(value) >= 2 and value.startswith(quote) and value.endswith(quote):
-            return value[1:-1]
-    return value
-
-def _parse_chart_yaml(content):
-    """Reads the top-level scalars and the `annotations` of a `Chart.yaml`.
-
-    `Chart.yaml` is a flat mapping of scalars, lists and the `annotations`
-    mapping of strings, which is all this handles.
-
-    Args:
-        content (str): The content of `Chart.yaml`.
-
-    Returns:
-        tuple: The top-level scalar fields and the annotations, both `dict[str, str]`.
-    """
-    fields = {}
-    annotations = {}
-    section = None
-    for line in content.splitlines():
-        stripped = line.strip()
-        if not stripped or stripped.startswith("#"):
-            continue
-        if not line[0].isspace() and not stripped.startswith("-"):
-            key, sep, value = stripped.partition(":")
-            if not sep:
-                continue
-            section = key.strip()
-            if value.strip():
-                fields[section] = _unquote(value.strip())
-        elif section == "annotations" and not stripped.startswith("-"):
-            key, sep, value = stripped.partition(":")
-            if sep:
-                annotations[key.strip()] = _unquote(value.strip())
-    return fields, annotations
 
 # File names under which charts ship their license text, by preference.
 _LICENSE_FILES = ["LICENSE", "LICENSE.txt", "LICENSE.md", "LICENCE", "COPYING"]
@@ -180,7 +138,7 @@ def _spdx_identifiers(repository_ctx):
     for line in repository_ctx.read(_SPDX_LICENSE_KINDS).splitlines():
         line = line.strip()
         if line.startswith("identifier = "):
-            identifiers[_unquote(line.removeprefix("identifier = ").rstrip(","))] = None
+            identifiers[chart_utils.scalar(line.removeprefix("identifier = ").rstrip(","))] = None
     return identifiers
 
 def _chart_license(repository_ctx, chart_dir, annotations):
@@ -251,7 +209,12 @@ helm_import(
     version = "{chart_version}",
     visibility = ["//visibility:public"],
 )
+{alias}"""
 
+# Makes `@<repository name>` resolve to the chart. Left out when the chart has
+# the name of the repository, because the `helm_import` target is then already
+# the default target, and a second target with that name is an error.
+_HELM_DEP_ALIAS = """
 alias(
     name = "{repository_name}",
     actual = ":{chart_name}",
@@ -259,18 +222,22 @@ alias(
 )
 """
 
-def _generate_build_file(repository_ctx, chart_file, chart_name, chart_version, purl):
+# Targets that the generated `BUILD.bazel` always declares.
+_RESERVED_TARGETS = ["license", "package_metadata"]
+
+def _generate_build_file(repository_ctx, chart_file, chart_url, oci, sha256):
     """Writes the `BUILD.bazel` and `REPO.bazel` of an imported chart.
 
     The chart is unpacked to read its `Chart.yaml` and license file, then
     removed again. The license file, if any, is kept at the repository root.
+    The name and the version of the chart are those in its `Chart.yaml`.
 
     Args:
         repository_ctx (repository_ctx): The repository context.
         chart_file (str): The chart `.tgz` in the repository.
-        chart_name (str): The name of the chart.
-        chart_version (str): The version of the chart.
-        purl (str): The purl identifying the chart.
+        chart_url (str): The `https://` or `oci://` url the chart was fetched from.
+        oci (struct): The chart from `oci_chart.parse_url` for an `oci://` url, otherwise `None`.
+        sha256 (str): The sha256 of the chart `.tgz`.
     """
     chart_dir = repository_ctx.path("chart")
     repository_ctx.extract(archive = chart_file, output = chart_dir)
@@ -284,7 +251,22 @@ def _generate_build_file(repository_ctx, chart_file, chart_name, chart_version, 
         ))
     chart_root = entries[0]
 
-    _, annotations = _parse_chart_yaml(repository_ctx.read(chart_root.get_child("Chart.yaml")))
+    chart_yaml = chart_root.get_child("Chart.yaml")
+    if not chart_yaml.exists:
+        fail("{} is not a Helm chart package: it has no Chart.yaml".format(chart_url))
+    fields, annotations = chart_utils.parse_chart_yaml(repository_ctx.read(chart_yaml))
+
+    # The name becomes a target name and the version a string in `BUILD.bazel`.
+    chart_name = fields.get("name")
+    chart_version = fields.get("version")
+    if not chart_utils.is_chart_name(chart_name):
+        fail("{} is not a Helm chart package: the `name` in its Chart.yaml is {}, which is not a name of letters, digits, `-`, `.` and `_`".format(chart_url, repr(chart_name)))
+    if not chart_utils.is_chart_version(chart_version):
+        fail("{} is not a Helm chart package: the `version` in its Chart.yaml is {}, which is not a version of letters, digits, `-`, `.`, `_` and `+`".format(chart_url, repr(chart_version)))
+
+    for name in [chart_name, repository_ctx.original_name]:
+        if name in _RESERVED_TARGETS:
+            fail("{}: `{}` is the name of a target that the generated BUILD.bazel declares, so it cannot name the chart or the repository".format(chart_url, name))
     identifier, text = _chart_license(repository_ctx, chart_root, annotations)
 
     kind = _NOASSERTION
@@ -299,13 +281,23 @@ def _generate_build_file(repository_ctx, chart_file, chart_name, chart_version, 
     repository_ctx.delete(chart_dir)
 
     repository_ctx.file("REPO.bazel", content = _HELM_DEP_REPO_FILE)
+
+    # `original_name` is the name given in the `MODULE.bazel` tag or the rule call.
+    # `name` is the canonical name, which `@<name>` cannot refer to under bzlmod.
+    alias = ""
+    if repository_ctx.original_name != chart_name:
+        alias = _HELM_DEP_ALIAS.format(
+            chart_name = chart_name,
+            repository_name = repository_ctx.original_name,
+        )
+
     repository_ctx.file("BUILD.bazel", content = _HELM_DEP_BUILD_FILE.format(
+        alias = alias,
         chart_file = chart_file,
         chart_name = chart_name,
         chart_version = chart_version,
         kind = str(kind),
-        purl = purl,
-        repository_name = repository_ctx.name,
+        purl = _chart_purl(chart_url, oci, chart_name, chart_version, sha256),
         text = text_attr,
     ))
 
@@ -336,7 +328,11 @@ def _helm_import_repository_impl(repository_ctx):
 
         chart_url = _find_chart_url(repository_ctx, repo_yaml, repository_ctx.attr.chart_name, repository_ctx.attr.version)
 
-    chart_file = _get_chart_file_name(chart_url)
+    oci = None
+    if chart_url.startswith("oci"):
+        oci = oci_chart.parse_url_or_fail(chart_url)
+
+    chart_file = _get_chart_file_name(chart_url, oci)
 
     if chart_url.startswith("http"):
         result = repository_ctx.download(
@@ -344,16 +340,14 @@ def _helm_import_repository_impl(repository_ctx):
             url = chart_url,
             sha256 = repository_ctx.attr.sha256,
         )
-    elif chart_url.startswith("oci"):
-        chart = oci_chart.parse_url(chart_url)
-
+    elif oci:
         # A Helm chart's OCI layer is the chart .tgz, so `sha256` names its
         # blob, and a cached blob needs neither a token nor the manifest.
         result = None
         if repository_ctx.attr.sha256:
             result = repository_ctx.download(
                 output = repository_ctx.path(chart_file),
-                url = oci_chart.blob_url(chart, "sha256:" + repository_ctx.attr.sha256),
+                url = oci_chart.blob_url(oci, "sha256:" + repository_ctx.attr.sha256),
                 sha256 = repository_ctx.attr.sha256,
                 allow_fail = True,
             )
@@ -361,7 +355,7 @@ def _helm_import_repository_impl(repository_ctx):
         if not result or not result.success:
             au = authn.new(repository_ctx)
             layer = oci_chart.find_chart_layer(repository_ctx, au, chart_url)
-            chart_blob_url = oci_chart.blob_url(chart, layer.digest)
+            chart_blob_url = oci_chart.blob_url(oci, layer.digest)
 
             # Download the chart package:
             result = repository_ctx.download(
@@ -376,14 +370,12 @@ def _helm_import_repository_impl(repository_ctx):
     else:
         fail("cannot download {} from {}, unsupported scheme".format(repository_ctx.attr.chart_name, chart_url))
 
-    chart_name, chart_version = _get_chart_name_and_version(chart_url, chart_file)
-
     _generate_build_file(
         repository_ctx,
         chart_file = chart_file,
-        chart_name = chart_name,
-        chart_version = chart_version,
-        purl = _chart_purl(chart_url, chart_name, chart_version, result.sha256),
+        chart_url = chart_url,
+        oci = oci,
+        sha256 = result.sha256,
     )
 
     if repository_ctx.attr.url:
@@ -394,11 +386,11 @@ def _helm_import_repository_impl(repository_ctx):
         }
     else:
         attrs_for_reproducibility = {
-            "chart_name": chart_name,
+            "chart_name": repository_ctx.attr.chart_name,
             "name": repository_ctx.name,
             "repository": repository_ctx.attr.repository,
             "sha256": result.sha256,
-            "version": chart_version,
+            "version": repository_ctx.attr.version,
         }
 
     # Bazel <8.3.0 lacks repository_ctx.repo_metadata
@@ -419,8 +411,14 @@ A rule for fetching external Helm charts from an arbitrary URL or repository.
 With bzlmod, the `helm_charts` extension in `@rules_helm//helm:extensions.bzl` fetches
 `oci://` charts with this rule and stores the digest it looks up in `MODULE.bazel.lock`.
 
-The repository exposes the chart as a `helm_import` target named after the chart,
-aliased to the repository name, and describes it for supply-chain tooling built on
+The repository exposes the chart as a `helm_import` target. The target takes its name and
+`version` from the `Chart.yaml` of the chart, not from the file name or the tag of the url.
+A chart fetched from `oci://.../cert-manager:1.19.4` has the version `v1.19.4` if its
+`Chart.yaml` says so, and `helm push` uses that version as the tag. The name can use
+letters, digits, `-`, `.` and `_`, and the version the same characters and `+`. Neither the
+chart name nor the repository name can be `license` or `package_metadata`. The target is
+aliased to the repository name, so `@<name>` resolves to it, unless the chart has the same
+name as the repository. The repository also describes the chart for supply-chain tooling built on
 [package_metadata](https://github.com/bazel-contrib/supply-chain):
 
 - `//:package_metadata` identifies the chart by [purl](https://github.com/package-url/purl-spec),

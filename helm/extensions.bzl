@@ -206,7 +206,7 @@ def _helm_charts_impl(module_ctx):
 
     for mod in module_ctx.modules:
         for tag in mod.tags.chart:
-            if not chart_utils.is_chart_url(tag.url):
+            if not oci_chart.parse_url(tag.url):
                 fail("helm_charts.chart(name = \"{}\") needs a url of the form `oci://<host>/<path>:<version>`, got `{}`".format(tag.name, tag.url))
             if tag.sha256 and not chart_utils.is_sha256(tag.sha256):
                 fail("helm_charts.chart(name = \"{}\") needs a `sha256` of 64 lower case hexadecimal digits, got `{}`".format(tag.name, tag.sha256))
@@ -354,9 +354,11 @@ _chart = tag_class(
     doc = """\
 Fetch a Helm chart from an OCI registry with `helm_import_repository`.
 
-The repository holds a `helm_import` target named after the chart, which is the last \
-path segment of `url` without the version. Refer to it as `@<name>//:<chart>`. The \
-shorthand `@<name>` does not resolve to the chart.
+The repository holds a `helm_import` target named after the `name` in the `Chart.yaml` \
+of the chart, which is normally the last path segment of `url` without the version. \
+Refer to it as `@<name>//:<chart>`. The shorthand `@<name>` is an alias of it, but \
+only when the name in `use_repo` is the same as the tag `name`, because Bazel reads \
+`@x` as `@x//:x`. Neither `name` nor the chart can be called `license` or `package_metadata`.
 
 If `sha256` is unset, the extension reads the digest of the chart package from the \
 registry manifest, and trusts the registry for it on first use. On Bazel 8.5 and newer \
@@ -365,6 +367,14 @@ evaluations make no registry request for it. Older Bazel versions record the dig
 the lockfile as part of the repository. Without a lockfile, the digest is looked up \
 whenever the extension is evaluated, and a version tag that the registry moves gives a \
 different chart. Set `sha256` to pin the digest in `MODULE.bazel`.
+
+Each lookup is a token request and a manifest download, and the lookups run one after \
+another. While a lookup is needed, an unreachable registry fails the evaluation, and so \
+fails every target that depends on a repository from this extension. This applies \
+whenever no stored fact exists: with the lockfile off, on the first evaluation, or after \
+you delete the fact. A tag with `sha256` makes no lookup while the extension evaluates. \
+Fetching the chart can still contact the registry, unless the chart is in the \
+repository cache.
 
 A stored digest is not checked against the registry. If the registry replaces the \
 chart behind a version tag, the fetch fails with a checksum mismatch. Delete the \
@@ -413,8 +423,10 @@ Module extension for fetching Helm charts from OCI registries.
 Charts live in their own extension, so an unreachable registry does not stop the `helm` \
 extension from resolving toolchains. All tags are resolved in one evaluation, so a \
 lookup that fails (an unknown version or an unreachable registry) fails every \
-repository from this extension. Set `sha256` to skip the lookup. Tags from every module \
-are used, so repository names must be unique across modules.
+repository from this extension. Set `sha256` to skip the lookup. A command that loads a \
+target from one of these repositories, such as `bazel query`, needs every lookup that has \
+no stored fact. Tags from every module are used, so repository names must be unique \
+across modules.
 """,
     implementation = _helm_charts_impl,
     tag_classes = {
