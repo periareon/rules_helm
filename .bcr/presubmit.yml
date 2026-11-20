@@ -5,8 +5,8 @@ bcr_test_module:
   # within the same repository.
   module_path: "."
   matrix:
-    platform: ["macos_arm64", "ubuntu2004", "windows"]
-    bazel: ["7.x", "8.x"]
+    platform: ["macos_arm64", "ubuntu2204", "windows"]
+    bazel: ["7.x", "8.x", "9.x"]
   tasks:
     run_tests:
       name: "Run test module"
