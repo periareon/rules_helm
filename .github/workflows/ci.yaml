@@ -124,14 +124,10 @@ jobs:
           USE_BAZEL_VERSION: 7.x
 
   # Each module under `extensions/` is its own Bazel module and resolves
-  # `rules_helm` to this checkout via its `.bazelrc`. Testing from inside a
+  # `rules_helm` to this checkout via its `.bazelrc`. Testing from inside the
   # module directory is the closest thing to how a consumer uses it. The image
   # tests live in these modules, so `ci-min-bazel` does not cover them and the
-  # minimum Bazel version is checked here too. The `rules_helm_img` tests need
-  # dependencies that a consumer cannot see, so they are a module of their own
-  # in `extensions/img/tests`, which `extensions/img/.bazelignore` keeps out of
-  # `@rules_helm_img//...`. The `rules_helm_oci` tests need none, so they stay
-  # in their module.
+  # minimum Bazel version is checked here too.
   ci-extensions:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -139,15 +135,15 @@ jobs:
         os:
           - macos-latest
           - ubuntu-22.04
-        directory:
-          - extensions/img/tests
-          - extensions/oci
+        module:
+          - img
+          - oci
         bazel:
           - latest
           - 7.x
     defaults:
       run:
-        working-directory: ${{ matrix.directory }}
+        working-directory: extensions/${{ matrix.module }}
     steps:
       # Checkout the code
       - uses: actions/checkout@v4
@@ -165,15 +161,6 @@ jobs:
       # Build and Test the code
       - name: Test
         run: bazel ${BAZEL_STARTUP_FLAGS[@]} test //...
-        env:
-          USE_BAZEL_VERSION: ${{ matrix.bazel }}
-
-      # The test module depends on `rules_helm_img`, so this loads the module
-      # the way a consumer does. It fails if `.bazelignore` stops hiding the
-      # tests.
-      - name: Load rules_helm_img as a dependency
-        if: matrix.directory == 'extensions/img/tests'
-        run: bazel ${BAZEL_STARTUP_FLAGS[@]} build --nobuild @rules_helm_img//...
         env:
           USE_BAZEL_VERSION: ${{ matrix.bazel }}
 

@@ -12,17 +12,17 @@ image:
 
 bazel_produced_images:
   image_a:
-    url: "{@//with_image_deps:image_a.push}"
+    url: "{@//tests/with_image_deps:image_a.push}"
   image_b:
-    url: "{@//with_image_deps:image_b.push}"
+    url: "{@//tests/with_image_deps:image_b.push}"
   image_c:
-    url: "{@//with_image_deps:image_c.push.repository}:{@//with_image_deps:image_c.push.tag}"
+    url: "{@//tests/with_image_deps:image_c.push.repository}:{@//tests/with_image_deps:image_c.push.tag}"
   image_d:
-    url: "{@//with_image_deps:image_d.push.repository}:{@//with_image_deps:image_d.push.tag}"
+    url: "{@//tests/with_image_deps:image_d.push.repository}:{@//tests/with_image_deps:image_d.push.tag}"
   image_e:
-    url: "{@//with_image_deps:image_e.push.repository}:{@//with_image_deps:image_e.push.tag}"
+    url: "{@//tests/with_image_deps:image_e.push.repository}:{@//tests/with_image_deps:image_e.push.tag}"
   image_f:
-    url: "{@//with_image_deps:image_f.push.registry}/{@//with_image_deps:image_f.push.project}@{@//with_image_deps:image_e.push.digest}"
+    url: "{@//tests/with_image_deps:image_f.push.registry}/{@//tests/with_image_deps:image_f.push.project}@{@//tests/with_image_deps:image_e.push.digest}"
   image_pull:
     url: "{@{base_container_label}}"
   image_pull_tag:
