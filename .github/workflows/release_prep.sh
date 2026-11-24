@@ -46,6 +46,12 @@ find "${WORKSPACE}/extensions" -name ".bazelrc" -type f | while read -r file; do
     fi
 done
 
+# `extensions/img/tests` needs the `rules_go` and `pull` dev dependencies, which
+# a module that depends on `rules_helm_img` cannot see, so loading
+# `@rules_helm_img//...` fails on it. Ignore the package in the archive. The
+# checkout keeps it, so `bazel test //...` there still runs the tests.
+printf 'tests\n' > "${WORKSPACE}/extensions/img/.bazelignore"
+
 # Build the source archive. Exclude .git (history isn't needed by
 # consumers), .github (release infrastructure isn't part of the
 # ruleset), examples (kept out to reduce archive size — matches
