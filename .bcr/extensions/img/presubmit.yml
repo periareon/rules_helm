@@ -1,8 +1,8 @@
 ---
 bcr_test_module:
-  # Relative to the module root after `strip_prefix`, so the module is
-  # its own test module.
-  module_path: "."
+  # Relative to the module root after `strip_prefix`. The tests are a module
+  # of their own, so that `@rules_helm_img//...` does not load them.
+  module_path: "tests"
   matrix:
     # rules_img has not been exercised on windows. See `tests/BUILD.bazel`.
     platform: ["macos_arm64", "ubuntu2404"]

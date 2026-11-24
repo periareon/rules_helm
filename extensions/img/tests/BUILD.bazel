@@ -1,7 +1,7 @@
 load("@rules_img//img:image.bzl", "image_manifest")
 load("@rules_img//img:layer.bzl", "image_layer")
 load("@rules_img//img:multi_deploy.bzl", "multi_deploy")
-load("//:defs.bzl", "helm_chart", "helm_img_image", "helm_lint_test", "helm_oci_manifest", "helm_template_test", "image_push")
+load("@rules_helm_img//:defs.bzl", "helm_chart", "helm_img_image", "helm_lint_test", "helm_oci_manifest", "helm_template_test", "image_push")
 
 # A smoke test that the module resolves against a standalone `rules_helm` and
 # that a chart loaded from `@rules_helm_img//:defs.bzl` stamps `rules_img`
@@ -63,7 +63,7 @@ helm_template_test(
     },
 )
 
-# Pushing is tested in `//tests/helm_oci_manifest`. This only checks that the
+# Pushing is tested in `//helm_oci_manifest`. This only checks that the
 # macro loads and builds against the declared dependencies.
 helm_oci_manifest(
     name = "chart.oci_manifest",

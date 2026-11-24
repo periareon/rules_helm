@@ -3,6 +3,7 @@
 # Bazel
 /bazel-*
 /extensions/*/bazel-*
+/extensions/img/tests/bazel-*
 /docs/bazel-*
 user.bazelrc
 

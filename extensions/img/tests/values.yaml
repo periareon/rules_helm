@@ -1,1 +1,1 @@
-image: "{@//tests:image.push}"
+image: "{@//:image.push}"

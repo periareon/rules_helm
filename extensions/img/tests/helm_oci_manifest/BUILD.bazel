@@ -1,10 +1,10 @@
 load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load("@rules_go//go:def.bzl", "go_test")
 load("@rules_img//img:multi_deploy.bzl", "multi_deploy")
-load("//:defs.bzl", "helm_chart", "helm_oci_manifest")
+load("@rules_helm_img//:defs.bzl", "helm_chart", "helm_oci_manifest")
 
 EXCLUDE_WINDOWS = select({
-    # As in //tests/with_image_deps.
+    # As in //with_image_deps.
     "@platforms//os:windows": ["@platforms//:incompatible"],
     "//conditions:default": [],
 })
